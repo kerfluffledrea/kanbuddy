@@ -112,16 +112,18 @@ class Kanban:
     def handleClickDown(self, event):
         print("DOWN: ",event.x, event.y)
         self.grabbed_card = self.getColldingCards(event.x, event.y)
-        self.grab_offset = (event.x - self.grabbed_card.position[0], event.y - self.grabbed_card.position[1])
+        if self.grabbed_card:
+            self.grab_offset = (event.x - self.grabbed_card.position[0], event.y - self.grabbed_card.position[1])
 
     def handleClickUp(self, event):
         print("UP: ", event.x, event.y)
-        drop_zone = self.getCollidingSections(event.x, event.y)
-        drop_zone.setCard(self.grabbed_card)
-        self.grabbed_card.move(drop_zone.x_pos+10, 35)
-        #self.root.update()
-        self.grabbed_card = None
-        self.grab_offset = None
+        if self.grabbed_card:
+            drop_zone = self.getCollidingSections(event.x, event.y)
+            drop_zone.setCard(self.grabbed_card)
+            self.grabbed_card.move(drop_zone.x_pos+10, 35)
+            #self.root.update()
+            self.grabbed_card = None
+            self.grab_offset = None
 
     def handleDoubleClick(self, event):
         print("Double-Click: ", event.x, event.y)
