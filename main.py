@@ -203,7 +203,7 @@ class Kanban:
         b4 = Button(color_button_grid, bg=PALETTE[4], width=5, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(PALETTE[4])).grid(column=4, row=0)
         b5 = Button(color_button_grid, bg=PALETTE[5], width=5, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(PALETTE[5])).grid(column=5, row=0)
 
-        bottom_button_grid = Frame(self.edit_menu)
+        bottom_button_grid = Frame(self.edit_menu, background='black')
         bottom_button_grid.pack(expand=True, fill=BOTH, pady=MARGIN/2, padx=MARGIN)
         decrease_points = Button(bottom_button_grid, text='-', fg='white', bg='black', width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.decreasePoints()).grid(column=1, row=0)
         increase_points = Button(bottom_button_grid, text='+', fg='white', bg='black', width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.increasePoints()).grid(column=2, row=0)
