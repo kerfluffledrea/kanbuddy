@@ -1,5 +1,6 @@
 import json
 import csv
+import os.path
 import tkinter as tk
 from tkinter.constants import BOTH, CENTER
 from tkinter import Frame, Text, Button
@@ -135,7 +136,7 @@ class Kanban:
         self.root.title("Kanbuddy")
         self.root.geometry(str(WIDTH)+"x"+str(HEIGHT))
         self.root.configure(background='red')
-        self.canvas = tk.Canvas(self.root, bg='black', width=WIDTH, height=HEIGHT)
+        self.canvas = tk.Canvas(self.root, bg='black', width=WIDTH, height=HEIGHT, highlightthickness=0)
         self.root.bind('<Control-a>', self.addNewCard)
         self.canvas.bind('<Button-1>', self.handleClickDown)
         self.canvas.bind('<ButtonRelease-1>', self.handleClickUp)
@@ -307,10 +308,11 @@ for sec in sections:
     sum_width += int(sec['width'])
 
 # Import cards
-with open('cards.csv', 'r', newline='\n') as csvfile:
-    cards = csv.DictReader(csvfile, delimiter='|')
-    for c in cards:
-        k.addCardFromFile(int(c['section_index']), c['description'], c['color'], int(c['points']))
-csvfile.close()
+if os.path.isfile('cards.csv'):
+    with open('cards.csv', 'r', newline='\n') as csvfile:
+        cards = csv.DictReader(csvfile, delimiter='|')
+        for c in cards:
+            k.addCardFromFile(int(c['section_index']), c['description'], c['color'], int(c['points']))
+    csvfile.close()
 
 k.root.mainloop()
