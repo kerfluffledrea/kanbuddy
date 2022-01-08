@@ -20,35 +20,61 @@ class Card:
         self.color = color
         self.points = points
         self.position = (0,0)
-        self.width = 180
-        self.height = 100
+        self.width = 5
+        self.height = 5
         self.canvas_text = None
         self.canvas_rect = None
         self.canvas_lines = []
         self.section_index = 0
         self.draw()
     
+    def clearCanvas(self):
+        self.canvas.delete(self.canvas_text)
+        self.canvas.delete(self.canvas_rect)
+        for l in self.canvas_lines:
+            self.canvas.delete(l)
+
     def setColor(self, color):
         self.color = color
         self.canvas.itemconfig(self.canvas_text, fill=color)
         self.canvas.itemconfig(self.canvas_rect, outline=color)
+        for l in self.canvas_lines:
+            self.canvas.itemconfig(l, fill=color)
 
     def setDescription(self, desc):
         self.description = desc
         self.canvas.itemconfig(self.canvas_text, text=desc)
     
+    def increasePoints(self):
+        if self.points < 10:
+            self.points += 1
+            self.canvas_lines.append(self.canvas.create_line(self.position[0] + self.width, self.position[1] + self.height - self.points*MARGIN,
+                    self.position[0] + self.width - self.points*MARGIN, self.position[1] + self.height, fill=self.color))
+
+    def decreasePoints(self):
+        if self.points > 0:
+            self.points -= 1
+            self.canvas.delete(self.canvas_lines.pop())
+
     def draw(self):
         self.canvas_text = self.canvas.create_text(self.position[0] + self.width/2, self.position[1] + self.height/2, anchor=CENTER, text=self.description, fill=self.color, width=self.width-MARGIN*2, font=CARDFONT)
         self.canvas_rect = self.canvas.create_rectangle(self.position[0], self.position[1], self.position[0] + self.width, self.position[1] + self.height, outline=self.color)
         i = 0
-        while i < range(self.points):
-            pass
+        while i < self.points+1:
+            self.canvas_lines.append(self.canvas.create_line(self.position[0] + self.width, self.position[1] + self.height - i*MARGIN,
+                self.position[0] + self.width - i*MARGIN, self.position[1] + self.height, fill=self.color))
+            i += 1
 
     def move(self, x, y):
         self.position = (x,y)
         self.canvas.itemconfig(self.canvas_text, width=self.width-MARGIN*2)
         self.canvas.coords(self.canvas_text, x + self.width/2, y + self.height/2)
         self.canvas.coords(self.canvas_rect, x, y, x + self.width, y + self.height)
+        i = 0
+        for l in self.canvas_lines:
+            self.canvas.coords(l, self.position[0] + self.width, self.position[1] + self.height - i*MARGIN,
+                self.position[0] + self.width - i*MARGIN, self.position[1] + self.height)
+            i += 1
 
 class DropZone:
     def __init__(self, x_pos, y_pos, width, height):
@@ -126,11 +152,16 @@ class Kanban:
 
     # --- File Reading/Writing ---
     def saveCardstoFile(self):
-        with open('cards.csv', 'w', newline='\n') as csvfile:
-            writer = csv.writer(csvfile, delimiter="|")
-            writer.writerow(['section_index', 'description', 'color', 'points'])
-            for c in self.cards:
-                writer.writerow([c.section_index, c.description, c.color, c.points])
+        with open('cards.csv', 'w', newline='\n') as cardfile:
+            with open('archive.csv', 'a', newline='\n') as archivefile:
+                cardwriter = csv.writer(cardfile, delimiter="|")
+                archivewriter = csv.writer(archivefile, delimiter="|")
+                cardwriter.writerow(['section_index', 'description', 'color', 'points'])
+                for c in self.cards:
+                    if c.section_index == len(self.sections)-1:
+                        archivewriter.writerow([c.description, c.points])
+                    else:
+                        cardwriter.writerow([c.section_index, c.description, c.color, c.points])
 
     def addSectionFromFile(self, name, width, xpos, cardheight):
         s = Section(self.canvas, name, width,  xpos, cardheight)
@@ -162,23 +193,36 @@ class Kanban:
         description_entry.insert(tk.END, edit_card.description)
         description_entry.pack(padx=MARGIN, pady=MARGIN)
         
-        button_grid = Frame(self.edit_menu)
-        button_grid.pack(padx=MARGIN, pady=MARGIN)
-        b0 = Button(button_grid, bg='white', width=5, height=2, command=lambda: edit_card.setColor('white')).grid(column=0, row=0)
-        b1 = Button(button_grid, bg='lime', width=5, height=2, command=lambda: edit_card.setColor('lime')).grid(column=1, row=0)
-        b2 = Button(button_grid, bg='cyan', width=5, height=2, command=lambda: edit_card.setColor('cyan')).grid(column=2, row=0)
-        b3 = Button(button_grid, bg='violetred1', width=5, height=2, command=lambda: edit_card.setColor('violetred1')).grid(column=3, row=0)
-        b4 = Button(button_grid, bg='magenta', width=5, height=2, command=lambda: edit_card.setColor('magenta')).grid(column=4, row=0)
-        b5 = Button(button_grid, bg='yellow', width=5, height=2, command=lambda: edit_card.setColor('yellow')).grid(column=5, row=0)
+        color_button_grid = Frame(self.edit_menu)
+        color_button_grid.pack(padx=MARGIN, pady=0)
+        b0 = Button(color_button_grid, bg=PALETTE[0], width=5, height=2, command=lambda: edit_card.setColor(PALETTE[0])).grid(column=0, row=0)
+        b1 = Button(color_button_grid, bg=PALETTE[1], width=5, height=2, command=lambda: edit_card.setColor(PALETTE[1])).grid(column=1, row=0)
+        b2 = Button(color_button_grid, bg=PALETTE[2], width=5, height=2, command=lambda: edit_card.setColor(PALETTE[2])).grid(column=2, row=0)
+        b3 = Button(color_button_grid, bg=PALETTE[3], width=5, height=2, command=lambda: edit_card.setColor(PALETTE[3])).grid(column=3, row=0)
+        b4 = Button(color_button_grid, bg=PALETTE[4], width=5, height=2, command=lambda: edit_card.setColor(PALETTE[4])).grid(column=4, row=0)
+        b5 = Button(color_button_grid, bg=PALETTE[5], width=5, height=2, command=lambda: edit_card.setColor(PALETTE[5])).grid(column=5, row=0)
 
-        close_button = Button(self.edit_menu, text='Save', fg='white', bg='black', width=10, height=2,highlightbackground='white', command=lambda: self.closeEditMenu(edit_card, description_entry.get("1.0","end-1c")))
-        close_button.pack(expand=True, fill=BOTH, pady=MARGIN, padx=MARGIN)
+        bottom_button_grid = Frame(self.edit_menu)
+        bottom_button_grid.pack(expand=True, fill=BOTH, pady=MARGIN/2, padx=MARGIN)
+        decrease_points = Button(bottom_button_grid, text='-', fg='white', bg='black', width=4, height=2,highlightbackground='white', command=lambda: edit_card.decreasePoints()).grid(column=1, row=0)
+        increase_points = Button(bottom_button_grid, text='+', fg='white', bg='black', width=4, height=2,highlightbackground='white', command=lambda: edit_card.increasePoints()).grid(column=2, row=0)
+        close_button = Button(bottom_button_grid, text='SAVE', fg='white', bg='black', width=17, height=2,highlightbackground='white', command=lambda: self.closeEditMenu(edit_card, description_entry.get("1.0","end-1c"))).grid(column=3, row=0)
+        delete_button = Button(bottom_button_grid, text='DELETE', fg='white', bg='black', width=8, height=2,highlightbackground='white', command=lambda: self.deleteCard(edit_card)).grid(column=4, row=0)
         self.canvas.create_window(WIDTH/2, HEIGHT/2, anchor=CENTER, window=self.edit_menu)
 
     def closeEditMenu(self, edit_card, desc):
         edit_card.setDescription(desc)
         self.edit_menu.destroy()
         self.edit_menu = None
+        self.saveCardstoFile()
+
+    def deleteCard(self, card):
+        self.cards.remove(card)
+        self.sections[card.section_index].cards.remove(card)
+        self.edit_menu.destroy()
+        self.edit_menu = None
+        card.clearCanvas()
+        del card
         self.saveCardstoFile()
 
     # --- Event Handlers ---
@@ -207,6 +251,8 @@ class Kanban:
                     self.grabbed_card.section_index = self.sections.index(drop_section)
                     drop_section.addCard(self.grabbed_card)
                     self.grabbed_card_section.removeCard(self.grabbed_card)
+                    if self.grabbed_card.section_index == len(self.sections)-1:
+                        self.grabbed_card.setColor(SECONDARYCOLOR)
                 else:
                     # This prevents the tiny movements during double clicks from moving cards around within a section
                     drag_vector = (event.x - self.grab_location[0],  event.y- self.grab_location[1])
@@ -244,6 +290,13 @@ MARGIN = settings['margin']
 WIDTH = settings['width']
 HEIGHT = settings['height']
 HEADERSIZE = settings['headersize']
+PALETTE = [settings['colors']['pal0'],
+        settings['colors']['pal1'],
+        settings['colors']['pal2'],
+        settings['colors']['pal3'],
+        settings['colors']['pal4'],
+        settings['colors']['pal5'],
+    ]
 k = Kanban()
 
 # Import sections
