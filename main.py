@@ -136,7 +136,7 @@ class Kanban:
         self.root.title("Kanbuddy")
         self.root.geometry(str(WIDTH)+"x"+str(HEIGHT))
         self.root.configure(background='red')
-        self.canvas = tk.Canvas(self.root, bg='black', width=WIDTH, height=HEIGHT, highlightthickness=0)
+        self.canvas = tk.Canvas(self.root, bg='black', width=WIDTH, height=HEIGHT, highlightthickness=1, highlightbackground=MAINCOLOR)
         self.root.bind('<Control-a>', self.addNewCard)
         self.canvas.bind('<Button-1>', self.handleClickDown)
         self.canvas.bind('<ButtonRelease-1>', self.handleClickUp)
