@@ -7,7 +7,7 @@
   "headersize": 25,
   "colors": {
     "main": "blueviolet",
-    "secondary": "white",
+    "secondary": "grey",
     "pal0": "white",
     "pal1": "lime",
     "pal2": "cyan",
@@ -24,12 +24,12 @@
     {
       "name": "IN PROGRESS",
       "width": 400,
-      "cardheight": 135
+      "cardheight": 137
     },
     {
       "name": "FINISHED",
       "width": 200,
-      "cardheight": 100
+      "cardheight": 78
     }
   ]
 }
