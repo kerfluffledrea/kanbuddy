@@ -98,7 +98,7 @@ class Section:
 
     def draw(self):
         self.canvas_line = self.canvas.create_line(self.x_pos, HEADERSIZE, self.x_pos+self.width, HEADERSIZE, fill=MAINCOLOR)
-        self.canvas_text = self.canvas.create_text(self.x_pos + self.width/2, 15, anchor=CENTER, text=self.name, fill=MAINCOLOR, width=self.width, font=(HEADERFONT, 15, 'bold'))
+        self.canvas_text = self.canvas.create_text(self.x_pos + self.width/2, 15, anchor=CENTER, text=self.name, fill=MAINCOLOR, width=self.width, font=(HEADERFONT))
         self.canvas_rect = self.canvas.create_rectangle(self.x_pos, 0, self.x_pos + self.width, HEIGHT, outline=MAINCOLOR)
 
     def createDropZones(self):
@@ -207,8 +207,8 @@ class Kanban:
         bottom_button_grid.pack(expand=True, fill=BOTH, pady=MARGIN/2, padx=MARGIN)
         decrease_points = Button(bottom_button_grid, text='-', fg='white', bg='black', width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.decreasePoints()).grid(column=1, row=0)
         increase_points = Button(bottom_button_grid, text='+', fg='white', bg='black', width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.increasePoints()).grid(column=2, row=0)
-        close_button = Button(bottom_button_grid, text='SAVE', fg='white', bg='black', width=20, height=2, highlightbackground=MAINCOLOR, command=lambda: self.closeEditMenu(edit_card, description_entry.get("1.0","end-1c"))).grid(column=3, row=0, sticky='ew')
-        delete_button = Button(bottom_button_grid, text='DELETE', fg='white', bg='black', width=5, height=2, highlightbackground=MAINCOLOR, command=lambda: self.deleteCard(edit_card)).grid(column=4, row=0, sticky='ew')
+        close_button = Button(bottom_button_grid, text='SAVE', fg='white', bg='black', width=20, height=2, highlightbackground=MAINCOLOR, command=lambda: self.closeEditMenu(edit_card, description_entry.get("1.0","end-1c"))).grid(column=3, row=0, sticky='nesw')
+        delete_button = Button(bottom_button_grid, text='DELETE', fg='white', bg='black', width=5, height=2, highlightbackground=MAINCOLOR, command=lambda: self.deleteCard(edit_card)).grid(column=4, row=0, sticky='nesw')
         self.canvas.create_window(WIDTH/2, HEIGHT/2, anchor=CENTER, window=self.edit_menu)
 
     def closeEditMenu(self, edit_card, desc):
