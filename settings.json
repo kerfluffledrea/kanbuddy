@@ -1,0 +1,35 @@
+{
+  "headerfont": "Courier",
+  "cardfont": "Consolas",
+  "width": 800,
+  "height": 480,
+  "margin": 10,
+  "headersize": 25,
+  "colors": {
+    "main": "blueviolet",
+    "secondary": "white",
+    "pal0": "white",
+    "pal1": "lime",
+    "pal2": "cyan",
+    "pal3": "violetred1",
+    "pal4": "magenta",
+    "pal5": "yellow"
+  },
+  "sections": [
+    {
+      "name": "TO DO",
+      "width": 200,
+      "cardheight": 100
+    },
+    {
+      "name": "IN PROGRESS",
+      "width": 400,
+      "cardheight": 135
+    },
+    {
+      "name": "FINISHED",
+      "width": 200,
+      "cardheight": 100
+    }
+  ]
+}
