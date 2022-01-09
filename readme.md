@@ -9,7 +9,7 @@ Launch: ``python3 main.py``
 Cards placed in the last section will be moved to an archive file and will no longer appear on the board on subsequent launches. (note to self, make this a toggleable setting)
 
 ### Settings
-Within ``settings.json``, the following can be cadjusted:
+Within ``settings.json``, the following can be adjusted:
 - Fonts
 - Color Scheme
 - Default window size
