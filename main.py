@@ -196,12 +196,13 @@ class Kanban:
         
         color_button_grid = Frame(self.edit_menu)
         color_button_grid.pack(padx=MARGIN, pady=0)
-        b0 = Button(color_button_grid, bg=PALETTE[0], width=5, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(PALETTE[0])).grid(column=0, row=0)
-        b1 = Button(color_button_grid, bg=PALETTE[1], width=5, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(PALETTE[1])).grid(column=1, row=0)
-        b2 = Button(color_button_grid, bg=PALETTE[2], width=5, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(PALETTE[2])).grid(column=2, row=0)
-        b3 = Button(color_button_grid, bg=PALETTE[3], width=5, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(PALETTE[3])).grid(column=3, row=0)
-        b4 = Button(color_button_grid, bg=PALETTE[4], width=5, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(PALETTE[4])).grid(column=4, row=0)
-        b5 = Button(color_button_grid, bg=PALETTE[5], width=5, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(PALETTE[5])).grid(column=5, row=0)
+        b0 = Button(color_button_grid, bg=PALETTE[0], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(PALETTE[0])).grid(column=0, row=0)
+        b1 = Button(color_button_grid, bg=PALETTE[1], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(PALETTE[1])).grid(column=1, row=0)
+        b2 = Button(color_button_grid, bg=PALETTE[2], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(PALETTE[2])).grid(column=2, row=0)
+        b3 = Button(color_button_grid, bg=PALETTE[3], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(PALETTE[3])).grid(column=3, row=0)
+        b4 = Button(color_button_grid, bg=PALETTE[4], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(PALETTE[4])).grid(column=4, row=0)
+        b5 = Button(color_button_grid, bg=PALETTE[5], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(PALETTE[5])).grid(column=5, row=0)
+        b6 = Button(color_button_grid, bg=PALETTE[6], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(PALETTE[6])).grid(column=6, row=0)
 
         bottom_button_grid = Frame(self.edit_menu, background='black')
         bottom_button_grid.pack(expand=True, fill=BOTH, pady=MARGIN/2, padx=MARGIN)
@@ -297,6 +298,7 @@ PALETTE = [settings['colors']['pal0'],
         settings['colors']['pal3'],
         settings['colors']['pal4'],
         settings['colors']['pal5'],
+        settings['colors']['pal6'],
     ]
 k = Kanban()
 
