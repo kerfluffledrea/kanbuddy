@@ -11,9 +11,10 @@
     "pal0": "white",
     "pal1": "lime",
     "pal2": "cyan",
-    "pal3": "violetred1",
-    "pal4": "magenta",
-    "pal5": "yellow"
+    "pal3": "magenta",
+    "pal4": "violetred1",
+    "pal5": "yellow",
+    "pal6": "orange"
   },
   "sections": [
     {
