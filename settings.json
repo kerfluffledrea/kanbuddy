@@ -1,20 +1,22 @@
 {
   "headerfont": "Courier",
   "cardfont": "Consolas",
+  "counterfont": "Consolas",
   "width": 800,
   "height": 480,
   "margin": 10,
   "headersize": 25,
+  "daycounter": 1,
   "colors": {
     "main": "blueviolet",
     "secondary": "grey",
     "pal0": "white",
     "pal1": "lime",
     "pal2": "cyan",
-    "pal3": "magenta",
-    "pal4": "violetred1",
+    "pal3": "dodgerblue",
+    "pal4": "magenta",
     "pal5": "yellow",
-    "pal6": "orange"
+    "pal6": "darkorange"
   },
   "sections": [
     {

@@ -1,25 +1,29 @@
 import json
 import csv
 import os.path
+from datetime import date
 import tkinter as tk
 from tkinter.constants import BOTH, CENTER
-from tkinter import Frame, Text, Button
+from tkinter import W, Frame, Text, Button
 
 HEADERFONT = 'Courier'
 CARDFONT = 'Consolas'
+COUNTERFONT = 'Consolas'
 MAINCOLOR = 'blueviolet'
 SECONDARYCOLOR = 'white'
 MARGIN = 10
 WIDTH = 800
 HEIGHT = 480
 HEADERSIZE = 25
+DAYCOUNTERENABLED = 1
 
 class Card:
-    def __init__(self, canvas, desc='-[O-O]- Hello', color=SECONDARYCOLOR, points=1):
+    def __init__(self, canvas, desc='-[O-O]- Hello', color=SECONDARYCOLOR, points=1, creation_date = date.today()):
         self.canvas = canvas
         self.description = desc
         self.color = color
         self.points = points
+        self.creation_date = creation_date
         self.position = (0,0)
         self.width = 5
         self.height = 5
@@ -41,6 +45,11 @@ class Card:
         self.canvas.itemconfig(self.canvas_rect, outline=color)
         for l in self.canvas_lines:
             self.canvas.itemconfig(l, fill=color)
+        if DAYCOUNTER:
+            self.canvas.itemconfig(self.canvas_dayctr, fill=color)
+
+    def updateCounter(self):
+        self.canvas.itemconfig(self.canvas_dayctr, text=(self.creation_date - date.today()).days)
 
     def setDescription(self, desc):
         self.description = desc
@@ -65,6 +74,8 @@ class Card:
             self.canvas_lines.append(self.canvas.create_line(self.position[0] + self.width, self.position[1] + self.height - i*MARGIN,
                 self.position[0] + self.width - i*MARGIN, self.position[1] + self.height, fill=self.color))
             i += 1
+        if DAYCOUNTER:
+            self.canvas_dayctr = self.canvas.create_text(self.position[0] + 5, self.position[1] + 10, anchor=W, text=(self.creation_date - date.today()).days, fill=self.color, width=self.width-MARGIN*2, font=COUNTERFONT)
 
     def move(self, x, y):
         self.position = (x,y)
@@ -76,6 +87,8 @@ class Card:
             self.canvas.coords(l, self.position[0] + self.width, self.position[1] + self.height - i*MARGIN,
                 self.position[0] + self.width - i*MARGIN, self.position[1] + self.height)
             i += 1
+        if DAYCOUNTER:
+            self.canvas.coords(self.canvas_dayctr, x + 5, y + 10)
 
 class DropZone:
     def __init__(self, x_pos, y_pos, width, height):
@@ -157,19 +170,19 @@ class Kanban:
             with open('archive.csv', 'a', newline='\n') as archivefile:
                 cardwriter = csv.writer(cardfile, delimiter="|")
                 archivewriter = csv.writer(archivefile, delimiter="|")
-                cardwriter.writerow(['section_index', 'description', 'color', 'points'])
+                cardwriter.writerow(['section_index', 'description', 'color', 'points', 'creation_date'])
                 for c in self.cards:
                     if c.section_index == len(self.sections)-1:
-                        archivewriter.writerow([c.description, c.points])
+                        archivewriter.writerow([c.description, c.points, (c.creation_date - date.today()).days])
                     else:
-                        cardwriter.writerow([c.section_index, c.description, c.color, c.points])
+                        cardwriter.writerow([c.section_index, c.description, c.color, c.points, c.creation_date])
 
     def addSectionFromFile(self, name, width, xpos, cardheight):
         s = Section(self.canvas, name, width,  xpos, cardheight)
         self.sections.append(s)
 
-    def addCardFromFile(self, section_index, description, color, points):
-        c = Card(self.canvas, description, color, points)
+    def addCardFromFile(self, section_index, description, color, points, creation_date):
+        c = Card(self.canvas, description, color, points, creation_date)
         c.section_index = section_index
         self.sections[section_index].addCard(c)
         self.cards.append(c)
@@ -227,6 +240,10 @@ class Kanban:
         del card
         self.saveCardstoFile()
 
+    def updateCounters(self):
+        for c in self.cards:
+            c.updateCounter()
+
     # --- Event Handlers ---
     def addNewCard(self, event):
         if not self.edit_menu:
@@ -246,6 +263,8 @@ class Kanban:
                 self.grab_location = (event.x, event.y)
 
     def handleClickUp(self, event):
+        if DAYCOUNTER:
+            self.updateCounters()
         if not self.edit_menu:
             if self.grabbed_card:
                 drop_section = self.getCollidingSections(event.x, event.y)
@@ -286,6 +305,7 @@ settings_file = open('settings.json')
 settings = json.load(settings_file)
 HEADERFONT = settings['headerfont']
 CARDFONT = settings['cardfont']
+COUNTERFONT = settings['counterfont']
 MAINCOLOR = settings['colors']['main']
 SECONDARYCOLOR = settings['colors']['secondary']
 MARGIN = settings['margin']
@@ -300,6 +320,7 @@ PALETTE = [settings['colors']['pal0'],
         settings['colors']['pal5'],
         settings['colors']['pal6'],
     ]
+DAYCOUNTER = settings['daycounter']
 k = Kanban()
 
 # Import sections
@@ -314,7 +335,6 @@ if os.path.isfile('cards.csv'):
     with open('cards.csv', 'r', newline='\n') as csvfile:
         cards = csv.DictReader(csvfile, delimiter='|')
         for c in cards:
-            k.addCardFromFile(int(c['section_index']), c['description'], c['color'], int(c['points']))
+            k.addCardFromFile(int(c['section_index']), c['description'], c['color'], int(c['points']), date.fromisoformat(c['creation_date']))
     csvfile.close()
-
 k.root.mainloop()
