@@ -15,7 +15,7 @@ MARGIN = 10
 WIDTH = 800
 HEIGHT = 480
 HEADERSIZE = 25
-DAYCOUNTERENABLED = 1
+DAYCOUNTER = 1
 
 class Card:
     def __init__(self, canvas, desc='-[O-O]- Hello', color=SECONDARYCOLOR, points=1, creation_date = date.today()):
@@ -72,12 +72,12 @@ class Card:
         self.canvas_text = self.canvas.create_text(self.position[0] + self.width/2, self.position[1] + self.height/2, anchor=CENTER, text=self.description, fill=self.color, width=self.width-MARGIN*2, font=CARDFONT)
         self.canvas_rect = self.canvas.create_rectangle(self.position[0], self.position[1], self.position[0] + self.width, self.position[1] + self.height, outline=self.color)
         i = 0
+        if DAYCOUNTER:
+            self.canvas_dayctr = self.canvas.create_text(self.position[0] + 5, self.position[1] + 7, anchor=W, text=(date.today() - self.creation_date).days, fill=self.color, width=self.width-MARGIN*2, font=(COUNTERFONT, 9))
         while i < self.points+1:
             self.canvas_lines.append(self.canvas.create_line(self.position[0] + self.width, self.position[1] + self.height - i*MARGIN,
                 self.position[0] + self.width - i*MARGIN, self.position[1] + self.height, fill=self.color))
             i += 1
-        if DAYCOUNTER:
-            self.canvas_dayctr = self.canvas.create_text(self.position[0] + 5, self.position[1] + 10, anchor=W, text=(date.today() - self.creation_date).days, fill=self.color, width=self.width-MARGIN*2, font=COUNTERFONT)
 
     def move(self, x, y):
         self.position = (x,y)
