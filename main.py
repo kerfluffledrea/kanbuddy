@@ -38,6 +38,8 @@ class Card:
         self.canvas.delete(self.canvas_rect)
         for l in self.canvas_lines:
             self.canvas.delete(l)
+        if DAYCOUNTER:
+            self.canvas.delete(self.canvas_dayctr)
 
     def setColor(self, color):
         self.color = color
