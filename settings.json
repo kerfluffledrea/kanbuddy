@@ -1,10 +1,12 @@
 {
   "headerfont": "Courier",
   "cardfont": "Consolas",
+  "counterfont": "Consolas",
   "width": 800,
   "height": 480,
   "margin": 10,
   "headersize": 25,
+  "daycounter": 1,
   "colors": {
     "main": "blueviolet",
     "secondary": "grey",
