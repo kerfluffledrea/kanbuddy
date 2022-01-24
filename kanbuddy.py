@@ -1,4 +1,3 @@
-from ctypes.wintypes import POINT
 import json
 import csv
 import os.path
