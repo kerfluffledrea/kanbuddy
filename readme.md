@@ -2,7 +2,7 @@
 A kanban board for minimalists and other assorted weirdos.
 
 ### Operation
-Launch: ``python3 main.py``
+Launch: ``python3 kanbuddy.py``
 - Create a new card with CTRL-A
 - Double click card to edit.
 
