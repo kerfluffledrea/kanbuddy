@@ -1,10 +1,11 @@
+from ctypes.wintypes import POINT
 import json
 import csv
 import os.path
 from datetime import date
 import tkinter as tk
 from tkinter.constants import BOTH, CENTER
-from tkinter import W, Frame, Text, Button
+from tkinter import E, LAST, W, Frame, Text, Button
 
 HEADERFONT = 'Courier'
 CARDFONT = 'Consolas'
@@ -92,15 +93,39 @@ class Card:
         if DAYCOUNTER:
             self.canvas.coords(self.canvas_dayctr, x + 5, y + 10)
 
+
 class DropZone:
-    def __init__(self, x_pos, y_pos, width, height):
+    def __init__(self, canvas, x_pos, y_pos, width, height):
+        self.canvas = canvas
         self.x_pos = x_pos
         self.y_pos = y_pos
         self.width = width
         self.height = height
+        self.canvas_rect = self.canvas.create_rectangle(x_pos, y_pos, x_pos + width, y_pos + self.height, outline = 'grey4')
+
+class PointsDisplay(DropZone):
+    def __init__(self, canvas, x_pos, y_pos, width, height):
+        self.canvas = canvas
+        self.x_pos = x_pos
+        self.y_pos = y_pos
+        self.width = width
+        self.height = height
+        self.canvas_rect = self.canvas.create_rectangle(x_pos, y_pos, x_pos + width, y_pos + self.height, outline=SECONDARYCOLOR)
+        self.point_counter = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2, anchor=CENTER, text=self.getPointsFromFile(), fill=SECONDARYCOLOR, width=self.width-MARGIN*2, font=CARDFONT)
+    
+    def updatePointCounter(self):
+        self.canvas.itemconfig(self.point_counter, text=self.getPointsFromFile())
+
+    def getPointsFromFile(self):
+        point_sum = 0
+        with open('archive.csv', 'r', newline='\n') as csvfile:
+            cards = csv.DictReader(csvfile, delimiter='|')
+            for c in cards:
+                point_sum += int(c['points'])
+        return point_sum
 
 class Section:
-    def __init__(self, canvas, name, w, x, ch):
+    def __init__(self, canvas, name, w, x, ch, last_column_flag):
         self.canvas = canvas
         self.name = name
         self.width = w
@@ -108,24 +133,33 @@ class Section:
         self.card_height = ch
         self.drop_zones = []
         self.cards = []
-        self.draw()
-        self.createDropZones()
+        self.draw()            
+        self.createDropZones(last_column_flag)
 
     def draw(self):
         self.canvas_line = self.canvas.create_line(self.x_pos, HEADERSIZE, self.x_pos+self.width, HEADERSIZE, fill=MAINCOLOR)
         self.canvas_text = self.canvas.create_text(self.x_pos + self.width/2, 15, anchor=CENTER, text=self.name, fill=MAINCOLOR, width=self.width, font=(HEADERFONT))
         self.canvas_rect = self.canvas.create_rectangle(self.x_pos, 0, self.x_pos + self.width, HEIGHT, outline=MAINCOLOR)
 
-    def createDropZones(self):
+    def createDropZones(self, last_column_flag):
         i = 0
         while True:
-            xpos = self.x_pos + MARGIN
-            ypos = HEADERSIZE + self.card_height * i + MARGIN * (i + 1)
-            if ypos + self.card_height > HEIGHT:
-                break
-            self.drop_zones.append(DropZone(xpos, ypos, self.width - MARGIN * 2, self.card_height))
-            self.canvas.create_rectangle(xpos, ypos, xpos + self.width - MARGIN * 2, ypos + self.card_height, outline = 'grey4')
-            i += 1
+            if last_column_flag:
+                xpos = self.x_pos + MARGIN
+                ypos = HEADERSIZE + self.card_height * i + MARGIN * (i + 1)
+                self.drop_zones.append(DropZone(self.canvas, xpos, ypos, self.width - MARGIN * 2, self.card_height))
+                i += 1
+                ypos = HEADERSIZE + self.card_height * (i+1) + MARGIN * (i + 2)
+                if ypos + self.card_height > HEIGHT:
+                    self.addPointCounter()
+                    break
+            else: 
+                xpos = self.x_pos + MARGIN
+                ypos = HEADERSIZE + self.card_height * i + MARGIN * (i + 1)
+                if ypos + self.card_height > HEIGHT:
+                    break
+                self.drop_zones.append(DropZone(self.canvas, xpos, ypos, self.width - MARGIN * 2, self.card_height))
+                i += 1
 
     def addCard(self, card):
         dz_index = len(self.cards)
@@ -142,6 +176,11 @@ class Section:
             card.height = self.drop_zones[i].height
             card.move(self.drop_zones[i].x_pos, self.drop_zones[i].y_pos)
             i += 1
+
+    def addPointCounter(self):
+        xpos = self.x_pos + MARGIN
+        ypos = HEADERSIZE + self.card_height * len(self.drop_zones) + MARGIN * (len(self.drop_zones) + 1)
+        self.archive_dropzone = PointsDisplay(self.canvas, xpos, ypos, self.width - MARGIN * 2, self.card_height)
 
 class Kanban:
     def __init__(self):
@@ -160,6 +199,7 @@ class Kanban:
         self.canvas.pack()
         self.cards = []
         self.sections = []
+        self.archive_dropzone = None
         self.edit_menu = None
         self.grabbed_card = None
         self.grab_offset = None
@@ -174,13 +214,10 @@ class Kanban:
                 archivewriter = csv.writer(archivefile, delimiter="|")
                 cardwriter.writerow(['section_index', 'description', 'color', 'points', 'creation_date'])
                 for c in self.cards:
-                    if c.section_index == len(self.sections)-1:
-                        archivewriter.writerow([c.description, c.points, (date.today() - self.creation_date).days])
-                    else:
-                        cardwriter.writerow([c.section_index, c.description, c.color, c.points, c.creation_date])
+                    cardwriter.writerow([c.section_index, c.description, c.color, c.points, c.creation_date])
 
-    def addSectionFromFile(self, name, width, xpos, cardheight):
-        s = Section(self.canvas, name, width,  xpos, cardheight)
+    def addSectionFromFile(self, name, width, xpos, cardheight, last_column = False):
+        s = Section(self.canvas, name, width,  xpos, cardheight, last_column)
         self.sections.append(s)
 
     def addCardFromFile(self, section_index, description, color, points, creation_date):
@@ -199,6 +236,11 @@ class Kanban:
         for c in self.cards:
             if mx > c.position[0] and mx < c.position[0] + c.width and my > c.position[1] and my < c.position[1] + c.height:
                 return c
+
+    def isInArchiveDropzone(self, mx, my):
+        if mx > self.archive_dropzone.x_pos and mx < self.archive_dropzone.x_pos + self.archive_dropzone.width and my > self.archive_dropzone.y_pos and my < self.archive_dropzone.y_pos + self.archive_dropzone.height:
+            return True
+        return False
 
     # --- Card Editing ---
     def openEditMenu(self, edit_card):
@@ -224,7 +266,7 @@ class Kanban:
         decrease_points = Button(bottom_button_grid, text='-', fg='white', bg='black', width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.decreasePoints()).grid(column=1, row=0)
         increase_points = Button(bottom_button_grid, text='+', fg='white', bg='black', width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.increasePoints()).grid(column=2, row=0)
         close_button = Button(bottom_button_grid, text='SAVE', fg='white', bg='black', width=20, height=2, highlightbackground=MAINCOLOR, command=lambda: self.closeEditMenu(edit_card, description_entry.get("1.0","end-1c"))).grid(column=3, row=0, sticky='nesw')
-        delete_button = Button(bottom_button_grid, text='DELETE', fg='white', bg='black', width=5, height=2, highlightbackground=MAINCOLOR, command=lambda: self.deleteCard(edit_card)).grid(column=4, row=0, sticky='nesw')
+        delete_button = Button(bottom_button_grid, text='DELETE', fg='white', bg='black', width=5, height=2, highlightbackground=MAINCOLOR, command=lambda: self.deleteCard(edit_card, True)).grid(column=4, row=0, sticky='nesw')
         self.canvas.create_window(WIDTH/2, HEIGHT/2, anchor=CENTER, window=self.edit_menu)
 
     def closeEditMenu(self, edit_card, desc):
@@ -233,19 +275,20 @@ class Kanban:
         self.edit_menu = None
         self.saveCardstoFile()
 
-    def deleteCard(self, card):
+    def deleteCard(self, card, editing=False):
         self.cards.remove(card)
         self.sections[card.section_index].cards.remove(card)
-        self.edit_menu.destroy()
-        self.edit_menu = None
         card.clearCanvas()
         del card
+        if editing:
+            self.edit_menu.destroy()
+            self.edit_menu = None
         self.saveCardstoFile()
 
-    def updateCounters(self):
+    def updateCardCounters(self):
         for c in self.cards:
             c.updateCounter()
-
+    
     # --- Event Handlers ---
     def addNewCard(self, event):
         if not self.edit_menu:
@@ -266,11 +309,17 @@ class Kanban:
 
     def handleClickUp(self, event):
         if DAYCOUNTER:
-            self.updateCounters()
+            self.updateCardCounters()
         if not self.edit_menu:
             if self.grabbed_card:
                 drop_section = self.getCollidingSections(event.x, event.y)
-                if drop_section and len(drop_section.cards) < len(drop_section.drop_zones) and self.sections.index(drop_section) != self.grabbed_card.section_index:
+                if self.sections.index(drop_section) == len(self.sections)-1 and self.isInArchiveDropzone(event.x, event.y):
+                    with open('archive.csv', 'a', newline='\n') as archivefile:
+                        archivewriter = csv.writer(archivefile, delimiter="|")
+                        archivewriter.writerow([self.grabbed_card.description, self.grabbed_card.points, (date.today() - self.grabbed_card.creation_date).days])
+                    self.archive_dropzone.updatePointCounter()
+                    self.deleteCard(self.grabbed_card)
+                elif drop_section and len(drop_section.cards) < len(drop_section.drop_zones) and self.sections.index(drop_section) != self.grabbed_card.section_index:
                     self.grabbed_card.section_index = self.sections.index(drop_section)
                     drop_section.addCard(self.grabbed_card)
                     self.grabbed_card_section.removeCard(self.grabbed_card)
@@ -329,7 +378,11 @@ k = Kanban()
 sections = settings['sections']
 sum_width = 0
 for sec in sections:
-    k.addSectionFromFile(sec['name'], int(sec['width']), sum_width, int(sec['cardheight']))
+    if sec == sections[-1]:
+        k.addSectionFromFile(sec['name'], int(sec['width']), sum_width, int(sec['cardheight']), True)
+        k.archive_dropzone = k.sections[len(k.sections)-1].archive_dropzone
+    else:
+        k.addSectionFromFile(sec['name'], int(sec['width']), sum_width, int(sec['cardheight']))
     sum_width += int(sec['width'])
 
 # Import cards
