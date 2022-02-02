@@ -5,8 +5,7 @@ A kanban board for minimalists and other assorted weirdos.
 Launch: ``python3 kanbuddy.py``
 - Create a new card with CTRL-A
 - Double click card to edit.
-
-Cards placed in the last section will be moved to an archive file and will no longer appear on the board on subsequent launches. (note to self, make this a toggleable setting)
+- Once a card has been completed, drop it in the bottom-right spot and watch your points go up!
 
 ### Settings
 Within ``settings.json``, the following can be adjusted:
@@ -16,4 +15,4 @@ Within ``settings.json``, the following can be adjusted:
 - Fullscreened/Windowed mode (add this!!!!)
 - Margin/Header size
 
-Sections can also be added or removed from the board, you can adjust the section title, width and card height within the section.
+Sections can also be added or removed from the board. You can adjust the section title, width and card height within the section. The last section will always have the final card spot replaced with the point counter.
