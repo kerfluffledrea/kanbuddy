@@ -14,7 +14,6 @@ Within ``settings.json``, the following can be adjusted:
 - Fonts
 - Color Scheme
 - Default window size
-- Fullscreened/Windowed mode (add this!!!!)
 - Margin/Header size
 
 Sections can also be added or removed from the board. You can adjust the section title, width and card height within the section. The last section will always have the final card spot replaced with the point counter.
