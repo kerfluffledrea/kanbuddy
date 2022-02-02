@@ -6,16 +6,29 @@ import tkinter as tk
 from tkinter.constants import BOTH, CENTER
 from tkinter import E, LAST, W, Frame, Text, Button
 
-HEADERFONT = 'Courier'
-CARDFONT = 'Consolas'
-COUNTERFONT = 'Consolas'
-MAINCOLOR = 'blueviolet'
-SECONDARYCOLOR = 'white'
-MARGIN = 10
-WIDTH = 800
-HEIGHT = 480
-HEADERSIZE = 25
-DAYCOUNTER = 1
+# Read Config File
+settings_file = open('settings.json')
+settings = json.load(settings_file)
+HEADERFONT = settings['headerfont']
+CARDFONT = settings['cardfont']
+COUNTERFONT = settings['counterfont']
+BGCOLOR = settings['colors']['bg']
+MAINCOLOR = settings['colors']['main']
+SECONDARYCOLOR = settings['colors']['secondary']
+MARGIN = settings['margin']
+WIDTH = settings['width']
+HEIGHT = settings['height']
+HEADERSIZE = settings['headersize']
+PALETTE = [settings['colors']['pal0'],
+        settings['colors']['pal1'],
+        settings['colors']['pal2'],
+        settings['colors']['pal3'],
+        settings['colors']['pal4'],
+        settings['colors']['pal5'],
+        settings['colors']['pal6'],
+    ]
+DAYCOUNTER = settings['daycounter']
+POINTVALS = [1,5,10,15,25,50,100,500,1000,2500,5000]
 
 class Card:
     def __init__(self, canvas, desc='-[O-O]- Hello', color=SECONDARYCOLOR, points=1, creation_date = date.today()):
@@ -120,7 +133,7 @@ class PointsDisplay(DropZone):
         with open('archive.csv', 'r', newline='\n') as csvfile:
             cards = csv.DictReader(csvfile, delimiter='|')
             for c in cards:
-                point_sum += int(c['points'])
+                point_sum += POINTVALS[int(c['points'])]
         return point_sum
 
 class Section:
@@ -243,7 +256,7 @@ class Kanban:
 
     # --- Card Editing ---
     def openEditMenu(self, edit_card):
-        self.edit_menu = Frame(self.root, bg='black', highlightcolor=MAINCOLOR, highlightbackground=MAINCOLOR, highlightthickness=1, height=edit_card.height-1, width=edit_card.width-1)
+        self.edit_menu = Frame(self.root, bg=BGCOLOR, highlightcolor=MAINCOLOR, highlightbackground=MAINCOLOR, highlightthickness=1, height=edit_card.height-1, width=edit_card.width-1)
         self.edit_menu.pack(fill=BOTH, expand=True, padx=20, pady=20)
         
         description_entry = Text(self.edit_menu, height=3, width=32, bg='black', bd=0, highlightbackground=MAINCOLOR, highlightcolor=MAINCOLOR, fg=MAINCOLOR)
@@ -350,30 +363,8 @@ class Kanban:
             move_pos = (event.x - self.grab_offset[0], event.y - self.grab_offset[1])
             self.grabbed_card.move(move_pos[0], move_pos[1])
 
-# Read Config File
-settings_file = open('settings.json')
-settings = json.load(settings_file)
-HEADERFONT = settings['headerfont']
-CARDFONT = settings['cardfont']
-COUNTERFONT = settings['counterfont']
-MAINCOLOR = settings['colors']['main']
-SECONDARYCOLOR = settings['colors']['secondary']
-MARGIN = settings['margin']
-WIDTH = settings['width']
-HEIGHT = settings['height']
-HEADERSIZE = settings['headersize']
-PALETTE = [settings['colors']['pal0'],
-        settings['colors']['pal1'],
-        settings['colors']['pal2'],
-        settings['colors']['pal3'],
-        settings['colors']['pal4'],
-        settings['colors']['pal5'],
-        settings['colors']['pal6'],
-    ]
-DAYCOUNTER = settings['daycounter']
-k = Kanban()
-
 # Import sections
+k = Kanban()
 sections = settings['sections']
 sum_width = 0
 for sec in sections:
