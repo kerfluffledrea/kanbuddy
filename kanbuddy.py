@@ -6,16 +6,29 @@ import tkinter as tk
 from tkinter.constants import BOTH, CENTER
 from tkinter import E, LAST, W, Frame, Text, Button
 
-HEADERFONT = 'Courier'
-CARDFONT = 'Consolas'
-COUNTERFONT = 'Consolas'
-MAINCOLOR = 'blueviolet'
-SECONDARYCOLOR = 'white'
-MARGIN = 10
-WIDTH = 800
-HEIGHT = 480
-HEADERSIZE = 25
-DAYCOUNTER = 1
+# Read Config File
+settings_file = open('settings.json')
+settings = json.load(settings_file)
+HEADERFONT = settings['headerfont']
+CARDFONT = settings['cardfont']
+COUNTERFONT = settings['counterfont']
+BGCOLOR = settings['colors']['bg']
+MAINCOLOR = settings['colors']['main']
+SECONDARYCOLOR = settings['colors']['secondary']
+MARGIN = settings['margin']
+WIDTH = settings['width']
+HEIGHT = settings['height']
+HEADERSIZE = settings['headersize']
+PALETTE = [settings['colors']['pal0'],
+        settings['colors']['pal1'],
+        settings['colors']['pal2'],
+        settings['colors']['pal3'],
+        settings['colors']['pal4'],
+        settings['colors']['pal5'],
+        settings['colors']['pal6'],
+    ]
+DAYCOUNTER = settings['daycounter']
+POINTVALS = [1,5,10,15,25,50,100,500,1000,2500,5000]
 
 class Card:
     def __init__(self, canvas, desc='-[O-O]- Hello', color=SECONDARYCOLOR, points=1, creation_date = date.today()):
@@ -110,17 +123,17 @@ class PointsDisplay(DropZone):
         self.width = width
         self.height = height
         self.canvas_rect = self.canvas.create_rectangle(x_pos, y_pos, x_pos + width, y_pos + self.height, outline=SECONDARYCOLOR)
-        self.point_counter = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2, anchor=CENTER, text=self.getPointsFromFile(), fill=SECONDARYCOLOR, width=self.width-MARGIN*2, font=CARDFONT)
+        self.point_counter = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2, anchor=CENTER, text="{:,}".format(self.getPointsFromFile()), fill=SECONDARYCOLOR, width=self.width-MARGIN*2, font=(COUNTERFONT, 14))
     
     def updatePointCounter(self):
-        self.canvas.itemconfig(self.point_counter, text=self.getPointsFromFile())
+        self.canvas.itemconfig(self.point_counter, text="{:,}".format(self.getPointsFromFile()))
 
     def getPointsFromFile(self):
         point_sum = 0
         with open('archive.csv', 'r', newline='\n') as csvfile:
             cards = csv.DictReader(csvfile, delimiter='|')
             for c in cards:
-                point_sum += int(c['points'])
+                point_sum += POINTVALS[int(c['points'])]
         return point_sum
 
 class Section:
@@ -169,6 +182,9 @@ class Section:
 
     def removeCard(self, card):
         self.cards.remove(card)
+        self.reorderCards()
+
+    def reorderCards(self):
         i = 0
         for card in self.cards:
             card.width = self.drop_zones[i].width
@@ -243,7 +259,7 @@ class Kanban:
 
     # --- Card Editing ---
     def openEditMenu(self, edit_card):
-        self.edit_menu = Frame(self.root, bg='black', highlightcolor=MAINCOLOR, highlightbackground=MAINCOLOR, highlightthickness=1, height=edit_card.height-1, width=edit_card.width-1)
+        self.edit_menu = Frame(self.root, bg=BGCOLOR, highlightcolor=MAINCOLOR, highlightbackground=MAINCOLOR, highlightthickness=1, height=edit_card.height-1, width=edit_card.width-1)
         self.edit_menu.pack(fill=BOTH, expand=True, padx=20, pady=20)
         
         description_entry = Text(self.edit_menu, height=3, width=32, bg='black', bd=0, highlightbackground=MAINCOLOR, highlightcolor=MAINCOLOR, fg=MAINCOLOR)
@@ -318,12 +334,13 @@ class Kanban:
                         archivewriter.writerow([self.grabbed_card.description, self.grabbed_card.points, (date.today() - self.grabbed_card.creation_date).days])
                     self.archive_dropzone.updatePointCounter()
                     self.deleteCard(self.grabbed_card)
+                    self.grabbed_card_section.reorderCards()
                 elif drop_section and len(drop_section.cards) < len(drop_section.drop_zones) and self.sections.index(drop_section) != self.grabbed_card.section_index:
                     self.grabbed_card.section_index = self.sections.index(drop_section)
                     drop_section.addCard(self.grabbed_card)
                     self.grabbed_card_section.removeCard(self.grabbed_card)
-                    if self.grabbed_card.section_index == len(self.sections)-1:
-                        self.grabbed_card.setColor(SECONDARYCOLOR)
+                    #if self.grabbed_card.section_index == len(self.sections)-1:
+                    #    self.grabbed_card.setColor(SECONDARYCOLOR)
                 else:
                     # This prevents the tiny movements during double clicks from moving cards around within a section
                     drag_vector = (event.x - self.grab_location[0],  event.y- self.grab_location[1])
@@ -350,30 +367,8 @@ class Kanban:
             move_pos = (event.x - self.grab_offset[0], event.y - self.grab_offset[1])
             self.grabbed_card.move(move_pos[0], move_pos[1])
 
-# Read Config File
-settings_file = open('settings.json')
-settings = json.load(settings_file)
-HEADERFONT = settings['headerfont']
-CARDFONT = settings['cardfont']
-COUNTERFONT = settings['counterfont']
-MAINCOLOR = settings['colors']['main']
-SECONDARYCOLOR = settings['colors']['secondary']
-MARGIN = settings['margin']
-WIDTH = settings['width']
-HEIGHT = settings['height']
-HEADERSIZE = settings['headersize']
-PALETTE = [settings['colors']['pal0'],
-        settings['colors']['pal1'],
-        settings['colors']['pal2'],
-        settings['colors']['pal3'],
-        settings['colors']['pal4'],
-        settings['colors']['pal5'],
-        settings['colors']['pal6'],
-    ]
-DAYCOUNTER = settings['daycounter']
-k = Kanban()
-
 # Import sections
+k = Kanban()
 sections = settings['sections']
 sum_width = 0
 for sec in sections:
