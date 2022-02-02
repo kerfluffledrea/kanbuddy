@@ -182,6 +182,9 @@ class Section:
 
     def removeCard(self, card):
         self.cards.remove(card)
+        self.reorderCards()
+
+    def reorderCards(self):
         i = 0
         for card in self.cards:
             card.width = self.drop_zones[i].width
@@ -331,6 +334,7 @@ class Kanban:
                         archivewriter.writerow([self.grabbed_card.description, self.grabbed_card.points, (date.today() - self.grabbed_card.creation_date).days])
                     self.archive_dropzone.updatePointCounter()
                     self.deleteCard(self.grabbed_card)
+                    self.grabbed_card_section.reorderCards()
                 elif drop_section and len(drop_section.cards) < len(drop_section.drop_zones) and self.sections.index(drop_section) != self.grabbed_card.section_index:
                     self.grabbed_card.section_index = self.sections.index(drop_section)
                     drop_section.addCard(self.grabbed_card)
