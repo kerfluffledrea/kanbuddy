@@ -1,3 +1,5 @@
+![Screenshot of Kanbuddy interface](https://i.imgur.com/5TRPGwr.png)
+
 ## Kanbuddy
 A kanban board for minimalists and other assorted weirdos.
 
