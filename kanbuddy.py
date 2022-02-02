@@ -103,7 +103,7 @@ class Card:
                 self.position[0] + self.width - i*MARGIN, self.position[1] + self.height)
             i += 1
         if DAYCOUNTER:
-            self.canvas.coords(self.canvas_dayctr, x + 5, y + 10)
+            self.canvas.coords(self.canvas_dayctr, x + 4, y + 11)
 
 
 class DropZone:
