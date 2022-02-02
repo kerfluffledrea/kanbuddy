@@ -123,10 +123,10 @@ class PointsDisplay(DropZone):
         self.width = width
         self.height = height
         self.canvas_rect = self.canvas.create_rectangle(x_pos, y_pos, x_pos + width, y_pos + self.height, outline=SECONDARYCOLOR)
-        self.point_counter = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2, anchor=CENTER, text=self.getPointsFromFile(), fill=SECONDARYCOLOR, width=self.width-MARGIN*2, font=CARDFONT)
+        self.point_counter = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2, anchor=CENTER, text="{:,}".format(self.getPointsFromFile()), fill=SECONDARYCOLOR, width=self.width-MARGIN*2, font=(COUNTERFONT, 14))
     
     def updatePointCounter(self):
-        self.canvas.itemconfig(self.point_counter, text=self.getPointsFromFile())
+        self.canvas.itemconfig(self.point_counter, text="{:,}".format(self.getPointsFromFile()))
 
     def getPointsFromFile(self):
         point_sum = 0
@@ -339,8 +339,8 @@ class Kanban:
                     self.grabbed_card.section_index = self.sections.index(drop_section)
                     drop_section.addCard(self.grabbed_card)
                     self.grabbed_card_section.removeCard(self.grabbed_card)
-                    if self.grabbed_card.section_index == len(self.sections)-1:
-                        self.grabbed_card.setColor(SECONDARYCOLOR)
+                    #if self.grabbed_card.section_index == len(self.sections)-1:
+                    #    self.grabbed_card.setColor(SECONDARYCOLOR)
                 else:
                     # This prevents the tiny movements during double clicks from moving cards around within a section
                     drag_vector = (event.x - self.grab_location[0],  event.y- self.grab_location[1])
