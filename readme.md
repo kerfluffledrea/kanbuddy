@@ -11,8 +11,8 @@ Launch: ``python3 kanbuddy.py``
 
 ### Settings
 Within ``settings.json``, the following can be adjusted:
-- Fonts
-- Color Scheme
+- Fonts (Any [tkinter fonts](https://stackoverflow.com/a/64301819))
+- Color Scheme (Any of [these](https://i0.wp.com/www.wikipython.com/wp-content/uploads/Color-chart-capture-082321.jpg?resize=1024%2C579&ssl=1))
 - Default window size
 - Margin/Header size
 
