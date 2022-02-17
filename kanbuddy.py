@@ -339,8 +339,8 @@ class Kanban:
                     self.grabbed_card.section_index = self.sections.index(drop_section)
                     drop_section.addCard(self.grabbed_card)
                     self.grabbed_card_section.removeCard(self.grabbed_card)
-                    #if self.grabbed_card.section_index == len(self.sections)-1:
-                    #    self.grabbed_card.setColor(SECONDARYCOLOR)
+                    if self.grabbed_card.section_index == len(self.sections)-1:
+                        self.grabbed_card.setColor("grey20")
                 else:
                     # This prevents the tiny movements during double clicks from moving cards around within a section
                     drag_vector = (event.x - self.grab_location[0],  event.y- self.grab_location[1])
