@@ -31,10 +31,10 @@ DAYCOUNTER = settings['daycounter']
 POINTVALS = [1,5,10,15,25,50,100,500,1000,2500,5000]
 
 class Card:
-    def __init__(self, canvas, desc='-[O-O]- Hello', color=SECONDARYCOLOR, points=1, creation_date = date.today()):
+    def __init__(self, canvas, desc='-[O-O]- Hello', colorIndex=0, points=1, creation_date = date.today()):
         self.canvas = canvas
         self.description = desc
-        self.color = color
+        self.colorIndex = colorIndex
         self.points = points
         self.creation_date = creation_date
         self.position = (0,0)
@@ -54,14 +54,14 @@ class Card:
         if DAYCOUNTER:
             self.canvas.delete(self.canvas_dayctr)
 
-    def setColor(self, color):
-        self.color = color
-        self.canvas.itemconfig(self.canvas_text, fill=color)
-        self.canvas.itemconfig(self.canvas_rect, outline=color)
+    def setColor(self, colorIndex):
+        self.colorIndex = colorIndex
+        self.canvas.itemconfig(self.canvas_text, fill=PALETTE[colorIndex])
+        self.canvas.itemconfig(self.canvas_rect, outline=PALETTE[colorIndex])
         for l in self.canvas_lines:
-            self.canvas.itemconfig(l, fill=color)
+            self.canvas.itemconfig(l, fill=PALETTE[colorIndex])
         if DAYCOUNTER:
-            self.canvas.itemconfig(self.canvas_dayctr, fill=color)
+            self.canvas.itemconfig(self.canvas_dayctr, fill=PALETTE[colorIndex])
 
     def updateCounter(self):
         self.canvas.itemconfig(self.canvas_dayctr, text=(date.today() - self.creation_date).days)
@@ -74,7 +74,7 @@ class Card:
         if self.points < 10:
             self.points += 1
             self.canvas_lines.append(self.canvas.create_line(self.position[0] + self.width, self.position[1] + self.height - self.points*MARGIN,
-                    self.position[0] + self.width - self.points*MARGIN, self.position[1] + self.height, fill=self.color))
+                    self.position[0] + self.width - self.points*MARGIN, self.position[1] + self.height, fill=PALETTE[self.colorIndex]))
 
     def decreasePoints(self):
         if self.points > 0:
@@ -82,14 +82,14 @@ class Card:
             self.canvas.delete(self.canvas_lines.pop())
 
     def draw(self):
-        self.canvas_text = self.canvas.create_text(self.position[0] + self.width/2, self.position[1] + self.height/2, anchor=CENTER, text=self.description, fill=self.color, width=self.width-MARGIN*2, font=CARDFONT)
-        self.canvas_rect = self.canvas.create_rectangle(self.position[0], self.position[1], self.position[0] + self.width, self.position[1] + self.height, outline=self.color)
+        self.canvas_text = self.canvas.create_text(self.position[0] + self.width/2, self.position[1] + self.height/2, anchor=CENTER, text=self.description, fill=PALETTE[self.colorIndex], width=self.width-MARGIN*2, font=CARDFONT)
+        self.canvas_rect = self.canvas.create_rectangle(self.position[0], self.position[1], self.position[0] + self.width, self.position[1] + self.height, outline=PALETTE[self.colorIndex])
         i = 0
         if DAYCOUNTER:
-            self.canvas_dayctr = self.canvas.create_text(self.position[0] + 5, self.position[1] + 8, anchor=W, text=(date.today() - self.creation_date).days, fill=self.color, width=self.width-MARGIN*2, font=(COUNTERFONT, 9))
+            self.canvas_dayctr = self.canvas.create_text(self.position[0] + 5, self.position[1] + 8, anchor=W, text=(date.today() - self.creation_date).days, fill=PALETTE[self.colorIndex], width=self.width-MARGIN*2, font=(COUNTERFONT, 9))
         while i < self.points+1:
             self.canvas_lines.append(self.canvas.create_line(self.position[0] + self.width, self.position[1] + self.height - i*MARGIN,
-                self.position[0] + self.width - i*MARGIN, self.position[1] + self.height, fill=self.color))
+                self.position[0] + self.width - i*MARGIN, self.position[1] + self.height, fill=PALETTE[self.colorIndex]))
             i += 1
 
     def move(self, x, y):
@@ -227,16 +227,16 @@ class Kanban:
             with open('archive.csv', 'a', newline='\n') as archivefile:
                 cardwriter = csv.writer(cardfile, delimiter="|")
                 archivewriter = csv.writer(archivefile, delimiter="|")
-                cardwriter.writerow(['section_index', 'description', 'color', 'points', 'creation_date'])
+                cardwriter.writerow(['section_index', 'description', 'colorIndex', 'points', 'creation_date'])
                 for c in self.cards:
-                    cardwriter.writerow([c.section_index, c.description, c.color, c.points, c.creation_date])
+                    cardwriter.writerow([c.section_index, c.description, c.colorIndex, c.points, c.creation_date])
 
     def addSectionFromFile(self, name, width, xpos, cardheight, last_column = False):
         s = Section(self.canvas, name, width,  xpos, cardheight, last_column)
         self.sections.append(s)
 
-    def addCardFromFile(self, section_index, description, color, points, creation_date):
-        c = Card(self.canvas, description, color, points, creation_date)
+    def addCardFromFile(self, section_index, description, colorIndex, points, creation_date):
+        c = Card(self.canvas, description, colorIndex, points, creation_date)
         c.section_index = section_index
         self.sections[section_index].addCard(c)
         self.cards.append(c)
@@ -268,13 +268,13 @@ class Kanban:
         
         color_button_grid = Frame(self.edit_menu)
         color_button_grid.pack(padx=MARGIN, pady=0)
-        b0 = Button(color_button_grid, bg=PALETTE[0], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(PALETTE[0])).grid(column=0, row=0)
-        b1 = Button(color_button_grid, bg=PALETTE[1], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(PALETTE[1])).grid(column=1, row=0)
-        b2 = Button(color_button_grid, bg=PALETTE[2], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(PALETTE[2])).grid(column=2, row=0)
-        b3 = Button(color_button_grid, bg=PALETTE[3], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(PALETTE[3])).grid(column=3, row=0)
-        b4 = Button(color_button_grid, bg=PALETTE[4], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(PALETTE[4])).grid(column=4, row=0)
-        b5 = Button(color_button_grid, bg=PALETTE[5], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(PALETTE[5])).grid(column=5, row=0)
-        b6 = Button(color_button_grid, bg=PALETTE[6], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(PALETTE[6])).grid(column=6, row=0)
+        b0 = Button(color_button_grid, bg=PALETTE[0], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(0)).grid(column=0, row=0)
+        b1 = Button(color_button_grid, bg=PALETTE[1], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(1)).grid(column=1, row=0)
+        b2 = Button(color_button_grid, bg=PALETTE[2], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(2)).grid(column=2, row=0)
+        b3 = Button(color_button_grid, bg=PALETTE[3], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(3)).grid(column=3, row=0)
+        b4 = Button(color_button_grid, bg=PALETTE[4], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(4)).grid(column=4, row=0)
+        b5 = Button(color_button_grid, bg=PALETTE[5], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(5)).grid(column=5, row=0)
+        b6 = Button(color_button_grid, bg=PALETTE[6], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(6)).grid(column=6, row=0)
 
         bottom_button_grid = Frame(self.edit_menu, background='black')
         bottom_button_grid.pack(expand=True, fill=BOTH, pady=MARGIN/2, padx=MARGIN)
@@ -348,6 +348,11 @@ class Kanban:
                         self.grabbed_card_section.removeCard(self.grabbed_card)
                         self.grabbed_card_section.addCard(self.grabbed_card)
                     else:
+                        print(self.grabbed_card.colorIndex)
+                        if self.grabbed_card.colorIndex < len(PALETTE)-1:
+                            self.grabbed_card.setColor(self.grabbed_card.colorIndex + 1)
+                        else:
+                            self.grabbed_card.setColor(0)
                         og_position = (self.grab_location[0] - self.grab_offset[0], self.grab_location[1] - self.grab_offset[1])
                         self.grabbed_card.move(og_position[0], og_position[1])
                 self.grabbed_card = None
@@ -384,6 +389,6 @@ if os.path.isfile('cards.csv'):
     with open('cards.csv', 'r', newline='\n') as csvfile:
         cards = csv.DictReader(csvfile, delimiter='|')
         for c in cards:
-            k.addCardFromFile(int(c['section_index']), c['description'], c['color'], int(c['points']), date.fromisoformat(c['creation_date']))
+            k.addCardFromFile(int(c['section_index']), c['description'], int(c['colorIndex']), int(c['points']), date.fromisoformat(c['creation_date']))
     csvfile.close()
 k.root.mainloop()
