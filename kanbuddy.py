@@ -224,7 +224,7 @@ class Kanban:
     # --- File Reading/Writing ---
     def saveCardstoFile(self):
         with open('.cards.csv', 'w', newline='\n') as cardfile:
-            with open('archive.csv', 'a', newline='\n') as archivefile:
+            with open('.archive.csv', 'a', newline='\n') as archivefile:
                 cardwriter = csv.writer(cardfile, delimiter="|")
                 archivewriter = csv.writer(archivefile, delimiter="|")
                 cardwriter.writerow(['section_index', 'description', 'colorIndex', 'points', 'creation_date'])
