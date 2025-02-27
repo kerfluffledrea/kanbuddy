@@ -329,7 +329,7 @@ class Kanban:
             if self.grabbed_card:
                 drop_section = self.getCollidingSections(event.x, event.y)
                 if self.sections.index(drop_section) == len(self.sections)-1 and self.isInArchiveDropzone(event.x, event.y):
-                    with open('archive.csv', 'a', newline='\n') as archivefile:
+                    with open('.archive.csv', 'a', newline='\n') as archivefile:
                         archivewriter = csv.writer(archivefile, delimiter="|")
                         archivewriter.writerow([self.grabbed_card.description, self.grabbed_card.points, (date.today() - self.grabbed_card.creation_date).days])
                     self.archive_dropzone.updatePointCounter()
