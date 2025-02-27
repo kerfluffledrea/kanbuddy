@@ -28,7 +28,7 @@ PALETTE = [settings['colors']['pal0'],
         settings['colors']['pal6'],
     ]
 DAYCOUNTER = settings['daycounter']
-POINTVALS = [1,5,10,15,25,50,100,500,1000,2500,5000]
+POINTVALS = [1,5,15,30,60,120,180,360,500,1000,2500]
 
 class Card:
     def __init__(self, canvas, desc='-[O-O]- Hello', color_index=0, points=1, creation_date = date.today()):
