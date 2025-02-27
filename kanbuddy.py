@@ -130,7 +130,7 @@ class PointsDisplay(DropZone):
 
     def getPointsFromFile(self):
         point_sum = 0
-        with open('archive.csv', 'r', newline='\n') as csvfile:
+        with open('.archive.csv', 'r', newline='\n') as csvfile:
             cards = csv.DictReader(csvfile, delimiter='|')
             for c in cards:
                 point_sum += POINTVALS[int(c['points'])]
@@ -223,7 +223,7 @@ class Kanban:
 
     # --- File Reading/Writing ---
     def saveCardstoFile(self):
-        with open('cards.csv', 'w', newline='\n') as cardfile:
+        with open('.cards.csv', 'w', newline='\n') as cardfile:
             with open('archive.csv', 'a', newline='\n') as archivefile:
                 cardwriter = csv.writer(cardfile, delimiter="|")
                 archivewriter = csv.writer(archivefile, delimiter="|")
