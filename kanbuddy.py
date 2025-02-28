@@ -9,11 +9,10 @@ from tkinter import E, LAST, W, Frame, Text, Button
 
 
 # Read Config File
-mod_path = Path(__file__).parent
-print("WOW " + str(mod_path))
-settings_file = open(str(mod_path)+"/settings.json")
-cards_filepath = str(mod_path) + "/.cards.csv"
-archive_filepath = str(mod_path) + "/.archive.csv"
+mod_path = str(Path(__file__).parent)
+settings_file = open(mod_path + "/settings.json")
+cards_filepath = mod_path + "/.cards.csv"
+archive_filepath = mod_path + "/.archive.csv"
 settings = json.load(settings_file)
 HEADERFONT = settings['headerfont']
 CARDFONT = settings['cardfont']
@@ -34,10 +33,11 @@ PALETTE = [settings['colors']['pal0'],
         settings['colors']['pal6'],
     ]
 DAYCOUNTER = settings['daycounter']
+# Make this a setting
 POINTVALS = [1,5,15,30,60,120,180,360,500,1000,2500]
 
 class Card:
-    def __init__(self, canvas, desc='-[O-O]- Hello', color_index=0, points=1, creation_date = date.today()):
+    def __init__(self, canvas, desc='-[O-O]-', color_index=0, points=1, creation_date = date.today()):
         self.canvas = canvas
         self.description = desc
         self.color_index = color_index
@@ -88,11 +88,11 @@ class Card:
             self.canvas.delete(self.canvas_lines.pop())
 
     def draw(self):
-        self.canvas_text = self.canvas.create_text(self.position[0] + self.width/2, self.position[1] + self.height/2, anchor=CENTER, text=self.description, fill=PALETTE[self.color_index], width=self.width-MARGIN*2, font=CARDFONT)
+        self.canvas_text = self.canvas.create_text(self.position[0] + self.width/2, self.position[1] + self.height/2, anchor=CENTER, text=self.description, fill=PALETTE[self.color_index], width=self.width-MARGIN*2, justify=tk.CENTER, font=CARDFONT)
         self.canvas_rect = self.canvas.create_rectangle(self.position[0], self.position[1], self.position[0] + self.width, self.position[1] + self.height, outline=PALETTE[self.color_index])
         i = 0
         if DAYCOUNTER:
-            self.canvas_dayctr = self.canvas.create_text(self.position[0] + 5, self.position[1] + 8, anchor=W, text=(date.today() - self.creation_date).days, fill=PALETTE[self.color_index], width=self.width-MARGIN*2, font=(COUNTERFONT, 9))
+            self.canvas_dayctr = self.canvas.create_text(self.position[0] + 5, self.position[1] + 8, anchor=W, text=(date.today() - self.creation_date).days, fill=PALETTE[self.color_index], width=self.width-MARGIN*2, justify=tk.CENTER, font=(COUNTERFONT, 9))
         while i < self.points+1:
             self.canvas_lines.append(self.canvas.create_line(self.position[0] + self.width, self.position[1] + self.height - i*MARGIN,
                 self.position[0] + self.width - i*MARGIN, self.position[1] + self.height, fill=PALETTE[self.color_index]))
@@ -119,7 +119,7 @@ class DropZone:
         self.y_pos = y_pos
         self.width = width
         self.height = height
-        self.canvas_rect = self.canvas.create_rectangle(x_pos, y_pos, x_pos + width, y_pos + self.height, outline = 'grey4')
+        self.canvas_rect = self.canvas.create_rectangle(x_pos, y_pos, x_pos + width, y_pos + self.height, outline = 'grey5')
 
 class PointsDisplay(DropZone):
     def __init__(self, canvas, x_pos, y_pos, width, height):
@@ -208,7 +208,7 @@ class Kanban:
         self.root = tk.Tk()
         self.root.resizable(False, False)
         #self.root.attributes('-fullscreen', True)
-        self.root.title("Kanbuddy")
+        self.root.wm_title("Kanbuddy")
         self.root.geometry(str(WIDTH)+"x"+str(HEIGHT))
         self.root.configure(background='red')
         self.canvas = tk.Canvas(self.root, bg='black', width=WIDTH, height=HEIGHT, highlightthickness=1, highlightbackground=MAINCOLOR)
@@ -345,8 +345,6 @@ class Kanban:
                     self.grabbed_card.section_index = self.sections.index(drop_section)
                     drop_section.addCard(self.grabbed_card)
                     self.grabbed_card_section.removeCard(self.grabbed_card)
-                    #if self.grabbed_card.section_index == len(self.sections)-1:
-                    #    self.grabbed_card.setColor("grey20")
                 else:
                     # This prevents the tiny movements during double clicks from moving cards around within a section
                     drag_vector = (event.x - self.grab_location[0],  event.y- self.grab_location[1])
@@ -354,7 +352,6 @@ class Kanban:
                         self.grabbed_card_section.removeCard(self.grabbed_card)
                         self.grabbed_card_section.addCard(self.grabbed_card)
                     else:
-                        print(self.grabbed_card.color_index)
                         if self.grabbed_card.color_index < len(PALETTE)-1:
                             self.grabbed_card.setColor(self.grabbed_card.color_index + 1)
                         else:
@@ -380,12 +377,6 @@ class Kanban:
 
 # Import sections
 k = Kanban()
-if os.path.isfile(cards_filepath):
-    with open(cards_filepath, 'r', newline='\n') as csvfile:
-        cards = csv.DictReader(csvfile, delimiter='|')
-        for c in cards:
-            k.addCardFromFile(int(c['section_index']), c['description'], int(c['color_index']), int(c['points']), date.fromisoformat(c['creation_date']))
-    csvfile.close()
 
 sections = settings['sections']
 sum_width = 0

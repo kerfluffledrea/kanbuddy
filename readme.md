@@ -1,7 +1,7 @@
 ![Screenshot of Kanbuddy interface](https://i.imgur.com/5TRPGwr.png)
 
 ## Kanbuddy
-A kanban board for minimalists and other assorted weirdos.
+A micro-kanban board for people who need help focusing on the short-term stuff.
 
 ### Operation
 Launch: ``python3 kanbuddy.py``
@@ -12,7 +12,7 @@ Launch: ``python3 kanbuddy.py``
 ### Settings
 Within ``settings.json``, the following can be adjusted:
 - Fonts (Any [tkinter fonts](https://stackoverflow.com/a/64301819))
-- Color Scheme (Any of [these](https://i0.wp.com/www.wikipython.com/wp-content/uploads/Color-chart-capture-082321.jpg?resize=1024%2C579&ssl=1))
+- Color Scheme (Any of [these](https://www.wikipython.com/wp-content/uploads/Color-chart-capture-082321.jpg))
 - Default window size
 - Margin/Header size
 
