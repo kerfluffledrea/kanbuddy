@@ -1,13 +1,19 @@
 import json
 import csv
 import os.path
+from pathlib import Path
 from datetime import date
 import tkinter as tk
 from tkinter.constants import BOTH, CENTER
-from tkinter import E, LAST, W, Frame, Text, Button
+from tkinter import E, LAST, W, Frame, Text, Button 
+
 
 # Read Config File
-settings_file = open('settings.json')
+mod_path = Path(__file__).parent
+print("WOW " + str(mod_path))
+settings_file = open(str(mod_path)+"/settings.json")
+cards_filepath = str(mod_path) + "/.cards.csv"
+archive_filepath = str(mod_path) + "/.archive.csv"
 settings = json.load(settings_file)
 HEADERFONT = settings['headerfont']
 CARDFONT = settings['cardfont']
@@ -45,7 +51,7 @@ class Card:
         self.canvas_lines = []
         self.section_index = 0
         self.draw()
-    
+
     def clearCanvas(self):
         self.canvas.delete(self.canvas_text)
         self.canvas.delete(self.canvas_rect)
@@ -130,7 +136,7 @@ class PointsDisplay(DropZone):
 
     def getPointsFromFile(self):
         point_sum = 0
-        with open('.archive.csv', 'r', newline='\n') as csvfile:
+        with open(archive_filepath, 'r', newline='\n') as csvfile:
             cards = csv.DictReader(csvfile, delimiter='|')
             for c in cards:
                 point_sum += POINTVALS[int(c['points'])]
@@ -223,8 +229,8 @@ class Kanban:
 
     # --- File Reading/Writing ---
     def saveCardstoFile(self):
-        with open('.cards.csv', 'w', newline='\n') as cardfile:
-            with open('.archive.csv', 'a', newline='\n') as archivefile:
+        with open(cards_filepath, 'w', newline='\n') as cardfile:
+            with open(archive_filepath, 'a', newline='\n') as archivefile:
                 cardwriter = csv.writer(cardfile, delimiter="|")
                 archivewriter = csv.writer(archivefile, delimiter="|")
                 cardwriter.writerow(['section_index', 'description', 'color_index', 'points', 'creation_date'])
@@ -329,7 +335,7 @@ class Kanban:
             if self.grabbed_card:
                 drop_section = self.getCollidingSections(event.x, event.y)
                 if self.sections.index(drop_section) == len(self.sections)-1 and self.isInArchiveDropzone(event.x, event.y):
-                    with open('.archive.csv', 'a', newline='\n') as archivefile:
+                    with open(archive_filepath, 'a', newline='\n') as archivefile:
                         archivewriter = csv.writer(archivefile, delimiter="|")
                         archivewriter.writerow([self.grabbed_card.description, self.grabbed_card.points, (date.today() - self.grabbed_card.creation_date).days])
                     self.archive_dropzone.updatePointCounter()
@@ -374,6 +380,13 @@ class Kanban:
 
 # Import sections
 k = Kanban()
+if os.path.isfile(cards_filepath):
+    with open(cards_filepath, 'r', newline='\n') as csvfile:
+        cards = csv.DictReader(csvfile, delimiter='|')
+        for c in cards:
+            k.addCardFromFile(int(c['section_index']), c['description'], int(c['color_index']), int(c['points']), date.fromisoformat(c['creation_date']))
+    csvfile.close()
+
 sections = settings['sections']
 sum_width = 0
 for sec in sections:
@@ -385,8 +398,8 @@ for sec in sections:
     sum_width += int(sec['width'])
 
 # Import cards
-if os.path.isfile('cards.csv'):
-    with open('cards.csv', 'r', newline='\n') as csvfile:
+if os.path.isfile(cards_filepath):
+    with open(cards_filepath, 'r', newline='\n') as csvfile:
         cards = csv.DictReader(csvfile, delimiter='|')
         for c in cards:
             k.addCardFromFile(int(c['section_index']), c['description'], int(c['color_index']), int(c['points']), date.fromisoformat(c['creation_date']))
