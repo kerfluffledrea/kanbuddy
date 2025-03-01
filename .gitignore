@@ -1,2 +1,5 @@
 *.csv
 *.png
+*.spec
+/dist
+/build
