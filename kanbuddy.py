@@ -267,29 +267,30 @@ class Kanban:
 
     # --- Card Editing ---
     def openEditMenu(self, edit_card):
-        self.edit_menu = Frame(self.root, bg=BGCOLOR, highlightcolor=MAINCOLOR, highlightbackground=MAINCOLOR, highlightthickness=1, height=edit_card.height-1, width=edit_card.width-1)
-        self.edit_menu.pack(fill=BOTH, expand=True, padx=20, pady=20)
+        edit_card.setColor(edit_card.color_index - 1)
+        self.edit_menu = Frame(self.root, bg=BGCOLOR, highlightcolor=SECONDARYCOLOR, highlightbackground=SECONDARYCOLOR, highlightthickness=1, height=edit_card.height-1, width=edit_card.width-1)
+        self.edit_menu.pack(fill=BOTH, expand=True, padx=40, pady=40)
         
-        description_entry = Text(self.edit_menu, height=3, width=32, bg='black', bd=0, highlightbackground=MAINCOLOR, highlightcolor=MAINCOLOR, fg=MAINCOLOR)
+        description_entry = Text(self.edit_menu, height=5, width=40, padx=10, pady=2, bg=BGCOLOR, bd=0, highlightbackground=SECONDARYCOLOR, highlightcolor=SECONDARYCOLOR, fg=SECONDARYCOLOR)
         description_entry.insert(tk.END, edit_card.description)
         description_entry.pack(padx=MARGIN, pady=MARGIN)
         
         color_button_grid = Frame(self.edit_menu)
         color_button_grid.pack(padx=MARGIN, pady=0)
-        b0 = Button(color_button_grid, bg=PALETTE[0], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(0)).grid(column=0, row=0)
-        b1 = Button(color_button_grid, bg=PALETTE[1], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(1)).grid(column=1, row=0)
-        b2 = Button(color_button_grid, bg=PALETTE[2], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(2)).grid(column=2, row=0)
-        b3 = Button(color_button_grid, bg=PALETTE[3], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(3)).grid(column=3, row=0)
-        b4 = Button(color_button_grid, bg=PALETTE[4], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(4)).grid(column=4, row=0)
-        b5 = Button(color_button_grid, bg=PALETTE[5], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(5)).grid(column=5, row=0)
-        b6 = Button(color_button_grid, bg=PALETTE[6], width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.setColor(6)).grid(column=6, row=0)
+        b0 = Button(color_button_grid, bg=PALETTE[0], width=1, height=1, highlightbackground=SECONDARYCOLOR, command=lambda: edit_card.setColor(0)).grid(column=0, row=0)
+        b1 = Button(color_button_grid, bg=PALETTE[1], width=1, height=1, highlightbackground=SECONDARYCOLOR, command=lambda: edit_card.setColor(1)).grid(column=1, row=0)
+        b2 = Button(color_button_grid, bg=PALETTE[2], width=1, height=1, highlightbackground=SECONDARYCOLOR, command=lambda: edit_card.setColor(2)).grid(column=2, row=0)
+        b3 = Button(color_button_grid, bg=PALETTE[3], width=1, height=1, highlightbackground=SECONDARYCOLOR, command=lambda: edit_card.setColor(3)).grid(column=3, row=0)
+        b4 = Button(color_button_grid, bg=PALETTE[4], width=1, height=1, highlightbackground=SECONDARYCOLOR, command=lambda: edit_card.setColor(4)).grid(column=4, row=0)
+        b5 = Button(color_button_grid, bg=PALETTE[5], width=1, height=1, highlightbackground=SECONDARYCOLOR, command=lambda: edit_card.setColor(5)).grid(column=5, row=0)
+        b6 = Button(color_button_grid, bg=PALETTE[6], width=1, height=1, highlightbackground=SECONDARYCOLOR, command=lambda: edit_card.setColor(6)).grid(column=6, row=0)
 
-        bottom_button_grid = Frame(self.edit_menu, background='black')
-        bottom_button_grid.pack(expand=True, fill=BOTH, pady=MARGIN/2, padx=MARGIN)
-        decrease_points = Button(bottom_button_grid, text='-', fg='white', bg='black', width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.decreasePoints()).grid(column=1, row=0)
-        increase_points = Button(bottom_button_grid, text='+', fg='white', bg='black', width=4, height=2, highlightbackground=MAINCOLOR, command=lambda: edit_card.increasePoints()).grid(column=2, row=0)
-        close_button = Button(bottom_button_grid, text='SAVE', fg='white', bg='black', width=20, height=2, highlightbackground=MAINCOLOR, command=lambda: self.closeEditMenu(edit_card, description_entry.get("1.0","end-1c"))).grid(column=3, row=0, sticky='nesw')
-        delete_button = Button(bottom_button_grid, text='DELETE', fg='white', bg='black', width=5, height=2, highlightbackground=MAINCOLOR, command=lambda: self.deleteCard(edit_card, True)).grid(column=4, row=0, sticky='nesw')
+        bottom_button_grid = Frame(self.edit_menu, background=BGCOLOR)
+        bottom_button_grid.pack(expand=True, fill=BOTH, pady=MARGIN, padx=MARGIN)
+        decrease_points = Button(bottom_button_grid, text='-', fg=SECONDARYCOLOR, bg=BGCOLOR, width=1, height=1, highlightbackground=SECONDARYCOLOR, command=lambda: edit_card.decreasePoints()).grid(column=1, row=0)
+        increase_points = Button(bottom_button_grid, text='+', fg=SECONDARYCOLOR, bg=BGCOLOR, width=1, height=1, highlightbackground=SECONDARYCOLOR, command=lambda: edit_card.increasePoints()).grid(column=2, row=0)
+        close_button = Button(bottom_button_grid, text='SAVE', fg=SECONDARYCOLOR, bg=BGCOLOR, width=20, height=1, highlightbackground=SECONDARYCOLOR, command=lambda: self.closeEditMenu(edit_card, description_entry.get("1.0","end-1c"))).grid(column=3, row=0, sticky='nesw')
+        delete_button = Button(bottom_button_grid, text='DELETE', fg=SECONDARYCOLOR, bg=BGCOLOR, width=5, height=1, highlightbackground=SECONDARYCOLOR, command=lambda: self.deleteCard(edit_card, True)).grid(column=4, row=0, sticky='nesw')
         self.canvas.create_window(WIDTH/2, HEIGHT/2, anchor=CENTER, window=self.edit_menu)
 
     def closeEditMenu(self, edit_card, desc):
