@@ -23,17 +23,17 @@
     {
       "name": "TO DO",
       "width": 200,
-      "cardheight": 100
+      "cardheight": 138
     },
     {
       "name": "IN PROGRESS",
       "width": 400,
-      "cardheight": 200
+      "cardheight": 212
     },
     {
       "name": "FINISHED",
       "width": 200,
-      "cardheight": 100
+      "cardheight": 79
     }
   ]
 }
