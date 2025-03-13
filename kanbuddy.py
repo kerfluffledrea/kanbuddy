@@ -209,8 +209,9 @@ class Kanban:
         self.root.resizable(False, False)
         #self.root.attributes('-fullscreen', True)
         self.root.wm_title("Kanbuddy")
+        self.root.wm_attributes('-type', 'splash')
         self.root.geometry(str(WIDTH)+"x"+str(HEIGHT))
-        self.root.configure(background='black')
+        self.root.configure(background=BGCOLOR)
         self.canvas = tk.Canvas(self.root, bg=BGCOLOR, width=WIDTH, height=HEIGHT, highlightthickness=1, highlightbackground=MAINCOLOR)
         self.root.bind('<Control-a>', self.addNewCard)
         self.canvas.bind('<Button-1>', self.handleClickDown)
@@ -226,6 +227,7 @@ class Kanban:
         self.grab_offset = None
         self.grab_location = None
         self.grabbed_card_section = None
+        self.drag_origin = ()
 
     # --- File Reading/Writing ---
     def saveCardstoFile(self):
@@ -321,6 +323,8 @@ class Kanban:
                 return c
 
     def handleClickDown(self, event):
+        if event.y < HEADERSIZE:
+            self.drag_origin = (event.x, event.y)
         if not self.edit_menu:
             self.grabbed_card = self.getColldingCards(event.x, event.y)
             if self.grabbed_card:
@@ -329,6 +333,7 @@ class Kanban:
                 self.grab_location = (event.x, event.y)
 
     def handleClickUp(self, event):
+        self.drag_origin = None
         if DAYCOUNTER:
             self.updateCardCounters()
         if not self.edit_menu:
@@ -371,9 +376,16 @@ class Kanban:
                 self.openEditMenu(edit_card)
 
     def handleMouseMove(self, event):
+        if self.drag_origin:
+            print(self.drag_origin)
+            x, y = event.x - self.drag_origin[0] + self.root.winfo_x(), event.y - self.drag_origin[1] + self.root.winfo_y()
+            self.root.geometry("+%s+%s" % (x , y))
         if self.grabbed_card:
             move_pos = (event.x - self.grab_offset[0], event.y - self.grab_offset[1])
             self.grabbed_card.move(move_pos[0], move_pos[1])
+            section = self.getCollidingSections(event.x, event.y).drop_zones
+            print(section)
+
 
 # Import sections
 k = Kanban()
