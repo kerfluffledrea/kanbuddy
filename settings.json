@@ -8,9 +8,9 @@
   "headersize": 25,
   "daycounter": 0,
   "colors": {
-    "bg": "pink",
+    "bg": "black",
     "main": "blueviolet",
-    "secondary": "grey28",
+    "secondary": "grey40",
     "pal0": "white",
     "pal1": "lime",
     "pal2": "cyan",
