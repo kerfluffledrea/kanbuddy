@@ -30,15 +30,15 @@ jobs:
 
       - name: Build binary using PyInstaller
         run: |
-          pyinstaller --onefile kanbuddy.py
-          ls dist
+          pyinstaller --onefile --icon=icon.ico kanbuddy.py
+          mv dist/* .
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: executable-${{ matrix.os }}
           path: |
-            dist/kanbuddy.exe
-            dist/kanbuddy
+            kanbuddy.exe
+            kanbuddy
             settings.json
             readme.md
