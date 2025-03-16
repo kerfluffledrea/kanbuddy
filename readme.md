@@ -12,8 +12,9 @@ Launch: ``python3 kanbuddy.py``
 ### Settings
 Within ``settings.json``, the following can be adjusted:
 - Fonts (Any [tkinter fonts](https://stackoverflow.com/a/64301819))
-- Color Scheme (Any of [these](https://www.wikipython.com/wp-content/uploads/Color-chart-capture-082321.jpg))
-- Default window size
+- Color Scheme (Any hex code, or [Tkinter Color](https://www.wikipython.com/wp-content/uploads/Color-chart-capture-082321.jpg))
+- Window size
 - Margin/Header size
+- Day counter
 
 Sections can also be added or removed from the board. You can adjust the section title, width and card height within the section. The last section will always have the final card spot replaced with the point counter.
