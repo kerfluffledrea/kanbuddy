@@ -10,7 +10,8 @@
   "colors": {
     "bg": "black",
     "main": "blueviolet",
-    "secondary": "grey40",
+    "secondary": "grey50",
+    "highlight": "#050010",
     "pal0": "white",
     "pal1": "lime",
     "pal2": "cyan",

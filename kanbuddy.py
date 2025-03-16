@@ -19,6 +19,7 @@ COUNTERFONT = settings['counterfont']
 BGCOLOR = settings['colors']['bg']
 MAINCOLOR = settings['colors']['main']
 SECONDARYCOLOR = settings['colors']['secondary']
+HIGHLIGHTCOLOR = settings['colors']['highlight']
 MARGIN = settings['margin']
 WIDTH = settings['width']
 HEIGHT = settings['height']
@@ -154,14 +155,18 @@ class Section:
         self.x_pos = x
         self.card_height = ch
         self.drop_zones = []
+        self.canvas_rect = None
         self.cards = []
         self.draw()            
         self.createDropZones(last_column_flag)
 
     def draw(self):
+        self.canvas_rect = self.canvas.create_rectangle(self.x_pos, 0, self.x_pos + self.width, HEIGHT, outline=MAINCOLOR)
         self.canvas_line = self.canvas.create_line(self.x_pos, HEADERSIZE, self.x_pos+self.width, HEADERSIZE, fill=MAINCOLOR)
         self.canvas_text = self.canvas.create_text(self.x_pos + self.width/2, 15, anchor=CENTER, text=self.name, fill=MAINCOLOR, width=self.width, font=(HEADERFONT))
-        self.canvas_rect = self.canvas.create_rectangle(self.x_pos, 0, self.x_pos + self.width, HEIGHT, outline=MAINCOLOR)
+
+    def setColor(self, COLOR):
+        self.canvas.itemconfig(self.canvas_rect, fill=COLOR)
 
     def createDropZones(self, last_column_flag):
         i = 0
@@ -244,7 +249,7 @@ class Kanban:
                     cardwriter.writerow([c.section_index, c.description, c.color_index, c.points, c.creation_date])
 
     def addSectionFromFile(self, name, width, xpos, cardheight, last_column = False):
-        s = Section(self.canvas, name, width,  xpos, cardheight, last_column)
+        s = Section(self.canvas, name, width, xpos, cardheight, last_column)
         self.sections.append(s)
 
     def addCardFromFile(self, section_index, description, color_index, points, creation_date):
@@ -356,6 +361,8 @@ class Kanban:
     def handleClickUp(self, event):
         self.canvas.config(cursor='')
         self.drag_origin = None
+        for s in self.sections:
+            s.setColor(BGCOLOR)
         if DAYCOUNTER:
             self.updateCardCounters()
         if not self.edit_menu:
@@ -399,36 +406,38 @@ class Kanban:
 
     def handleMouseMove(self, event):
         if self.drag_origin:
-            print(self.drag_origin)
             x, y = event.x - self.drag_origin[0] + self.root.winfo_x(), event.y - self.drag_origin[1] + self.root.winfo_y()
             self.root.geometry("+%s+%s" % (x , y))
         if self.grabbed_card:
             self.canvas.config(cursor='fleur')
             move_pos = (event.x - self.grab_offset[0], event.y - self.grab_offset[1])
             self.grabbed_card.move(move_pos[0], move_pos[1])
-            section = self.getCollidingSections(event.x, event.y).drop_zones
-            print(section)
+            section = self.getCollidingSections(event.x, event.y)
+            for s in self.sections:
+                s.setColor(BGCOLOR)
+            if section:
+                section.setColor(HIGHLIGHTCOLOR)
     
     # --- Welcome Screen ---
     def openWelcomeScreen(self):
-        self.edit_menu = Frame(self.root, name='welcome_screen', relief=tk.FLAT, bg=BGCOLOR, highlightcolor=SECONDARYCOLOR, highlightbackground=SECONDARYCOLOR, highlightthickness=1, height=HEIGHT-(MARGIN*2), width=WIDTH-(MARGIN*2))        
-        self.edit_menu.pack(fill=BOTH, expand=False, padx=MARGIN*2, pady=MARGIN*2)
+        self.edit_menu = Frame(self.root, name='welcome_screen', relief=tk.FLAT, bg=BGCOLOR, padx=MARGIN*2, pady=MARGIN*2, highlightcolor=SECONDARYCOLOR, highlightbackground=SECONDARYCOLOR, highlightthickness=1, height=HEIGHT-(MARGIN*2), width=WIDTH-(MARGIN*2))        
+        self.edit_menu.pack(fill=BOTH, expand=False, padx=MARGIN, pady=MARGIN)
         
         welcome_grid = Frame(self.edit_menu, name='welcome_grid', background=BGCOLOR)
         welcome_grid.pack(padx=MARGIN, pady=MARGIN/4)
 
         welcome = Label(welcome_grid, text="Welcome to Kanbuddy!", font=(HEADERFONT, 24, "bold"), bg=BGCOLOR, fg=SECONDARYCOLOR, padx=MARGIN, pady=MARGIN).grid(column=0, row=0)
-        instructions = Label(welcome_grid, text=
-        '''
-        Test Line
-        Test Line 2
-        Test Line 3
-        Test Line 4
-        Test Line 5
-        I LOVE THE DELICIOUS TASTE OF PEPSI
-        ''', bg=BGCOLOR, fg=SECONDARYCOLOR, padx=MARGIN, pady=MARGIN, justify=tk.CENTER).grid(column=0, row=1)
+        byline = Label(welcome_grid, text="by kerfluffle", font=(HEADERFONT, 12, "bold"), bg=BGCOLOR, fg=SECONDARYCOLOR, padx=MARGIN, pady=MARGIN).grid(column=0, row=1)
 
-        close_button = Button(welcome_grid, text="Enter the World of Kanbuddy", bg=BGCOLOR, fg=SECONDARYCOLOR, padx=MARGIN, highlightbackground=BGCOLOR, command=lambda: self.closeWelcomeScreen()).grid(column=0,row=3)
+        instructions = Label(welcome_grid, font=(CARDFONT, 12), text=
+'''
+- CTRL-A to make new Card
+- Double-Click card to Edit
+- Drag card to bottom-right box to mark as complete.
+- Settings can be changed in settings.json
+''', bg=BGCOLOR, fg=SECONDARYCOLOR, justify=tk.CENTER).grid(column=0, row=2)
+
+        close_button = Button(welcome_grid, text="Enter the World of Kanbuddy", relief=tk.FLAT, bg=BGCOLOR, fg=SECONDARYCOLOR, padx=MARGIN, highlightbackground=SECONDARYCOLOR, command=lambda: self.closeWelcomeScreen()).grid(column=0,row=3)
         self.canvas.create_window(WIDTH/2, HEIGHT/2, anchor=CENTER, window=self.edit_menu)
 
     def closeWelcomeScreen(self):
