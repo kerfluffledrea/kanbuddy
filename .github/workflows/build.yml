@@ -3,10 +3,10 @@ name: Build Executables
 on:
   push:
     branches:
-      - main # Adjust to your default branch
+      - main
   pull_request:
     branches:
-      - main # Adjust to your default branch
+      - main
 
 jobs:
   build:
