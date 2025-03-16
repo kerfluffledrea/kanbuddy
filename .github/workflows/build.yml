@@ -3,40 +3,42 @@ name: Build Executables
 on:
   push:
     branches:
-      - main  # Adjust to your default branch
+      - main # Adjust to your default branch
   pull_request:
     branches:
-      - main  # Adjust to your default branch
+      - main # Adjust to your default branch
 
 jobs:
   build:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-    
+
     runs-on: ${{ matrix.os }}
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.x'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
 
-    - name: Install dependencies
-      run: pip install pyinstaller
-    
-    - name: Build binary using PyInstaller
-      run: |
-        pyinstaller --onefile kanbuddy.py
-        ls dist
-        
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: executable-${{ matrix.os }}
-        path: |
-          dist/kanbuddy.exe
-          dist/kanbuddy
+      - name: Install dependencies
+        run: pip install pyinstaller
+
+      - name: Build binary using PyInstaller
+        run: |
+          pyinstaller --onefile kanbuddy.py
+          ls dist
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: executable-${{ matrix.os }}
+          path: |
+            dist/kanbuddy.exe
+            dist/kanbuddy
+            settings.json
+            readme.md
