@@ -36,5 +36,5 @@ jobs:
       with:
         name: executable-${{ matrix.os }}
         path: |
-          dist.script.exe
+          dist/script.exe
           dist/script
