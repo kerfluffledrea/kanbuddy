@@ -31,7 +31,7 @@ jobs:
           pip install -r requirements.txt
         fi
         pip install pyinstaller  # Install PyInstaller to build the binary
-
+    
     - name: Build binary using PyInstaller
       run: |
         # Build the executable with PyInstaller
@@ -42,14 +42,30 @@ jobs:
         elif [ "${{ runner.os }}" == "macOS" ]; then
           pyinstaller --onefile --distpath dist/macos myscript.py
         fi
-
+    
     - name: Debug - List files in dist directory
       run: |
         echo "Listing contents of dist directory:"
         ls -R dist  # List all files in dist directory
+    
+    - name: Check if build files are generated
+      run: |
+        # Verify that the expected files exist in the dist directory
+        if [ -d "dist/linux" ]; then
+          echo "Linux build exists"
+          ls dist/linux
+        fi
+        if [ -d "dist/windows" ]; then
+          echo "Windows build exists"
+          ls dist/windows
+        fi
+        if [ -d "dist/macos" ]; then
+          echo "macOS build exists"
+          ls dist/macos
+        fi
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v2
       with:
         name: my-python-app-binaries
         path: |
