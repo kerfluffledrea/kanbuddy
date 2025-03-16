@@ -1,0 +1,53 @@
+name: Build and Test Python Application
+
+on:
+  push:
+    branches:
+      - main  # Adjust to your default branch
+  pull_request:
+    branches:
+      - main  # Adjust to your default branch
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'  # You can specify a specific version if needed
+
+    - name: Install dependencies
+      run: |
+        if [ -f requirements.txt ]; then
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+        fi
+        pip install pyinstaller  # Install PyInstaller to build the binary
+
+    - name: Build binary using PyInstaller
+      run: |
+        # Build the executable with PyInstaller
+        if [ "${{ runner.os }}" == "Linux" ]; then
+          pyinstaller --onefile --distpath dist/linux kanbuddy.py
+        elif [ "${{ runner.os }}" == "Windows" ]; then
+          pyinstaller --onefile --distpath dist/windows kanbuddy.py
+        elif [ "${{ runner.os }}" == "macOS" ]; then
+          pyinstaller --onefile --distpath dist/macos kanbuddy.py
+        fi
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: my-python-app-binaries
+        path: |
+          dist/linux/*  # For Linux
+          dist/windows/*  # For Windows
+          dist/macos/*  # For macOS
