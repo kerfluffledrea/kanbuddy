@@ -134,11 +134,17 @@ class PointsDisplay(DropZone):
 
     def getPointsFromFile(self):
         point_sum = 0
-        with open(archive_filepath, 'r', newline='\n') as csvfile:
-            cards = csv.DictReader(csvfile, delimiter='|')
-            for c in cards:
-                point_sum += POINTVALS[int(c['points'])]
-        return point_sum
+        if os.path.isfile(archive_filepath):
+            with open(archive_filepath, 'r', newline='\n') as csvfile:
+                cards = csv.DictReader(csvfile, delimiter='|')
+                for c in cards:
+                    point_sum += POINTVALS[int(c['points'])]
+            return point_sum
+        else:
+            with open(archive_filepath, 'w', newline='\n') as archivefile:
+                archivewriter = csv.writer(archivefile, delimiter="|")
+                archivewriter.writerow(['description', 'points', 'color_index', 'creation_date', 'completion_date'])
+            return 0
 
 class Section:
     def __init__(self, canvas, name, w, x, ch, last_column_flag):
@@ -232,7 +238,7 @@ class Kanban:
         with open(cards_filepath, 'w', newline='\n') as cardfile:
             with open(archive_filepath, 'a', newline='\n') as archivefile:
                 cardwriter = csv.writer(cardfile, delimiter="|")
-                archivewriter = csv.writer(archivefile, delimiter="|")
+                #archivewriter = csv.writer(archivefile, delimiter="|")
                 cardwriter.writerow(['section_index', 'description', 'color_index', 'points', 'creation_date'])
                 for c in self.cards:
                     cardwriter.writerow([c.section_index, c.description, c.color_index, c.points, c.creation_date])
@@ -357,7 +363,7 @@ class Kanban:
                 if self.sections.index(drop_section) == len(self.sections)-1 and self.isInArchiveDropzone(event.x, event.y):
                     with open(archive_filepath, 'a', newline='\n') as archivefile:
                         archivewriter = csv.writer(archivefile, delimiter="|")
-                        archivewriter.writerow([self.grabbed_card.description, self.grabbed_card.points, (date.today() - self.grabbed_card.creation_date).days])
+                        archivewriter.writerow([self.grabbed_card.description, self.grabbed_card.points, self.grabbed_card.color_index, self.grabbed_card.creation_date, date.today()])
                     self.archive_dropzone.updatePointCounter()
                     self.deleteCard(self.grabbed_card)
                     self.grabbed_card_section.reorderCards()
