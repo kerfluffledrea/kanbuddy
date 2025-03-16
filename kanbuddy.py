@@ -5,7 +5,7 @@ from pathlib import Path
 from datetime import date
 import tkinter as tk
 from tkinter.constants import BOTH, CENTER
-from tkinter import E, LAST, W, Frame, Text, Button 
+from tkinter import E, LAST, W, Frame, Text, Button, Label
 
 # Read Config File
 mod_path = str(Path(__file__).parent)
@@ -268,12 +268,12 @@ class Kanban:
         if mx > self.archive_dropzone.x_pos and mx < self.archive_dropzone.x_pos + self.archive_dropzone.width and my > self.archive_dropzone.y_pos and my < self.archive_dropzone.y_pos + self.archive_dropzone.height:
             return True
         return False
-
+    
     # --- Card Editing ---
     def openEditMenu(self, edit_card):
         edit_card.setColor(edit_card.color_index - 1)
-        self.edit_menu = Frame(self.root, name='edit_menu', relief=tk.SOLID, bg=BGCOLOR, highlightcolor=PALETTE[edit_card.color_index], highlightbackground=PALETTE[edit_card.color_index], highlightthickness=1, height=edit_card.height-1, width=edit_card.width-1)
-        self.edit_menu.pack(fill=BOTH, expand=True, padx=40, pady=40)
+        self.edit_menu = Frame(self.root, name='edit_menu', relief=tk.SOLID, bg=BGCOLOR, highlightcolor=PALETTE[edit_card.color_index], highlightbackground=PALETTE[edit_card.color_index], highlightthickness=1, height=HEIGHT-(MARGIN*2), width=WIDTH-(MARGIN*2))
+        self.edit_menu.pack(fill=BOTH, expand=True, padx=MARGIN*2, pady=MARGIN*2)
         
         description_entry = Text(self.edit_menu,name='edit_menu_text', wrap=tk.WORD, font=CARDFONT, height=5, width=34, padx=15, pady=5, bg=BGCOLOR, bd=0, highlightbackground=PALETTE[edit_card.color_index], highlightcolor=PALETTE[edit_card.color_index], fg=PALETTE[edit_card.color_index])
         description_entry.insert(tk.END, edit_card.description)
@@ -299,8 +299,8 @@ class Kanban:
 
         bottom_button_grid = Frame(self.edit_menu, name='bottom_button_grid', background=BGCOLOR)
         bottom_button_grid.pack(pady=MARGIN, padx=MARGIN/10)
-        close_button = Button(bottom_button_grid, name='close_button', text='SAVE', fg=PALETTE[edit_card.color_index], bg=BGCOLOR, width=20, height=1, highlightbackground=PALETTE[edit_card.color_index], command=lambda: self.closeEditMenu(edit_card, description_entry.get("1.0","end-1c"))).grid(column=3, row=0)
-        delete_button = Button(bottom_button_grid, name='delete_button', text='DELETE', fg=PALETTE[edit_card.color_index], bg=BGCOLOR, width=5, height=1, highlightbackground=PALETTE[edit_card.color_index], command=lambda: self.deleteCard(edit_card, True)).grid(column=4, row=0)
+        close_button = Button(bottom_button_grid, relief=tk.RAISED, name='close_button', text='SAVE', fg=PALETTE[edit_card.color_index], bg=BGCOLOR, width=20, height=1, highlightbackground=PALETTE[edit_card.color_index], command=lambda: self.closeEditMenu(edit_card, description_entry.get("1.0","end-1c"))).grid(column=3, row=0)
+        delete_button = Button(bottom_button_grid, relief=tk.GROOVE, name='delete_button', text='DELETE', fg=PALETTE[edit_card.color_index], bg=BGCOLOR, width=5, height=1, highlightbackground=PALETTE[edit_card.color_index], command=lambda: self.deleteCard(edit_card, True)).grid(column=4, row=0)
         self.canvas.create_window(WIDTH/2, HEIGHT/2, anchor=CENTER, window=self.edit_menu)
 
     def changeColorButton(self, edit_card, color_index):
@@ -408,6 +408,32 @@ class Kanban:
             self.grabbed_card.move(move_pos[0], move_pos[1])
             section = self.getCollidingSections(event.x, event.y).drop_zones
             print(section)
+    
+    # --- Welcome Screen ---
+    def openWelcomeScreen(self):
+        self.edit_menu = Frame(self.root, name='welcome_screen', relief=tk.FLAT, bg=BGCOLOR, highlightcolor=SECONDARYCOLOR, highlightbackground=SECONDARYCOLOR, highlightthickness=1, height=HEIGHT-(MARGIN*2), width=WIDTH-(MARGIN*2))        
+        self.edit_menu.pack(fill=BOTH, expand=False, padx=MARGIN*2, pady=MARGIN*2)
+        
+        welcome_grid = Frame(self.edit_menu, name='welcome_grid', background=BGCOLOR)
+        welcome_grid.pack(padx=MARGIN, pady=MARGIN/4)
+
+        welcome = Label(welcome_grid, text="Welcome to Kanbuddy!", font=(HEADERFONT, 24, "bold"), bg=BGCOLOR, fg=SECONDARYCOLOR, padx=MARGIN, pady=MARGIN).grid(column=0, row=0)
+        instructions = Label(welcome_grid, text=
+        '''
+        Test Line
+        Test Line 2
+        Test Line 3
+        Test Line 4
+        Test Line 5
+        I LOVE THE DELICIOUS TASTE OF PEPSI
+        ''', bg=BGCOLOR, fg=SECONDARYCOLOR, padx=MARGIN, pady=MARGIN, justify=tk.CENTER).grid(column=0, row=1)
+
+        close_button = Button(welcome_grid, text="Enter the World of Kanbuddy", bg=BGCOLOR, fg=SECONDARYCOLOR, padx=MARGIN, highlightbackground=BGCOLOR, command=lambda: self.closeWelcomeScreen()).grid(column=0,row=3)
+        self.canvas.create_window(WIDTH/2, HEIGHT/2, anchor=CENTER, window=self.edit_menu)
+
+    def closeWelcomeScreen(self):
+        self.edit_menu.destroy()
+        self.edit_menu = None
 
 
 # Import sections
@@ -415,6 +441,9 @@ k = Kanban()
 
 sections = settings['sections']
 sum_width = 0
+if not os.path.isfile(archive_filepath):
+    k.openWelcomeScreen()
+
 for sec in sections:
     if sec == sections[-1]:
         k.addSectionFromFile(sec['name'], int(sec['width']), sum_width, int(sec['cardheight']), True)
