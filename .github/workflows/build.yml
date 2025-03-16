@@ -36,12 +36,17 @@ jobs:
       run: |
         # Build the executable with PyInstaller
         if [ "${{ runner.os }}" == "Linux" ]; then
-          pyinstaller --onefile --distpath dist/linux kanbuddy.py
+          pyinstaller --onefile --distpath dist/linux myscript.py
         elif [ "${{ runner.os }}" == "Windows" ]; then
-          pyinstaller --onefile --distpath dist/windows kanbuddy.py
+          pyinstaller --onefile --distpath dist/windows myscript.py
         elif [ "${{ runner.os }}" == "macOS" ]; then
-          pyinstaller --onefile --distpath dist/macos kanbuddy.py
+          pyinstaller --onefile --distpath dist/macos myscript.py
         fi
+
+    - name: Debug - List files in dist directory
+      run: |
+        echo "Listing contents of dist directory:"
+        ls -R dist  # List all files in dist directory
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
@@ -51,3 +56,7 @@ jobs:
           dist/linux/*  # For Linux
           dist/windows/*  # For Windows
           dist/macos/*  # For macOS
+
+    - name: Run tests (optional)
+      run: |
+        python -m unittest discover  # Adjust this if you're using a different test framework
