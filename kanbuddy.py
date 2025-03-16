@@ -19,7 +19,8 @@ COUNTERFONT = settings['counterfont']
 BGCOLOR = settings['colors']['bg']
 MAINCOLOR = settings['colors']['main']
 SECONDARYCOLOR = settings['colors']['secondary']
-HIGHLIGHTCOLOR = settings['colors']['highlight']
+SECTIONHIGHLIGHT = settings['colors']['sectionhighlight']
+BUTTONHIGHLIGHT = settings['colors']['buttonhighlight']
 MARGIN = settings['margin']
 WIDTH = settings['width']
 HEIGHT = settings['height']
@@ -277,7 +278,7 @@ class Kanban:
     # --- Card Editing ---
     def openEditMenu(self, edit_card):
         edit_card.setColor(edit_card.color_index - 1)
-        self.edit_menu = Frame(self.root, name='edit_menu', relief=tk.SOLID, bg=BGCOLOR, highlightcolor=PALETTE[edit_card.color_index], highlightbackground=PALETTE[edit_card.color_index], highlightthickness=1, height=HEIGHT-(MARGIN*2), width=WIDTH-(MARGIN*2))
+        self.edit_menu = Frame(self.root, name='edit_menu', pady=MARGIN/3, padx=MARGIN/3, relief=tk.SOLID, bg=BGCOLOR, highlightcolor=PALETTE[edit_card.color_index], highlightbackground=PALETTE[edit_card.color_index], highlightthickness=1)
         self.edit_menu.pack(fill=BOTH, expand=True, padx=MARGIN*2, pady=MARGIN*2)
         
         description_entry = Text(self.edit_menu,name='edit_menu_text', wrap=tk.WORD, font=CARDFONT, height=5, width=34, padx=15, pady=5, bg=BGCOLOR, bd=0, highlightbackground=PALETTE[edit_card.color_index], highlightcolor=PALETTE[edit_card.color_index], fg=PALETTE[edit_card.color_index])
@@ -299,24 +300,23 @@ class Kanban:
 
         value_button_grid = Frame(button_grid, name='value_button_grid')
         value_button_grid.pack(side = tk.RIGHT, padx=MARGIN)
-        decrease_points = Button(value_button_grid, name='decrease_button', text='-', fg=PALETTE[edit_card.color_index], bg=BGCOLOR, width=1, height=1, highlightbackground=PALETTE[edit_card.color_index], command=lambda: edit_card.decreasePoints()).grid(column=8, row=0)
-        increase_points = Button(value_button_grid, name='increase_button', text='+', fg=PALETTE[edit_card.color_index], bg=BGCOLOR, width=1, height=1, highlightbackground=PALETTE[edit_card.color_index], command=lambda: edit_card.increasePoints()).grid(column=9, row=0)
+        decrease_points = Button(value_button_grid, activebackground=BUTTONHIGHLIGHT, activeforeground=PALETTE[edit_card.color_index], relief=tk.FLAT, name='decrease_button', text='-', fg=PALETTE[edit_card.color_index], bg=BGCOLOR, width=1, height=1, highlightbackground=PALETTE[edit_card.color_index], command=lambda: edit_card.decreasePoints()).grid(column=8, row=0)
+        increase_points = Button(value_button_grid, activebackground=BUTTONHIGHLIGHT, activeforeground=PALETTE[edit_card.color_index], relief=tk.FLAT, name='increase_button', text='+', fg=PALETTE[edit_card.color_index], bg=BGCOLOR, width=1, height=1, highlightbackground=PALETTE[edit_card.color_index], command=lambda: edit_card.increasePoints()).grid(column=9, row=0)
 
         bottom_button_grid = Frame(self.edit_menu, name='bottom_button_grid', background=BGCOLOR)
         bottom_button_grid.pack(pady=MARGIN, padx=MARGIN/10)
-        close_button = Button(bottom_button_grid, relief=tk.RAISED, name='close_button', text='SAVE', fg=PALETTE[edit_card.color_index], bg=BGCOLOR, width=20, height=1, highlightbackground=PALETTE[edit_card.color_index], command=lambda: self.closeEditMenu(edit_card, description_entry.get("1.0","end-1c"))).grid(column=3, row=0)
-        delete_button = Button(bottom_button_grid, relief=tk.GROOVE, name='delete_button', text='DELETE', fg=PALETTE[edit_card.color_index], bg=BGCOLOR, width=5, height=1, highlightbackground=PALETTE[edit_card.color_index], command=lambda: self.deleteCard(edit_card, True)).grid(column=4, row=0)
+        close_button = Button(bottom_button_grid, activeforeground=PALETTE[edit_card.color_index], activebackground=BUTTONHIGHLIGHT, relief=tk.FLAT, name='close_button', text='SAVE', fg=PALETTE[edit_card.color_index], bg=BGCOLOR, width=20, height=1, highlightbackground=PALETTE[edit_card.color_index], command=lambda: self.closeEditMenu(edit_card, description_entry.get("1.0","end-1c"))).grid(column=3, row=0)
+        delete_button = Button(bottom_button_grid, activeforeground=PALETTE[edit_card.color_index], activebackground=BUTTONHIGHLIGHT, relief=tk.FLAT, name='delete_button', text='DELETE', fg=PALETTE[edit_card.color_index], bg=BGCOLOR, width=5, height=1, highlightbackground=PALETTE[edit_card.color_index], command=lambda: self.deleteCard(edit_card, True)).grid(column=4, row=0)
         self.canvas.create_window(WIDTH/2, HEIGHT/2, anchor=CENTER, window=self.edit_menu)
 
     def changeColorButton(self, edit_card, color_index):
-        self.edit_menu.config(highlightbackground=PALETTE[color_index], highlightcolor=PALETTE[color_index])
         edit_card.setColor(color_index)
+        self.edit_menu.config(highlightbackground=PALETTE[color_index], highlightcolor=PALETTE[color_index])
         self.edit_menu.nametowidget('edit_menu_text').config(highlightcolor=PALETTE[color_index], highlightbackground=PALETTE[color_index], fg=PALETTE[color_index])
-        self.edit_menu.nametowidget('button_grid').nametowidget('value_button_grid').nametowidget('increase_button').config(highlightbackground=PALETTE[color_index], fg=PALETTE[color_index])
-        self.edit_menu.nametowidget('button_grid').nametowidget('value_button_grid').nametowidget('decrease_button').config(highlightbackground=PALETTE[color_index], fg=PALETTE[color_index])
-
-        self.edit_menu.nametowidget('bottom_button_grid').nametowidget('close_button').config(highlightbackground=PALETTE[color_index], fg=PALETTE[color_index])
-        self.edit_menu.nametowidget('bottom_button_grid').nametowidget('delete_button').config(highlightbackground=PALETTE[color_index], fg=PALETTE[color_index])
+        self.edit_menu.nametowidget('button_grid').nametowidget('value_button_grid').nametowidget('increase_button').config(activeforeground=PALETTE[color_index], highlightbackground=PALETTE[color_index], fg=PALETTE[color_index])
+        self.edit_menu.nametowidget('button_grid').nametowidget('value_button_grid').nametowidget('decrease_button').config(activeforeground=PALETTE[color_index], highlightbackground=PALETTE[color_index], fg=PALETTE[color_index])
+        self.edit_menu.nametowidget('bottom_button_grid').nametowidget('close_button').config(activeforeground=PALETTE[color_index], highlightbackground=PALETTE[color_index], fg=PALETTE[color_index])
+        self.edit_menu.nametowidget('bottom_button_grid').nametowidget('delete_button').config(activeforeground=PALETTE[color_index], highlightbackground=PALETTE[color_index], fg=PALETTE[color_index])
 
     def closeEditMenu(self, edit_card, desc):
         edit_card.setDescription(desc)
@@ -416,7 +416,7 @@ class Kanban:
             for s in self.sections:
                 s.setColor(BGCOLOR)
             if section:
-                section.setColor(HIGHLIGHTCOLOR)
+                section.setColor(SECTIONHIGHLIGHT)
     
     # --- Welcome Screen ---
     def openWelcomeScreen(self):
@@ -437,7 +437,7 @@ class Kanban:
 - Settings can be changed in settings.json
 ''', bg=BGCOLOR, fg=SECONDARYCOLOR, justify=tk.CENTER).grid(column=0, row=2)
 
-        close_button = Button(welcome_grid, text="Enter the World of Kanbuddy", relief=tk.FLAT, bg=BGCOLOR, fg=SECONDARYCOLOR, padx=MARGIN, highlightbackground=SECONDARYCOLOR, command=lambda: self.closeWelcomeScreen()).grid(column=0,row=3)
+        close_button = Button(welcome_grid, text="Enter the World of Kanbuddy", activeforeground=SECONDARYCOLOR, activebackground=BUTTONHIGHLIGHT, relief=tk.FLAT, bg=BGCOLOR, fg=SECONDARYCOLOR, padx=MARGIN, highlightbackground=SECONDARYCOLOR, command=lambda: self.closeWelcomeScreen()).grid(column=0,row=3)
         self.canvas.create_window(WIDTH/2, HEIGHT/2, anchor=CENTER, window=self.edit_menu)
 
     def closeWelcomeScreen(self):
