@@ -87,8 +87,8 @@ class Card:
             self.canvas.delete(self.canvas_lines.pop())
 
     def draw(self):
-        self.canvas_text = self.canvas.create_text(self.position[0] + self.width/2, self.position[1] + self.height/2, anchor=CENTER, text=self.description, fill=PALETTE[self.color_index], width=self.width-MARGIN*2, justify=tk.CENTER, font=CARDFONT)
-        self.canvas_rect = self.canvas.create_rectangle(self.position[0], self.position[1], self.position[0] + self.width, self.position[1] + self.height, outline=PALETTE[self.color_index])
+        self.canvas_text = self.canvas.create_text(self.position[0] + self.width/2, self.position[1] + self.height/2, anchor=CENTER, text=self.description, fill=PALETTE[self.color_index], width=self.width-MARGIN*2, justify=tk.CENTER, font=CARDFONT, tag='card')
+        self.canvas_rect = self.canvas.create_rectangle(self.position[0], self.position[1], self.position[0] + self.width, self.position[1] + self.height, outline=PALETTE[self.color_index], tag='card')
         i = 0
         if DAYCOUNTER:
             self.canvas_dayctr = self.canvas.create_text(self.position[0] + 5, self.position[1] + 8, anchor=W, text=(date.today() - self.creation_date).days, fill=PALETTE[self.color_index], width=self.width-MARGIN*2, justify=tk.CENTER, font=(COUNTERFONT, 9))
@@ -354,6 +354,7 @@ class Kanban:
                 self.grab_location = (event.x, event.y)
 
     def handleClickUp(self, event):
+        self.canvas.config(cursor='')
         self.drag_origin = None
         if DAYCOUNTER:
             self.updateCardCounters()
@@ -402,6 +403,7 @@ class Kanban:
             x, y = event.x - self.drag_origin[0] + self.root.winfo_x(), event.y - self.drag_origin[1] + self.root.winfo_y()
             self.root.geometry("+%s+%s" % (x , y))
         if self.grabbed_card:
+            self.canvas.config(cursor='fleur')
             move_pos = (event.x - self.grab_offset[0], event.y - self.grab_offset[1])
             self.grabbed_card.move(move_pos[0], move_pos[1])
             section = self.getCollidingSections(event.x, event.y).drop_zones
