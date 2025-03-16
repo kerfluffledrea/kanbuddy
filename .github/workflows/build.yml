@@ -1,4 +1,4 @@
-name: Build and Test Python Application
+name: Build Executables
 
 on:
   push:
@@ -10,10 +10,11 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+    
+    runs-on: ${{ matrix.os }}
     
     steps:
     - name: Checkout code
@@ -22,57 +23,18 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.x'  # You can specify a specific version if needed
+        python-version: '3.x'
 
     - name: Install dependencies
-      run: |
-        if [ -f requirements.txt ]; then
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-        fi
-        pip install pyinstaller  # Install PyInstaller to build the binary
+      run: pip install pyinstaller
     
     - name: Build binary using PyInstaller
-      run: |
-        # Build the executable with PyInstaller
-        if [ "${{ runner.os }}" == "Linux" ]; then
-          pyinstaller --onefile --distpath dist/linux myscript.py
-        elif [ "${{ runner.os }}" == "Windows" ]; then
-          pyinstaller --onefile --distpath dist/windows myscript.py
-        elif [ "${{ runner.os }}" == "macOS" ]; then
-          pyinstaller --onefile --distpath dist/macos myscript.py
-        fi
-    
-    - name: Debug - List files in dist directory
-      run: |
-        echo "Listing contents of dist directory:"
-        ls -R dist  # List all files in dist directory
-    
-    - name: Check if build files are generated
-      run: |
-        # Verify that the expected files exist in the dist directory
-        if [ -d "dist/linux" ]; then
-          echo "Linux build exists"
-          ls dist/linux
-        fi
-        if [ -d "dist/windows" ]; then
-          echo "Windows build exists"
-          ls dist/windows
-        fi
-        if [ -d "dist/macos" ]; then
-          echo "macOS build exists"
-          ls dist/macos
-        fi
-
+      run: pyinstaller --onefile kanbuddy.py
+        
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
-        name: my-python-app-binaries
+        name: executable-${{ matrix.os }}
         path: |
-          dist/linux/*  # For Linux
-          dist/windows/*  # For Windows
-          dist/macos/*  # For macOS
-
-    - name: Run tests (optional)
-      run: |
-        python -m unittest discover  # Adjust this if you're using a different test framework
+          dist.script.exe
+          dist/script
