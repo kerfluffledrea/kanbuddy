@@ -349,7 +349,6 @@ class Kanban:
         delete_button = Button(bottom_button_grid, activeforeground=PALETTE[edit_card.color_index], activebackground=BUTTONHIGHLIGHT, relief=tk.FLAT, name='delete_button', text='DELETE', fg=PALETTE[edit_card.color_index], bg=BGCOLOR, width=5, height=1, highlightbackground=PALETTE[edit_card.color_index], command=lambda: self.deleteCard(edit_card, True)).grid(column=4, row=0)
         self.canvas.create_window(WIDTH/2, HEIGHT/2, anchor=CENTER, window=self.edit_menu)
 
-    def closeEditMenu(self, edit_card, desc):
     def changeColorButton(self, edit_card, color_index):
         edit_card.setColor(color_index)
         self.edit_menu.config(highlightbackground=PALETTE[color_index], highlightcolor=PALETTE[color_index])
@@ -359,6 +358,7 @@ class Kanban:
         self.edit_menu.nametowidget('bottom_button_grid').nametowidget('close_button').config(activeforeground=PALETTE[color_index], highlightbackground=PALETTE[color_index], fg=PALETTE[color_index])
         self.edit_menu.nametowidget('bottom_button_grid').nametowidget('delete_button').config(activeforeground=PALETTE[color_index], highlightbackground=PALETTE[color_index], fg=PALETTE[color_index])
 
+    def closeEditMenu(self, edit_card, desc):
         edit_card.setDescription(desc)
         self.edit_menu.destroy()
         self.edit_menu = None
