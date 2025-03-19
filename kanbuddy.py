@@ -19,7 +19,7 @@ print('other one :' + str(os.path.dirname(os.path.abspath(__file__))))
 print('OS.cwd :' + str(os.getcwd()))
 
 # Read Config File
-mod_path = str(Path(__file__).parent)
+mod_path = str(str(os.getcwd()))
 settings = open(mod_path + "/settings.yaml")
 cards_filepath = mod_path + "/.cards.csv"
 archive_filepath = mod_path + "/.archive.csv"
