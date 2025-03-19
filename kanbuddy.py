@@ -377,7 +377,7 @@ class Kanban:
     def deleteCard(self, card, editing=False):
         self.cards.remove(card)
         self.sections[card.section_index].cards.remove(card)
-        card.clearCanvas()
+        card.delete()
         del card
         if editing:
             self.edit_menu.destroy()
@@ -546,7 +546,7 @@ class Kanban:
             self.context_menu.add_command(label="New Card", accelerator='Ctrl-A', command=lambda: self.addNewCard())
         self.context_menu.add_separator()
         self.context_menu.add_checkbutton(label="Stay On Top", variable=self.pinned, onvalue=1, offvalue=0, command=lambda: self.setPinned())
-        self.context_menu.add_command(label="Quit", command=lambda: quit())
+        self.context_menu.add_command(label="Quit", command=lambda: exit(0))
         self.context_menu.post(event.x_root, event.y_root)
     
     # --- Welcome Screen ---
