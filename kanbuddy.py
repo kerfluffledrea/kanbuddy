@@ -3,7 +3,7 @@ import yaml
 import sys
 import csv
 import os.path
-from inspect import getsourcefile
+from inspect import getsourcefile, getframeinfo, currentframe
 from pathlib import Path
 from datetime import date
 import tkinter as tk
@@ -11,6 +11,9 @@ from tkinter.constants import BOTH, CENTER
 from tkinter import E, W, Frame, Text, Button, Label, font, LAST, Menu, FLAT, CENTER, RIDGE
 
 print("abspath: " + str(os.path.abspath(getsourcefile(lambda:0))))
+filename = getframeinfo(currentframe()).filename
+print("path : " + str(os.path.dirname(os.path.abspath(filename))))
+
 # Read Config File
 mod_path = str(Path(__file__).parent)
 settings = open(mod_path + "/settings.yaml")
