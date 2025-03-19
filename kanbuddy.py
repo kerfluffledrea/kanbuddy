@@ -3,9 +3,10 @@ import csv
 import os.path
 from pathlib import Path
 from datetime import date
+
 import tkinter as tk
 from tkinter.constants import BOTH, CENTER
-from tkinter import E, LAST, W, Frame, Text, Button, Label
+from tkinter import E, W, Frame, Text, Button, Label, font, LAST, Menu, FLAT, CENTER, RIDGE
 
 # Read Config File
 mod_path = str(Path(__file__).parent)
@@ -21,6 +22,7 @@ MAINCOLOR = settings['colors']['main']
 SECONDARYCOLOR = settings['colors']['secondary']
 SECTIONHIGHLIGHT = settings['colors']['sectionhighlight']
 BUTTONHIGHLIGHT = settings['colors']['buttonhighlight']
+DRAGTHRESHOLD = 30
 MARGIN = settings['margin']
 WIDTH = settings['width']
 HEIGHT = settings['height']
@@ -89,11 +91,11 @@ class Card:
             self.canvas.delete(self.canvas_lines.pop())
 
     def draw(self):
-        self.canvas_text = self.canvas.create_text(self.position[0] + self.width/2, self.position[1] + self.height/2, anchor=CENTER, text=self.description, fill=PALETTE[self.color_index], width=self.width-MARGIN*2, justify=tk.CENTER, font=CARDFONT, tag='card')
+        self.canvas_text = self.canvas.create_text(self.position[0] + self.width/2, self.position[1] + self.height/2, anchor=CENTER, text=self.description, fill=PALETTE[self.color_index], width=self.width-MARGIN*2, justify=CENTER, font=CARDFONT, tag='card')
         self.canvas_rect = self.canvas.create_rectangle(self.position[0], self.position[1], self.position[0] + self.width, self.position[1] + self.height, outline=PALETTE[self.color_index], tag='card')
         i = 0
         if DAYCOUNTER:
-            self.canvas_dayctr = self.canvas.create_text(self.position[0] + 5, self.position[1] + 8, anchor=W, text=(date.today() - self.creation_date).days, fill=PALETTE[self.color_index], width=self.width-MARGIN*2, justify=tk.CENTER, font=(COUNTERFONT, 9))
+            self.canvas_dayctr = self.canvas.create_text(self.position[0] + 5, self.position[1] + 8, anchor=W, text=(date.today() - self.creation_date).days, fill=PALETTE[self.color_index], width=self.width-MARGIN*2, justify=CENTER, font=(COUNTERFONT, 9))
         while i < self.points+1:
             self.canvas_lines.append(self.canvas.create_line(self.position[0] + self.width, self.position[1] + self.height - i*MARGIN,
                 self.position[0] + self.width - i*MARGIN, self.position[1] + self.height, fill=PALETTE[self.color_index]))
@@ -217,29 +219,53 @@ class Kanban:
     def __init__(self):
         self.root = tk.Tk()
         self.root.resizable(False, False)
-        #self.root.attributes('-fullscreen', True)
         self.root.wm_title("Kanbuddy")
         self.root.wm_attributes('-type', 'splash')
         self.root.geometry(str(WIDTH)+"x"+str(HEIGHT))
         self.root.configure(background=BGCOLOR)
         self.canvas = tk.Canvas(self.root, bg=BGCOLOR, width=WIDTH, height=HEIGHT, highlightthickness=1, highlightbackground=MAINCOLOR)
+        self.canvas.pack()
+
         self.root.bind('<Control-a>', self.addNewCard)
         self.canvas.bind('<Button-1>', self.handleClickDown)
+        self.canvas.bind('<Button-2>', self.handleMiddleClickDown)
+        self.canvas.bind('<Button-3>', self.handleRightClickDown)
         self.canvas.bind('<ButtonRelease-1>', self.handleClickUp)
+        self.canvas.bind('<ButtonRelease-2>', self.handleMiddleClickUp)
+        self.canvas.bind('<ButtonRelease-3>', self.handleRightClickUp)
         self.canvas.bind('<Double-Button-1>', self.handleDoubleClick)
         self.canvas.bind('<B1-Motion>', self.handleMouseMove)
-        self.canvas.pack()
+        self.canvas.bind('<B2-Motion>', self.handleMiddleClickDrag)
+        
+        #HEADERFONT = tk.font.Font(self.root, family = "Noto Sans Ethiopic",  
+        #    size = 20,  
+        #    weight = "bold")
         self.cards = []
         self.sections = []
         self.archive_dropzone = None
         self.edit_menu = None
+        self.context_menu = None
         self.grabbed_card = None
         self.grab_offset = None
         self.grab_location = None
+        self.middle_click_origin = None
         self.grabbed_card_section = None
+        self.control_held = False
+        self.lmb_held = False
+        self.rmb_held = False
+        self.pinned = tk.BooleanVar()
         self.drag_origin = ()
 
     # --- File Reading/Writing ---
+    def addNewCard(self, event=None):
+        if not self.edit_menu:
+            if len(self.sections[0].cards) < len(self.sections[0].drop_zones):
+                c = Card(self.canvas)
+                self.cards.append(c)
+                self.sections[0].addCard(c)
+                self.saveCardstoFile()
+                return c
+
     def saveCardstoFile(self):
         with open(cards_filepath, 'w', newline='\n') as cardfile:
             with open(archive_filepath, 'a', newline='\n') as archivefile:
@@ -275,9 +301,11 @@ class Kanban:
             return True
         return False
     
-    # --- Card Editing ---
+    # --- Menus ---
+    def card_popup(self, event):
+        pass
+
     def openEditMenu(self, edit_card):
-        edit_card.setColor(edit_card.color_index - 1)
         self.edit_menu = Frame(self.root, name='edit_menu', pady=MARGIN/3, padx=MARGIN/3, relief=tk.SOLID, bg=BGCOLOR, highlightcolor=PALETTE[edit_card.color_index], highlightbackground=PALETTE[edit_card.color_index], highlightthickness=1)
         self.edit_menu.pack(fill=BOTH, expand=True, padx=MARGIN*2, pady=MARGIN*2)
         
@@ -338,17 +366,20 @@ class Kanban:
         for c in self.cards:
             c.updateCounter()
     
-    # --- Event Handlers ---
-    def addNewCard(self, event):
-        if not self.edit_menu:
-            if len(self.sections[0].cards) < len(self.sections[0].drop_zones):
-                c = Card(self.canvas)
-                self.cards.append(c)
-                self.sections[0].addCard(c)
-                self.saveCardstoFile()
-                return c
+    def destroyContextMenu(self):
+        if self.context_menu:
+            self.context_menu.destroy()
 
+    def setPinned(self):
+        if self.pinned.get():
+            self.root.wm_attributes('-type', 'splash', "-topmost", "true")
+        else:
+            self.root.wm_attributes('-type', 'splash', "-topmost", "false")
+
+    # --- Event Handlers ---
     def handleClickDown(self, event):
+        self.lmb_held = True
+        self.destroyContextMenu()
         if event.y < HEADERSIZE:
             self.drag_origin = (event.x, event.y)
         if not self.edit_menu:
@@ -359,6 +390,7 @@ class Kanban:
                 self.grab_location = (event.x, event.y)
 
     def handleClickUp(self, event):
+        self.lmb_held = False
         self.canvas.config(cursor='')
         self.drag_origin = None
         for s in self.sections:
@@ -386,10 +418,6 @@ class Kanban:
                         self.grabbed_card_section.removeCard(self.grabbed_card)
                         self.grabbed_card_section.addCard(self.grabbed_card)
                     else:
-                        if self.grabbed_card.color_index < len(PALETTE)-1:
-                            self.grabbed_card.setColor(self.grabbed_card.color_index + 1)
-                        else:
-                            self.grabbed_card.setColor(0)
                         og_position = (self.grab_location[0] - self.grab_offset[0], self.grab_location[1] - self.grab_offset[1])
                         self.grabbed_card.move(og_position[0], og_position[1])
                 self.grabbed_card = None
@@ -397,7 +425,7 @@ class Kanban:
                 self.grabbed_card_section = None
                 self.grab_location = None
                 self.saveCardstoFile()
-    
+
     def handleDoubleClick(self, event):
         if not self.edit_menu:
             edit_card = self.getColldingCards(event.x, event.y)
@@ -417,10 +445,78 @@ class Kanban:
                 s.setColor(BGCOLOR)
             if section:
                 section.setColor(SECTIONHIGHLIGHT)
+
+    def handleMiddleClickDown(self, event):
+        if not self.edit_menu:
+            self.grabbed_card = self.getColldingCards(event.x, event.y)
+            if self.grabbed_card:
+                self.grab_offset = (event.x - self.grabbed_card.position[0], event.y - self.grabbed_card.position[1])
+                self.grabbed_card_section = self.sections[self.grabbed_card.section_index]
+                self.grab_location = (event.x, event.y)
+                self.middle_click_origin = (event.x, event.y)
+
+    def handleMiddleClickUp(self, event):
+        if not self.lmb_held:
+            if not self.edit_menu and self.grabbed_card:
+                total_drag_distance = self.grab_location[0] - event.x, self.grab_location[1] - event.y
+                if abs(total_drag_distance[1]) < DRAGTHRESHOLD:
+                    if event.state & 0x4: # Check if Ctrl-Key is held, maybe i should make this bindable one day, who's to say, truly we do not know what life has in store for us on this crazy world so perhaps it would be best to leave this for another day such that I have plenty of time to ruminate on the ramifications of hardcoding this value in an event call, whos to say. Not I. Yippee.
+                        if self.grabbed_card.color_index > 0:
+                            self.grabbed_card.setColor(self.grabbed_card.color_index - 1)
+                        else:
+                            self.grabbed_card.setColor(len(PALETTE)-1)
+                    else:
+                        if self.grabbed_card.color_index < len(PALETTE)-1:
+                            self.grabbed_card.setColor(self.grabbed_card.color_index + 1)
+                        else:
+                            self.grabbed_card.setColor(0)
+                    og_position = (self.grab_location[0] - self.grab_offset[0], self.grab_location[1] - self.grab_offset[1])
+                    self.grabbed_card.move(og_position[0], og_position[1])
+            self.grabbed_card = None
+            self.grab_offset = None
+            self.grabbed_card_section = None
+            self.grab_location = None
+            self.saveCardstoFile()
+
+    def handleMiddleClickDrag(self, event):
+        if not self.lmb_held:
+            drag_y_distance = event.y - self.middle_click_origin[1]
+            if drag_y_distance > DRAGTHRESHOLD:
+                self.grabbed_card.decreasePoints()
+                self.middle_click_origin = (self.middle_click_origin[0], self.middle_click_origin[1] + DRAGTHRESHOLD)
+            elif drag_y_distance < -DRAGTHRESHOLD:
+                self.grabbed_card.increasePoints()
+                self.middle_click_origin = (self.middle_click_origin[0], self.middle_click_origin[1] - DRAGTHRESHOLD)
+
+    def handleRightClickDown(self, event):
+        self.rmb_held = True
+        self.destroyContextMenu()
+        if not self.edit_menu:
+            self.grabbed_card = self.getColldingCards(event.x, event.y)
+            if self.grabbed_card:
+                self.grab_offset = (event.x - self.grabbed_card.position[0], event.y - self.grabbed_card.position[1])
+                self.grabbed_card_section = self.sections[self.grabbed_card.section_index]
+                self.grab_location = (event.x, event.y)
+
+    def handleRightClickUp(self, event):
+        self.rmb_held = False
+        self.grabbed_card = self.getColldingCards(event.x, event.y)
+
+        self.context_menu = tk.Menu(self.root, tearoff=0, bg=BGCOLOR, fg=SECONDARYCOLOR, selectcolor=SECONDARYCOLOR, font=COUNTERFONT)
+
+        if self.grabbed_card:
+            self.grab_location = (event.x, event.y)
+            self.context_menu.add_command(label="Edit", accelerator='Double-Click', command=lambda: self.openEditMenu(self.grabbed_card))
+            self.context_menu.add_command(label="Delete", command=lambda: self.deleteCard(self.grabbed_card))
+        else:
+            self.context_menu.add_command(label="New Card", accelerator='Ctrl-A', command=lambda: self.addNewCard())
+        self.context_menu.add_checkbutton(label="Stay On Top", variable=self.pinned, onvalue=1, offvalue=0, command=lambda: self.setPinned())
+        self.context_menu.add_command(label="Quit", command=lambda: quit())
+        self.context_menu.post(event.x_root, event.y_root)
     
     # --- Welcome Screen ---
     def openWelcomeScreen(self):
-        self.edit_menu = Frame(self.root, name='welcome_screen', relief=tk.FLAT, bg=BGCOLOR, padx=MARGIN*2, pady=MARGIN*2, highlightcolor=SECONDARYCOLOR, highlightbackground=SECONDARYCOLOR, highlightthickness=1, height=HEIGHT-(MARGIN*2), width=WIDTH-(MARGIN*2))        
+        self.edit_menu = Frame(self.root, name='welcome_screen', relief=FLAT, bg=BGCOLOR, padx=MARGIN*2, pady=MARGIN*2, highlightcolor=SECONDARYCOLOR, highlightbackground=SECONDARYCOLOR, highlightthickness=1, height=HEIGHT-(MARGIN*2), width=WIDTH-(MARGIN*2))        
         self.edit_menu.pack(fill=BOTH, expand=False, padx=MARGIN, pady=MARGIN)
         
         welcome_grid = Frame(self.edit_menu, name='welcome_grid', background=BGCOLOR)
@@ -435,7 +531,7 @@ class Kanban:
 - Double-Click card to Edit
 - Drag card to bottom-right box to mark as complete.
 - Settings can be changed in settings.json
-''', bg=BGCOLOR, fg=SECONDARYCOLOR, justify=tk.CENTER).grid(column=0, row=2)
+''', bg=BGCOLOR, fg=SECONDARYCOLOR, justify=CENTER).grid(column=0, row=2)
 
         close_button = Button(welcome_grid, text="Enter the World of Kanbuddy", activeforeground=SECONDARYCOLOR, activebackground=BUTTONHIGHLIGHT, relief=tk.FLAT, bg=BGCOLOR, fg=SECONDARYCOLOR, padx=MARGIN, highlightbackground=SECONDARYCOLOR, command=lambda: self.closeWelcomeScreen()).grid(column=0,row=3)
         self.canvas.create_window(WIDTH/2, HEIGHT/2, anchor=CENTER, window=self.edit_menu)
@@ -443,7 +539,6 @@ class Kanban:
     def closeWelcomeScreen(self):
         self.edit_menu.destroy()
         self.edit_menu = None
-
 
 # Import sections
 k = Kanban()
