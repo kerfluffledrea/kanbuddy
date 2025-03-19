@@ -10,14 +10,6 @@ import tkinter as tk
 from tkinter.constants import BOTH, CENTER
 from tkinter import E, W, Frame, Text, Button, Label, font, LAST, Menu, FLAT, CENTER, RIDGE
 
-print("abspath: " + str(os.path.abspath(getsourcefile(lambda:0))))
-filename = getframeinfo(currentframe()).filename
-print("path : " + str(os.path.dirname(os.path.abspath(filename))))
-print('__path__: ' + str(Path(__file__).parent))
-print('pathlib __file__: ' + str(Path(globals().get("__file__", "./_")).absolute().parent))
-print('other one :' + str(os.path.dirname(os.path.abspath(__file__))))
-print('OS.cwd :' + str(os.getcwd()))
-
 # Read Config File
 mod_path = str(str(os.getcwd()))
 settings = open(mod_path + "/settings.yaml")
@@ -394,9 +386,9 @@ class Kanban:
 
     def setPinned(self):
         if self.pinned.get():
-            self.root.wm_attributes('-type', 'splash', "-topmost", "true")
+            self.root.wm_attributes("-topmost", "true")
         else:
-            self.root.wm_attributes('-type', 'splash', "-topmost", "false")
+            self.root.wm_attributes("-topmost", "false")
 
     # --- Event Handlers ---
     def handleMouseMove(self, event):
