@@ -151,7 +151,7 @@ class PointsDisplay(DropZone):
         self.width = width
         self.height = height
         self.canvas_rect = self.canvas.create_rectangle(x_pos, y_pos, x_pos + width, y_pos + self.height, outline=SECONDARYCOLOR)
-        self.point_counter = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2, anchor=CENTER, text="{:,}".format(self.getPointsFromFile()), fill=SECONDARYCOLOR, width=self.width-MARGIN*2, font=(COUNTERFONT, 14))
+        self.point_counter = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2, anchor=CENTER, text="{:,}".format(self.getPointsFromFile()), fill=SECONDARYCOLOR, width=self.width-MARGIN*2, font=COUNTERFONT)
     
     def updatePointCounter(self):
         self.canvas.itemconfig(self.point_counter, text="{:,}".format(self.getPointsFromFile()))
@@ -259,9 +259,8 @@ class Kanban:
         self.canvas.bind('<B1-Motion>', self.handleClickDrag)
         self.canvas.bind('<B2-Motion>', self.handleMiddleClickDrag)
         
-        #HEADERFONT = tk.font.Font(self.root, family = "Noto Sans Ethiopic",  
-        #    size = 20,  
-        #    weight = "bold")
+#        print(font.families())
+
         self.cards = []
         self.sections = []
         self.archive_dropzone = None
@@ -532,13 +531,16 @@ class Kanban:
     def handleRightClickUp(self, event):
         self.rmb_held = False
         self.grabbed_card = self.getColldingCards(event.x, event.y)
-
+        
         self.context_menu = tk.Menu(self.root, tearoff=0, bg=BGCOLOR, fg=SECONDARYCOLOR, selectcolor=SECONDARYCOLOR, font=COUNTERFONT)
 
-        if self.grabbed_card:
-            self.grab_location = (event.x, event.y)
-            self.context_menu.add_command(label="Edit", command=lambda: self.openEditMenu(self.grabbed_card))
-            self.context_menu.add_command(label="Delete", command=lambda: self.deleteCard(self.grabbed_card))
+        if self.isInArchiveDropzone(event.x, event.y): 
+            #self.context_menu.add_command(label="Reset Archive", state='disabled', command=lambda: self.openEditMenu(self.grabbed_card))
+            pass
+        elif self.grabbed_card:
+                self.grab_location = (event.x, event.y)
+                self.context_menu.add_command(label="Edit", command=lambda: self.openEditMenu(self.grabbed_card))
+                self.context_menu.add_command(label="Delete", command=lambda: self.deleteCard(self.grabbed_card))
         else:
             self.context_menu.add_command(label="New Card", accelerator='Ctrl-A', command=lambda: self.addNewCard())
         self.context_menu.add_separator()

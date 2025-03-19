@@ -1,6 +1,6 @@
-headerfont: Terminal 12 bold
-cardfont: Terminal 12
-counterfont: Terminal 10
+headerfont: Unifont 12 bold
+cardfont: Unifont 12
+counterfont: Unifont 12
 width: 800
 height: 480
 margin: 10
