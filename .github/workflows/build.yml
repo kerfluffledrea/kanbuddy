@@ -29,18 +29,9 @@ jobs:
         run: |
             pip install pyinstaller pyyaml pillow
 
-      - name: Set icon based on OS
-        shell: bash  # Ensures Bash is used, even on Windows
-        run: |
-          if [[ "$RUNNER_OS" == "macOS" ]]; then
-            echo "ICON=icon.icns" >> $GITHUB_ENV
-          else
-            echo "ICON=icon.ico" >> $GITHUB_ENV
-          fi
-
       - name: Build binary using PyInstaller
         run: |
-          pyinstaller --onefile  --noconsole --icon=$ICON kanbuddy.py
+          pyinstaller --onefile  --noconsole --icon=icon.ico kanbuddy.py
           mv dist/* .
 
       - name: Upload build artifacts
