@@ -28,7 +28,7 @@ jobs:
       - name: Install dependencies
         run: |
             pip install pyinstaller
-            pip install yaml
+            pip install pyyaml
 
       - name: Build binary using PyInstaller
         run: |
