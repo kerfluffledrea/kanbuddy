@@ -13,6 +13,9 @@ from tkinter import E, W, Frame, Text, Button, Label, font, LAST, Menu, FLAT, CE
 print("abspath: " + str(os.path.abspath(getsourcefile(lambda:0))))
 filename = getframeinfo(currentframe()).filename
 print("path : " + str(os.path.dirname(os.path.abspath(filename))))
+print('__path__: ' + str(Path(__file__).parent))
+print('pathlib __file__: ' + str(Path(globals().get("__file__", "./_")).absolute().parent))
+print('other one :' + str(os.path.dirname(os.path.abspath(__file__))))
 
 # Read Config File
 mod_path = str(Path(__file__).parent)
