@@ -30,14 +30,14 @@ jobs:
             pip install pyinstaller
             pip install pyyaml
 
-      - name: Set icon based on OS
-        run: |
-          if [ "${{ matrix.os }}" == "macos-latest" ]; then
-            export ICON="icon.icns"
-          else
-            export ICON="icon.ico"
-          fi
-          
+      - name: Set icon for macOS
+        if: runner.os == 'macOS'
+        run: echo "ICON=icon.icns" >> $GITHUB_ENV
+
+      - name: Set icon for Windows/Linux
+        if: runner.os != 'macOS'
+        run: echo "ICON=icon.ico" >> $GITHUB_ENV          
+      
       - name: Build binary using PyInstaller
         run: |
           pyinstaller --onefile  --noconsole --icon=$ICON kanbuddy.py
