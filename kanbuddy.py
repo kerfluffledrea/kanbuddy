@@ -2,7 +2,7 @@ import json
 import yaml
 import sys
 import csv
-import os.path
+import os
 from inspect import getsourcefile, getframeinfo, currentframe
 from pathlib import Path
 from datetime import date
@@ -16,6 +16,7 @@ print("path : " + str(os.path.dirname(os.path.abspath(filename))))
 print('__path__: ' + str(Path(__file__).parent))
 print('pathlib __file__: ' + str(Path(globals().get("__file__", "./_")).absolute().parent))
 print('other one :' + str(os.path.dirname(os.path.abspath(__file__))))
+print('OS.cwd :' + str(os.getcwd()))
 
 # Read Config File
 mod_path = str(Path(__file__).parent)
