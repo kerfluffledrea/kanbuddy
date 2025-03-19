@@ -27,8 +27,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-            pip install pyinstaller
-            pip install pyyaml
+            pip install pyinstaller pyyaml pillow
 
       - name: Set icon based on OS
         shell: bash  # Ensures Bash is used, even on Windows
