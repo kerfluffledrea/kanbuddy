@@ -42,5 +42,5 @@ jobs:
           path: |
             kanbuddy.exe
             kanbuddy
-            settings.json
+            settings.yaml
             readme.md
