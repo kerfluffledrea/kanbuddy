@@ -30,9 +30,17 @@ jobs:
             pip install pyinstaller
             pip install pyyaml
 
+      - name: Set icon based on OS
+        run: |
+          if [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            export ICON="icon.icns"
+          else
+            export ICON="icon.ico"
+          fi
+
       - name: Build binary using PyInstaller
         run: |
-          pyinstaller --onefile --noconsole --icon=icon.ico kanbuddy.py
+          pyinstaller --onefile  --noconsole --icon=$ICON kanbuddy.py
           mv dist/* .
 
       - name: Upload build artifacts
