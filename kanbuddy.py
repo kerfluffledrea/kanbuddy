@@ -1,4 +1,5 @@
 import json
+import yaml
 import csv
 import os.path
 from pathlib import Path
@@ -10,23 +11,26 @@ from tkinter import E, W, Frame, Text, Button, Label, font, LAST, Menu, FLAT, CE
 
 # Read Config File
 mod_path = str(Path(__file__).parent)
-settings_file = open(mod_path + "/settings.json")
+settings = open(mod_path + "/settings.yaml")
 cards_filepath = mod_path + "/.cards.csv"
 archive_filepath = mod_path + "/.archive.csv"
-settings = json.load(settings_file)
+settings = yaml.safe_load(settings)
+
+WIDTH = settings['width']
+HEIGHT = settings['height']
+MARGIN = settings['margin']
+HEADERSIZE = settings['headersize']
+
 HEADERFONT = settings['headerfont']
 CARDFONT = settings['cardfont']
 COUNTERFONT = settings['counterfont']
+
 BGCOLOR = settings['colors']['bg']
 MAINCOLOR = settings['colors']['main']
 SECONDARYCOLOR = settings['colors']['secondary']
-SECTIONHIGHLIGHT = settings['colors']['sectionhighlight']
+EMPTYSLOTCOLOR = settings['colors']['emptyslot']
 BUTTONHIGHLIGHT = settings['colors']['buttonhighlight']
-DRAGTHRESHOLD = 30
-MARGIN = settings['margin']
-WIDTH = settings['width']
-HEIGHT = settings['height']
-HEADERSIZE = settings['headersize']
+SECTIONHIGHLIGHT = settings['colors']['sectionhighlight']
 PALETTE = [settings['colors']['pal0'],
         settings['colors']['pal1'],
         settings['colors']['pal2'],
@@ -35,8 +39,9 @@ PALETTE = [settings['colors']['pal0'],
         settings['colors']['pal5'],
         settings['colors']['pal6'],
     ]
+
+DRAGTHRESHOLD = 30
 DAYCOUNTER = settings['daycounter']
-# Make this a setting
 POINTVALS = [1,5,15,30,60,120,180,360,500,1000,2500]
 
 class Card:
@@ -63,6 +68,21 @@ class Card:
         if DAYCOUNTER:
             self.canvas.delete(self.canvas_dayctr)
 
+    def hover(self):
+        self.canvas.itemconfig(self.canvas_rect, fill=BUTTONHIGHLIGHT, tag='hover_card')
+        self.canvas.itemconfig(self.canvas_text, tag='hover_card')
+        for l in self.canvas_lines:
+            self.canvas.itemconfig(l, tag='hover_card')
+        self.canvas.tag_raise("hover_card")
+
+    def unhover(self):
+        self.canvas.itemconfig(self.canvas_rect, fill=BGCOLOR, tag='card')
+        self.canvas.itemconfig(self.canvas_text, tag='card')
+        for l in self.canvas_lines:
+            self.canvas.itemconfig(l, tag='card')
+
+        #self.canvas_rect.lower()
+
     def setColor(self, color_index):
         self.color_index = color_index
         self.canvas.itemconfig(self.canvas_text, fill=PALETTE[color_index])
@@ -80,7 +100,7 @@ class Card:
         self.canvas.itemconfig(self.canvas_text, text=desc)
     
     def increasePoints(self):
-        if self.points < 10:
+        if self.points < 10 and self.points * MARGIN < self.height:
             self.points += 1
             self.canvas_lines.append(self.canvas.create_line(self.position[0] + self.width, self.position[1] + self.height - self.points*MARGIN,
                     self.position[0] + self.width - self.points*MARGIN, self.position[1] + self.height, fill=PALETTE[self.color_index]))
@@ -91,8 +111,8 @@ class Card:
             self.canvas.delete(self.canvas_lines.pop())
 
     def draw(self):
-        self.canvas_text = self.canvas.create_text(self.position[0] + self.width/2, self.position[1] + self.height/2, anchor=CENTER, text=self.description, fill=PALETTE[self.color_index], width=self.width-MARGIN*2, justify=CENTER, font=CARDFONT, tag='card')
         self.canvas_rect = self.canvas.create_rectangle(self.position[0], self.position[1], self.position[0] + self.width, self.position[1] + self.height, outline=PALETTE[self.color_index], tag='card')
+        self.canvas_text = self.canvas.create_text(self.position[0] + self.width/2, self.position[1] + self.height/2, anchor=CENTER, text=self.description, fill=PALETTE[self.color_index], width=self.width-MARGIN*2, justify=CENTER, font=CARDFONT, tag='card')
         i = 0
         if DAYCOUNTER:
             self.canvas_dayctr = self.canvas.create_text(self.position[0] + 5, self.position[1] + 8, anchor=W, text=(date.today() - self.creation_date).days, fill=PALETTE[self.color_index], width=self.width-MARGIN*2, justify=CENTER, font=(COUNTERFONT, 9))
@@ -121,7 +141,7 @@ class DropZone:
         self.y_pos = y_pos
         self.width = width
         self.height = height
-        self.canvas_rect = self.canvas.create_rectangle(x_pos, y_pos, x_pos + width, y_pos + self.height, outline = 'grey5')
+        self.canvas_rect = self.canvas.create_rectangle(x_pos, y_pos, x_pos + width, y_pos + self.height, outline = EMPTYSLOTCOLOR)
 
 class PointsDisplay(DropZone):
     def __init__(self, canvas, x_pos, y_pos, width, height):
@@ -220,6 +240,7 @@ class Kanban:
         self.root = tk.Tk()
         self.root.resizable(False, False)
         self.root.wm_title("Kanbuddy")
+        #self.root.overrideredirect(True)
         self.root.wm_attributes('-type', 'splash')
         self.root.geometry(str(WIDTH)+"x"+str(HEIGHT))
         self.root.configure(background=BGCOLOR)
@@ -234,7 +255,8 @@ class Kanban:
         self.canvas.bind('<ButtonRelease-2>', self.handleMiddleClickUp)
         self.canvas.bind('<ButtonRelease-3>', self.handleRightClickUp)
         self.canvas.bind('<Double-Button-1>', self.handleDoubleClick)
-        self.canvas.bind('<B1-Motion>', self.handleMouseMove)
+        self.canvas.bind('<Motion>', self.handleMouseMove)
+        self.canvas.bind('<B1-Motion>', self.handleClickDrag)
         self.canvas.bind('<B2-Motion>', self.handleMiddleClickDrag)
         
         #HEADERFONT = tk.font.Font(self.root, family = "Noto Sans Ethiopic",  
@@ -377,6 +399,14 @@ class Kanban:
             self.root.wm_attributes('-type', 'splash', "-topmost", "false")
 
     # --- Event Handlers ---
+    def handleMouseMove(self, event):
+        self.grabbed_card = self.getColldingCards(event.x, event.y)
+        for c in self.cards:
+            if c == self.grabbed_card:
+                c.hover()
+            else:
+                c.unhover()
+
     def handleClickDown(self, event):
         self.lmb_held = True
         self.destroyContextMenu()
@@ -385,6 +415,7 @@ class Kanban:
         if not self.edit_menu:
             self.grabbed_card = self.getColldingCards(event.x, event.y)
             if self.grabbed_card:
+                self.grabbed_card.unhover()
                 self.grab_offset = (event.x - self.grabbed_card.position[0], event.y - self.grabbed_card.position[1])
                 self.grabbed_card_section = self.sections[self.grabbed_card.section_index]
                 self.grab_location = (event.x, event.y)
@@ -432,7 +463,7 @@ class Kanban:
             if edit_card:
                 self.openEditMenu(edit_card)
 
-    def handleMouseMove(self, event):
+    def handleClickDrag(self, event):
         if self.drag_origin:
             x, y = event.x - self.drag_origin[0] + self.root.winfo_x(), event.y - self.drag_origin[1] + self.root.winfo_y()
             self.root.geometry("+%s+%s" % (x , y))
@@ -453,7 +484,7 @@ class Kanban:
                 self.grab_offset = (event.x - self.grabbed_card.position[0], event.y - self.grabbed_card.position[1])
                 self.grabbed_card_section = self.sections[self.grabbed_card.section_index]
                 self.grab_location = (event.x, event.y)
-                self.middle_click_origin = (event.x, event.y)
+        self.middle_click_origin = (event.x, event.y)
 
     def handleMiddleClickUp(self, event):
         if not self.lmb_held:
@@ -479,7 +510,7 @@ class Kanban:
             self.saveCardstoFile()
 
     def handleMiddleClickDrag(self, event):
-        if not self.lmb_held:
+        if not self.lmb_held and self.grabbed_card:
             drag_y_distance = event.y - self.middle_click_origin[1]
             if drag_y_distance > DRAGTHRESHOLD:
                 self.grabbed_card.decreasePoints()
@@ -506,10 +537,11 @@ class Kanban:
 
         if self.grabbed_card:
             self.grab_location = (event.x, event.y)
-            self.context_menu.add_command(label="Edit", accelerator='Double-Click', command=lambda: self.openEditMenu(self.grabbed_card))
+            self.context_menu.add_command(label="Edit", command=lambda: self.openEditMenu(self.grabbed_card))
             self.context_menu.add_command(label="Delete", command=lambda: self.deleteCard(self.grabbed_card))
         else:
             self.context_menu.add_command(label="New Card", accelerator='Ctrl-A', command=lambda: self.addNewCard())
+        self.context_menu.add_separator()
         self.context_menu.add_checkbutton(label="Stay On Top", variable=self.pinned, onvalue=1, offvalue=0, command=lambda: self.setPinned())
         self.context_menu.add_command(label="Quit", command=lambda: quit())
         self.context_menu.post(event.x_root, event.y_root)

@@ -1,0 +1,32 @@
+headerfont: Terminal 12 bold
+cardfont: Terminal 12
+counterfont: Terminal 10
+width: 800
+height: 480
+margin: 10
+headersize: 25
+daycounter: 0
+colors:
+  bg: black
+  main: blueviolet
+  secondary: grey50
+  emptyslot: grey10
+  sectionhighlight: '#060015'
+  buttonhighlight: grey10
+  pal0: white
+  pal1: lime
+  pal2: cyan
+  pal3: dodgerblue
+  pal4: magenta
+  pal5: yellow
+  pal6: orangered
+sections:
+  - name: TO DO
+    width: 200
+    cardheight: 79
+  - name: IN PROGRESS
+    width: 400
+    cardheight: 212
+  - name: FINISHED
+    width: 200
+    cardheight: 79
