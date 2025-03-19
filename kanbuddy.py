@@ -4,7 +4,6 @@ import csv
 import os.path
 from pathlib import Path
 from datetime import date
-
 import tkinter as tk
 from tkinter.constants import BOTH, CENTER
 from tkinter import E, W, Frame, Text, Button, Label, font, LAST, Menu, FLAT, CENTER, RIDGE
@@ -60,56 +59,6 @@ class Card:
         self.section_index = 0
         self.draw()
 
-    def clearCanvas(self):
-        self.canvas.delete(self.canvas_text)
-        self.canvas.delete(self.canvas_rect)
-        for l in self.canvas_lines:
-            self.canvas.delete(l)
-        if DAYCOUNTER:
-            self.canvas.delete(self.canvas_dayctr)
-
-    def hover(self):
-        self.canvas.itemconfig(self.canvas_rect, fill=BUTTONHIGHLIGHT, tag='hover_card')
-        self.canvas.itemconfig(self.canvas_text, tag='hover_card')
-        for l in self.canvas_lines:
-            self.canvas.itemconfig(l, tag='hover_card')
-        self.canvas.tag_raise("hover_card")
-
-    def unhover(self):
-        self.canvas.itemconfig(self.canvas_rect, fill=BGCOLOR, tag='card')
-        self.canvas.itemconfig(self.canvas_text, tag='card')
-        for l in self.canvas_lines:
-            self.canvas.itemconfig(l, tag='card')
-
-        #self.canvas_rect.lower()
-
-    def setColor(self, color_index):
-        self.color_index = color_index
-        self.canvas.itemconfig(self.canvas_text, fill=PALETTE[color_index])
-        self.canvas.itemconfig(self.canvas_rect, outline=PALETTE[color_index])
-        for l in self.canvas_lines:
-            self.canvas.itemconfig(l, fill=PALETTE[color_index])
-        if DAYCOUNTER:
-            self.canvas.itemconfig(self.canvas_dayctr, fill=PALETTE[color_index])
-
-    def updateCounter(self):
-        self.canvas.itemconfig(self.canvas_dayctr, text=(date.today() - self.creation_date).days)
-
-    def setDescription(self, desc):
-        self.description = desc
-        self.canvas.itemconfig(self.canvas_text, text=desc)
-    
-    def increasePoints(self):
-        if self.points < 10 and self.points * MARGIN < self.height:
-            self.points += 1
-            self.canvas_lines.append(self.canvas.create_line(self.position[0] + self.width, self.position[1] + self.height - self.points*MARGIN,
-                    self.position[0] + self.width - self.points*MARGIN, self.position[1] + self.height, fill=PALETTE[self.color_index]))
-
-    def decreasePoints(self):
-        if self.points > 0:
-            self.points -= 1
-            self.canvas.delete(self.canvas_lines.pop())
-
     def draw(self):
         self.canvas_rect = self.canvas.create_rectangle(self.position[0], self.position[1], self.position[0] + self.width, self.position[1] + self.height, outline=PALETTE[self.color_index], tag='card')
         self.canvas_text = self.canvas.create_text(self.position[0] + self.width/2, self.position[1] + self.height/2, anchor=CENTER, text=self.description, fill=PALETTE[self.color_index], width=self.width-MARGIN*2, justify=CENTER, font=CARDFONT, tag='card')
@@ -133,6 +82,54 @@ class Card:
             i += 1
         if DAYCOUNTER:
             self.canvas.coords(self.canvas_dayctr, x + 4, y + 11)
+
+    def delete(self):
+        self.canvas.delete(self.canvas_text)
+        self.canvas.delete(self.canvas_rect)
+        for l in self.canvas_lines:
+            self.canvas.delete(l)
+        if DAYCOUNTER:
+            self.canvas.delete(self.canvas_dayctr)
+
+    def updateCounter(self):
+        self.canvas.itemconfig(self.canvas_dayctr, text=(date.today() - self.creation_date).days)
+
+    def hover(self):
+        self.canvas.itemconfig(self.canvas_rect, fill=BUTTONHIGHLIGHT, tag='hover_card')
+        self.canvas.itemconfig(self.canvas_text, tag='hover_card')
+        for l in self.canvas_lines:
+            self.canvas.itemconfig(l, tag='hover_card')
+        self.canvas.tag_raise("hover_card")
+
+    def unhover(self):
+        self.canvas.itemconfig(self.canvas_rect, fill=BGCOLOR, tag='card')
+        self.canvas.itemconfig(self.canvas_text, tag='card')
+        for l in self.canvas_lines:
+            self.canvas.itemconfig(l, tag='card')
+
+    def setColor(self, color_index):
+        self.color_index = color_index
+        self.canvas.itemconfig(self.canvas_text, fill=PALETTE[color_index])
+        self.canvas.itemconfig(self.canvas_rect, outline=PALETTE[color_index])
+        for l in self.canvas_lines:
+            self.canvas.itemconfig(l, fill=PALETTE[color_index])
+        if DAYCOUNTER:
+            self.canvas.itemconfig(self.canvas_dayctr, fill=PALETTE[color_index])
+
+    def setDescription(self, desc):
+        self.description = desc
+        self.canvas.itemconfig(self.canvas_text, text=desc)
+    
+    def increasePoints(self):
+        if self.points < 10 and self.points * MARGIN < self.height:
+            self.points += 1
+            self.canvas_lines.append(self.canvas.create_line(self.position[0] + self.width, self.position[1] + self.height - self.points*MARGIN,
+                    self.position[0] + self.width - self.points*MARGIN, self.position[1] + self.height, fill=PALETTE[self.color_index]))
+
+    def decreasePoints(self):
+        if self.points > 0:
+            self.points -= 1
+            self.canvas.delete(self.canvas_lines.pop())
     
 class DropZone:
     def __init__(self, canvas, x_pos, y_pos, width, height):
@@ -188,6 +185,25 @@ class Section:
         self.canvas_line = self.canvas.create_line(self.x_pos, HEADERSIZE, self.x_pos+self.width, HEADERSIZE, fill=MAINCOLOR)
         self.canvas_text = self.canvas.create_text(self.x_pos + self.width/2, 15, anchor=CENTER, text=self.name, fill=MAINCOLOR, width=self.width, font=(HEADERFONT))
 
+    def addCard(self, card):
+        dz_index = len(self.cards)
+        card.width = self.drop_zones[dz_index].width
+        card.height = self.drop_zones[dz_index].height
+        card.move(self.drop_zones[dz_index].x_pos, self.drop_zones[dz_index].y_pos)
+        self.cards.append(card)
+
+    def removeCard(self, card):
+        self.cards.remove(card)
+        self.reorderCards()
+
+    def reorderCards(self):
+        i = 0
+        for card in self.cards:
+            card.width = self.drop_zones[i].width
+            card.height = self.drop_zones[i].height
+            card.move(self.drop_zones[i].x_pos, self.drop_zones[i].y_pos)
+            i += 1
+
     def setColor(self, COLOR):
         self.canvas.itemconfig(self.canvas_rect, fill=COLOR)
 
@@ -211,25 +227,6 @@ class Section:
                 self.drop_zones.append(DropZone(self.canvas, xpos, ypos, self.width - MARGIN * 2, self.card_height))
                 i += 1
 
-    def addCard(self, card):
-        dz_index = len(self.cards)
-        card.width = self.drop_zones[dz_index].width
-        card.height = self.drop_zones[dz_index].height
-        card.move(self.drop_zones[dz_index].x_pos, self.drop_zones[dz_index].y_pos)
-        self.cards.append(card)
-
-    def removeCard(self, card):
-        self.cards.remove(card)
-        self.reorderCards()
-
-    def reorderCards(self):
-        i = 0
-        for card in self.cards:
-            card.width = self.drop_zones[i].width
-            card.height = self.drop_zones[i].height
-            card.move(self.drop_zones[i].x_pos, self.drop_zones[i].y_pos)
-            i += 1
-
     def addPointCounter(self):
         xpos = self.x_pos + MARGIN
         ypos = HEADERSIZE + self.card_height * len(self.drop_zones) + MARGIN * (len(self.drop_zones) + 1)
@@ -240,8 +237,7 @@ class Kanban:
         self.root = tk.Tk()
         self.root.resizable(False, False)
         self.root.wm_title("Kanbuddy")
-        #self.root.overrideredirect(True)
-        self.root.wm_attributes('-type', 'splash')
+        self.root.wm_attributes('-type', 'splash', '-topmost', 'true')
         self.root.geometry(str(WIDTH)+"x"+str(HEIGHT))
         self.root.configure(background=BGCOLOR)
         self.canvas = tk.Canvas(self.root, bg=BGCOLOR, width=WIDTH, height=HEIGHT, highlightthickness=1, highlightbackground=MAINCOLOR)
@@ -259,8 +255,6 @@ class Kanban:
         self.canvas.bind('<B1-Motion>', self.handleClickDrag)
         self.canvas.bind('<B2-Motion>', self.handleMiddleClickDrag)
         
-#        print(font.families())
-
         self.cards = []
         self.sections = []
         self.archive_dropzone = None
@@ -275,6 +269,7 @@ class Kanban:
         self.lmb_held = False
         self.rmb_held = False
         self.pinned = tk.BooleanVar()
+        self.pinned.set(True)
         self.drag_origin = ()
 
     # --- File Reading/Writing ---
@@ -291,7 +286,6 @@ class Kanban:
         with open(cards_filepath, 'w', newline='\n') as cardfile:
             with open(archive_filepath, 'a', newline='\n') as archivefile:
                 cardwriter = csv.writer(cardfile, delimiter="|")
-                #archivewriter = csv.writer(archivefile, delimiter="|")
                 cardwriter.writerow(['section_index', 'description', 'color_index', 'points', 'creation_date'])
                 for c in self.cards:
                     cardwriter.writerow([c.section_index, c.description, c.color_index, c.points, c.creation_date])
@@ -322,15 +316,12 @@ class Kanban:
             return True
         return False
     
-    # --- Menus ---
-    def card_popup(self, event):
-        pass
-
+    # --- Card Editing ---
     def openEditMenu(self, edit_card):
         self.edit_menu = Frame(self.root, name='edit_menu', pady=MARGIN/3, padx=MARGIN/3, relief=tk.SOLID, bg=BGCOLOR, highlightcolor=PALETTE[edit_card.color_index], highlightbackground=PALETTE[edit_card.color_index], highlightthickness=1)
         self.edit_menu.pack(fill=BOTH, expand=True, padx=MARGIN*2, pady=MARGIN*2)
         
-        description_entry = Text(self.edit_menu,name='edit_menu_text', wrap=tk.WORD, font=CARDFONT, height=5, width=34, padx=15, pady=5, bg=BGCOLOR, bd=0, highlightbackground=PALETTE[edit_card.color_index], highlightcolor=PALETTE[edit_card.color_index], fg=PALETTE[edit_card.color_index])
+        description_entry = Text(self.edit_menu,name='edit_menu_text', wrap=tk.WORD, insertbackground=SECONDARYCOLOR, font=CARDFONT, height=5, width=34, padx=15, pady=5, bg=BGCOLOR, bd=0, highlightbackground=PALETTE[edit_card.color_index], highlightcolor=PALETTE[edit_card.color_index], fg=PALETTE[edit_card.color_index])
         description_entry.insert(tk.END, edit_card.description)
         description_entry.pack(padx=MARGIN, pady=MARGIN)
         
@@ -358,6 +349,7 @@ class Kanban:
         delete_button = Button(bottom_button_grid, activeforeground=PALETTE[edit_card.color_index], activebackground=BUTTONHIGHLIGHT, relief=tk.FLAT, name='delete_button', text='DELETE', fg=PALETTE[edit_card.color_index], bg=BGCOLOR, width=5, height=1, highlightbackground=PALETTE[edit_card.color_index], command=lambda: self.deleteCard(edit_card, True)).grid(column=4, row=0)
         self.canvas.create_window(WIDTH/2, HEIGHT/2, anchor=CENTER, window=self.edit_menu)
 
+    def closeEditMenu(self, edit_card, desc):
     def changeColorButton(self, edit_card, color_index):
         edit_card.setColor(color_index)
         self.edit_menu.config(highlightbackground=PALETTE[color_index], highlightcolor=PALETTE[color_index])
@@ -367,7 +359,6 @@ class Kanban:
         self.edit_menu.nametowidget('bottom_button_grid').nametowidget('close_button').config(activeforeground=PALETTE[color_index], highlightbackground=PALETTE[color_index], fg=PALETTE[color_index])
         self.edit_menu.nametowidget('bottom_button_grid').nametowidget('delete_button').config(activeforeground=PALETTE[color_index], highlightbackground=PALETTE[color_index], fg=PALETTE[color_index])
 
-    def closeEditMenu(self, edit_card, desc):
         edit_card.setDescription(desc)
         self.edit_menu.destroy()
         self.edit_menu = None
@@ -456,12 +447,6 @@ class Kanban:
                 self.grab_location = None
                 self.saveCardstoFile()
 
-    def handleDoubleClick(self, event):
-        if not self.edit_menu:
-            edit_card = self.getColldingCards(event.x, event.y)
-            if edit_card:
-                self.openEditMenu(edit_card)
-
     def handleClickDrag(self, event):
         if self.drag_origin:
             x, y = event.x - self.drag_origin[0] + self.root.winfo_x(), event.y - self.drag_origin[1] + self.root.winfo_y()
@@ -476,6 +461,12 @@ class Kanban:
             if section:
                 section.setColor(SECTIONHIGHLIGHT)
 
+    def handleDoubleClick(self, event):
+        if not self.edit_menu:
+            edit_card = self.getColldingCards(event.x, event.y)
+            if edit_card:
+                self.openEditMenu(edit_card)
+
     def handleMiddleClickDown(self, event):
         if not self.edit_menu:
             self.grabbed_card = self.getColldingCards(event.x, event.y)
@@ -489,7 +480,7 @@ class Kanban:
         if not self.lmb_held:
             if not self.edit_menu and self.grabbed_card:
                 total_drag_distance = self.grab_location[0] - event.x, self.grab_location[1] - event.y
-                if abs(total_drag_distance[1]) < DRAGTHRESHOLD:
+                if abs(total_drag_distance[1]) < DRAGTHRESHOLD/2:
                     if event.state & 0x4: # Check if Ctrl-Key is held, maybe i should make this bindable one day, who's to say, truly we do not know what life has in store for us on this crazy world so perhaps it would be best to leave this for another day such that I have plenty of time to ruminate on the ramifications of hardcoding this value in an event call, whos to say. Not I. Yippee.
                         if self.grabbed_card.color_index > 0:
                             self.grabbed_card.setColor(self.grabbed_card.color_index - 1)
