@@ -239,7 +239,8 @@ class Kanban:
         self.root = tk.Tk()
         self.root.resizable(False, False)
         self.root.wm_title("Kanbuddy")
-        self.root.wm_attributes('-type', 'splash', '-topmost', 'true')
+        if not str(sys.platform).lower() == 'windows':
+            self.root.wm_attributes('-type', 'splash', '-topmost', 'true')
         self.root.geometry(str(WIDTH)+"x"+str(HEIGHT))
         self.root.configure(background=BGCOLOR)
         self.canvas = tk.Canvas(self.root, bg=BGCOLOR, width=WIDTH, height=HEIGHT, highlightthickness=1, highlightbackground=MAINCOLOR)
