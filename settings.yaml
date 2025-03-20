@@ -1,15 +1,25 @@
-font:
-  header: Unifont 12 bold
-  card: Unifont 12
-  counter: Unifont 12
-  timer: Unifont 18
+theme: prime
 width: 800
 height: 480
 margin: 10
-headersize: 25
+headersize: 22
 dashed: False
 daycounter: 0
-theme: prime
+sections:
+  - name: TO DO
+    width: 200
+    cards: 4
+  - name: IN PROGRESS
+    width: 400
+    cards: 2
+  - name: FINISHED
+    width: 200
+    cards: 5
+font:
+  header: Unifont 14 bold
+  card: Unifont 12
+  counter: Unifont 10
+  timer: Unifont 18
 customtheme:
   bg: black
   main: blueviolet
@@ -24,13 +34,3 @@ customtheme:
   pal4: magenta
   pal5: yellow
   pal6: orangered
-sections:
-  - name: TO DO
-    width: 200
-    cards: 4
-  - name: IN PROGRESS
-    width: 400
-    cards: 2
-  - name: FINISHED
-    width: 200
-    cards: 5
