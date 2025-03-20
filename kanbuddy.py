@@ -3,7 +3,6 @@ import yaml
 import sys
 import csv
 import os
- from inspect import getsourcefile, getframeinfo, currentframe
 from pathlib import Path
 from datetime import date
 import tkinter as tk
