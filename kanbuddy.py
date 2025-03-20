@@ -3,6 +3,7 @@ import yaml
 import sys
 import csv
 import os
+import webbrowser
 from pathlib import Path
 from datetime import date
 import tkinter as tk
@@ -638,8 +639,8 @@ class Kanban:
         themes_menu = tk.Menu(self.context_menu, tearoff=0, bg=self.theme['bg'], fg=self.theme['secondary'], selectcolor=self.theme['secondary'], font=COUNTERFONT)
         themes_menu.add_radiobutton(label="Kanbuddy Prime", variable=self.selected_theme, value='prime', command=lambda: self.setTheme('prime'))
         themes_menu.add_radiobutton(label="Tri.Optimum", variable=self.selected_theme, value='trioptimum', command=lambda: self.setTheme('trioptimum'))
-        themes_menu.add_radiobutton(label="Uplink", variable=self.selected_theme, value='uplink', command=lambda: self.setTheme('uplink'))
-        themes_menu.add_radiobutton(label="Peachy", variable=self.selected_theme, value='peach', command=lambda: self.setTheme('peach'))
+        #themes_menu.add_radiobutton(label="Uplink", variable=self.selected_theme, value='uplink', command=lambda: self.setTheme('uplink'))
+        #themes_menu.add_radiobutton(label="Peachy", variable=self.selected_theme, value='peach', command=lambda: self.setTheme('peach'))
         themes_menu.add_radiobutton(label="Whiteboard", variable=self.selected_theme, value='whiteboard', command=lambda: self.setTheme('whiteboard'))
         themes_menu.add_radiobutton(label="Custom", variable=self.selected_theme, value='custom', command=lambda: self.setTheme('custom'))
 
@@ -712,7 +713,11 @@ class Kanban:
 - Settings & custom theme can be changed in settings.yaml
 ''', bg=self.theme['bg'], fg=self.theme['secondary'], justify=tk.LEFT).grid(column=0, row=2)
 
-        close_button = Button(welcome_grid, text="Enter the World of Kanbuddy", activeforeground=self.theme['secondary'], activebackground=self.theme['buttonhighlight'], relief=FLAT, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, highlightbackground=self.theme['secondary'], command=lambda: self.closeWelcomeScreen()).grid(column=0,row=3)
+
+        bottom_button_grid = Frame(self.edit_menu, name='bottom_button_grid', background=self.theme['bg'])
+        bottom_button_grid.pack(pady=MARGIN, padx=MARGIN/10)
+        close_button = Button(bottom_button_grid, text="Enter the World of Kanbuddy", activeforeground=self.theme['secondary'], activebackground=self.theme['buttonhighlight'], relief=FLAT, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, highlightbackground=self.theme['secondary'], command=lambda: self.closeWelcomeScreen()).grid(column=0,row=0)
+        website_button = Button(bottom_button_grid, text="Kerflufflespace↗", activeforeground=self.theme['secondary'], activebackground=self.theme['buttonhighlight'], relief=FLAT, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, highlightbackground=self.theme['secondary'], command=lambda: webbrowser.open('https://kerfluffle.space')).grid(column=1,row=0, padx=10)
         self.canvas.create_window(WIDTH/2, HEIGHT/2, anchor=CENTER, window=self.edit_menu)
 
     def closeWelcomeScreen(self):
