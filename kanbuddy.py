@@ -70,8 +70,8 @@ THEMES['fortress'] = {
     'main' : 'white',
     'secondary' : 'grey50',
     'emptyslot' : 'grey20',
-    'buttonhighlight' : '#090020',
-    'sectionhighlight' : '#100020',
+    'buttonhighlight' : 'grey10',
+    'sectionhighlight' : 'grey5',
     'palette' : ['lime',
                  'cyan',
                  'blue',
@@ -594,6 +594,8 @@ class Kanban:
         if not self.edit_menu:
             if self.grabbed_card:
                 drop_section = self.getCollidingSections(event.x, event.y)
+                if not drop_section:
+                    drop_section = self.getCollidingSections(self.grab_location[0], self.grab_location[1])
                 if self.sections.index(drop_section) == len(self.sections)-1 and self.isInArchiveDropzone(event.x, event.y):
                     with open(archive_filepath, 'a', newline='\n') as archivefile:
                         archivewriter = csv.writer(archivefile, delimiter="|")
@@ -604,7 +606,7 @@ class Kanban:
                 elif drop_section and len(drop_section.cards) < len(drop_section.drop_zones) and self.sections.index(drop_section) != self.grabbed_card.section_index:
                     self.grabbed_card.section_index = self.sections.index(drop_section)
                     drop_section.addCard(self.grabbed_card)
-                    self.grabbed_card_section.removeCard(self.grabbed_card)
+                    self.grabbed_card_section.removeCard(self.grabbed_card)                    
                 else:
                     # This prevents the tiny movements during double clicks from moving cards around within a section
                     drag_vector = (event.x - self.grab_location[0],  event.y- self.grab_location[1])

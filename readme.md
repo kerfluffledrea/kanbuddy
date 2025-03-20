@@ -1,12 +1,12 @@
 ![Screenshot of Kanbuddy interface]()
 
 # Kanbuddy
-A micro-kanban board for people who need help focusing on the short-term stuff.
+A micro-kanban worktime buddy for people who want support when focusing on the short-term stuff.
 
 ## Installation
 
 #### Release (Reccomended)
-1. Download respective build from [Releases](https://github.com/Nosler/kanbuddy/releases)
+1. Download build for your OS from [Releases](https://github.com/Nosler/kanbuddy/releases)
 2. Launch it.
 
 #### Python
