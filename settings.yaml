@@ -6,7 +6,8 @@ height: 480
 margin: 10
 headersize: 25
 daycounter: 0
-colors:
+theme: trioptimum
+customtheme:
   bg: black
   main: blueviolet
   secondary: grey50
@@ -23,10 +24,10 @@ colors:
 sections:
   - name: TO DO
     width: 200
-    cardheight: 79
+    cards: 4
   - name: IN PROGRESS
     width: 400
-    cardheight: 212
+    cards: 2
   - name: FINISHED
     width: 200
-    cardheight: 79
+    cards: 5
