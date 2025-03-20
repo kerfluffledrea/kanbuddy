@@ -203,18 +203,32 @@ class Card:
     def updateCounter(self):
         self.canvas.itemconfig(self.canvas_dayctr, text=(date.today() - self.creation_date).days)
 
+    def displayPoints(self):
+        self.canvas.itemconfig(self.canvas_rect, fill=self.theme['buttonhighlight'])
+        self.canvas.itemconfig(self.canvas_text, text="+{}".format(POINTVALS[self.points]), font=TIMERFONT)
+
+    def undisplayPoints(self):
+        self.canvas.itemconfig(self.canvas_rect, fill=self.theme['bg'])
+        self.canvas.itemconfig(self.canvas_text, text=self.description, font=CARDFONT)
+
     def hover(self):
         self.canvas.itemconfig(self.canvas_rect, fill=self.theme['buttonhighlight'], tag='hover_card')
         self.canvas.itemconfig(self.canvas_text, tag='hover_card')
         for l in self.canvas_lines:
             self.canvas.itemconfig(l, tag='hover_card')
         self.canvas.tag_raise("hover_card")
+    
+    def drag(self):
+        self.canvas.tag_raise("hover_card")
+
+    def undrag(self):
+        self.canvas.tag_lower("hover_card")
 
     def unhover(self):
-        self.canvas.itemconfig(self.canvas_rect, fill=self.theme['bg'], tag='card')
-        self.canvas.itemconfig(self.canvas_text, tag='card')
         for l in self.canvas_lines:
             self.canvas.itemconfig(l, tag='card')
+        self.canvas.itemconfig(self.canvas_rect, fill=self.theme['bg'], tag='card')
+        self.canvas.itemconfig(self.canvas_text, tag='card')
 
     def setColor(self, color_index):
         self.color_index = color_index
@@ -234,6 +248,7 @@ class Card:
             self.points += 1
             self.canvas_lines.append(self.canvas.create_line(self.position[0] + self.width, self.position[1] + self.height - self.points*MARGIN,
                     self.position[0] + self.width - self.points*MARGIN, self.position[1] + self.height, fill=self.theme['palette'][self.color_index]))
+            self.canvas.tag_raise('line')
 
     def decreasePoints(self):
         if self.points > 0:
@@ -265,6 +280,9 @@ class PointsDisplay(DropZone):
         self.canvas_rect = self.canvas.create_rectangle(x_pos, y_pos, x_pos + width, y_pos + self.height, dash=DASH, outline=self.theme['secondary'])
         self.point_counter = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height - MARGIN *2, anchor=CENTER, text="{:,}".format(self.getPointsFromFile()), fill=self.theme['secondary'], width=self.width-MARGIN*2, font=COUNTERFONT)
         self.timer = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2 - MARGIN/2, anchor=CENTER, text="00:00:00", fill=self.theme['secondary'], width=self.width-MARGIN*2, font=TIMERFONT)
+        
+        #self.point_counter = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2 - MARGIN/2, anchor=CENTER, text="{:,}".format(self.getPointsFromFile()), fill=self.theme['secondary'], width=self.width-MARGIN*2, font=COUNTERFONT)
+        #self.timer = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height - MARGIN *2, anchor=CENTER, text="00:00:00", fill=self.theme['secondary'], width=self.width-MARGIN*2, font=TIMERFONT)
         self.time()
 
     def draw(self):
@@ -289,12 +307,21 @@ class PointsDisplay(DropZone):
                 archivewriter.writerow(['description', 'points', 'color_index', 'creation_date', 'completion_date'])
             return 0
     
+
     def time(self):
         time_delta = datetime.datetime.now() - self.start_time
         hours, remainder = divmod(time_delta.seconds, 3600)
         minutes, seconds = divmod(remainder, 60)
         self.canvas.itemconfig(self.timer, text=('{:02}:{:02}:{:02}'.format(hours, minutes, seconds)))
         self.canvas.after(1000, self.time)
+
+    def resetTime(self):
+        self.start_time = datetime.datetime.now()
+
+    def resetArchive(self):
+        os.remove(archive_filepath)
+        self.getPointsFromFile()
+        self.updatePointCounter()
 
 class Section:
     def __init__(self, canvas, theme, name, w, x, ch, last_column_flag=False):
@@ -313,7 +340,7 @@ class Section:
     def draw(self):
         self.canvas_rect = self.canvas.create_rectangle(self.x_pos, 0, self.x_pos + self.width, HEIGHT, outline=self.theme['main'])
         self.canvas_line = self.canvas.create_line(self.x_pos, HEADERSIZE, self.x_pos+self.width, HEADERSIZE, fill=self.theme['main'])
-        self.canvas_text = self.canvas.create_text(self.x_pos + self.width/2, 15, anchor=CENTER, text=self.name, fill=self.theme['main'], width=self.width, font=(HEADERFONT))
+        self.canvas_text = self.canvas.create_text(self.x_pos + self.width/2, HEADERSIZE/2, anchor=CENTER, text=self.name, fill=self.theme['main'], width=self.width, font=(HEADERFONT))
 
     def addCard(self, card):
         dz_index = len(self.cards)
@@ -536,9 +563,9 @@ class Kanban:
 
     # --- Event Handlers ---
     def handleMouseMove(self, event):
-        self.grabbed_card = self.getColldingCards(event.x, event.y)
+        card = self.getColldingCards(event.x, event.y)
         for c in self.cards:
-            if c == self.grabbed_card:
+            if c == card:
                 c.hover()
             else:
                 c.unhover()
@@ -598,6 +625,10 @@ class Kanban:
             x, y = event.x - self.drag_origin[0] + self.root.winfo_x(), event.y - self.drag_origin[1] + self.root.winfo_y()
             self.root.geometry("+%s+%s" % (x , y))
         if self.grabbed_card:
+            if self.isInArchiveDropzone(event.x, event.y):
+                self.grabbed_card.displayPoints()
+            else:
+                self.grabbed_card.undisplayPoints()
             self.canvas.config(cursor='fleur')
             move_pos = (event.x - self.grab_offset[0], event.y - self.grab_offset[1])
             self.grabbed_card.move(move_pos[0], move_pos[1])
@@ -625,6 +656,8 @@ class Kanban:
     def handleMiddleClickUp(self, event):
         if not self.lmb_held:
             if not self.edit_menu and self.grabbed_card:
+                self.grabbed_card.undrag()
+                self.grabbed_card.hover()
                 total_drag_distance = self.grab_location[0] - event.x, self.grab_location[1] - event.y
                 if abs(total_drag_distance[1]) < DRAGTHRESHOLD/2:
                     if event.state & 0x4: # Check if Ctrl-Key is held, maybe i should make this bindable one day, who's to say, truly we do not know what life has in store for us on this crazy world so perhaps it would be best to leave this for another day such that I have plenty of time to ruminate on the ramifications of hardcoding this value in an event call, whos to say. Not I. Yippee.
@@ -639,6 +672,8 @@ class Kanban:
                             self.grabbed_card.setColor(0)
                     og_position = (self.grab_location[0] - self.grab_offset[0], self.grab_location[1] - self.grab_offset[1])
                     self.grabbed_card.move(og_position[0], og_position[1])
+                    self.grabbed_card.hover()
+                    self.grabbed_card.unhover()
             self.grabbed_card = None
             self.grab_offset = None
             self.grabbed_card_section = None
@@ -669,8 +704,8 @@ class Kanban:
         self.rmb_held = False
         self.grabbed_card = self.getColldingCards(event.x, event.y)
         
-        self.context_menu = tk.Menu(self.root, tearoff=0, bg=self.theme['bg'], fg=self.theme['secondary'], selectcolor=self.theme['secondary'], font=COUNTERFONT)
-        themes_menu = tk.Menu(self.context_menu, tearoff=0, bg=self.theme['bg'], fg=self.theme['secondary'], selectcolor=self.theme['secondary'], font=COUNTERFONT)
+        self.context_menu = tk.Menu(self.root, tearoff=0, bg=self.theme['bg'], fg=self.theme['secondary'], selectcolor=self.theme['secondary'], font=CARDFONT)
+        themes_menu = tk.Menu(self.context_menu, tearoff=0, bg=self.theme['bg'], fg=self.theme['secondary'], selectcolor=self.theme['secondary'], font=CARDFONT)
         themes_menu.add_radiobutton(label="KB-Prime", variable=self.selected_theme, value='prime', command=lambda: self.setTheme('prime'))
         themes_menu.add_radiobutton(label="Tri.Optimum", variable=self.selected_theme, value='trioptimum', command=lambda: self.setTheme('trioptimum'))
         #themes_menu.add_radiobutton(label="Uplink", variable=self.selected_theme, value='uplink', command=lambda: self.setTheme('uplink'))
@@ -679,9 +714,9 @@ class Kanban:
         themes_menu.add_radiobutton(label="Whiteboard", variable=self.selected_theme, value='whiteboard', command=lambda: self.setTheme('whiteboard'))
         themes_menu.add_radiobutton(label="Custom", variable=self.selected_theme, value='custom', command=lambda: self.setTheme('custom'))
 
-        if self.isInArchiveDropzone(event.x, event.y): 
-            #self.context_menu.add_command(label="Reset Archive", state='disabled', command=lambda: self.openEditMenu(self.grabbed_card))
-            pass
+        if self.isInArchiveDropzone(event.x, event.y):
+            self.context_menu.add_command(label="Reset Timer", command=lambda: self.archive_dropzone.resetTime())
+            self.context_menu.add_command(label="Reset Points", command=lambda: self.archive_dropzone.resetArchive())
         elif self.grabbed_card:
                 self.grab_location = (event.x, event.y)
                 self.context_menu.add_command(label="Edit", command=lambda: self.openEditMenu(self.grabbed_card))
