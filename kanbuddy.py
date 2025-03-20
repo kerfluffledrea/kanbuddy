@@ -1,9 +1,9 @@
-import json
-import yaml
 import sys
 import csv
 import os
+import yaml
 import webbrowser
+import datetime
 from pathlib import Path
 from datetime import date
 import tkinter as tk
@@ -17,14 +17,20 @@ cards_filepath = mod_path + "/.cards.csv"
 archive_filepath = mod_path + "/.archive.csv"
 settings = yaml.safe_load(settings)
 
+
+DASH = None
+if bool(settings['dashed']):
+    DASH = (5,)
+
 WIDTH = settings['width']
 HEIGHT = settings['height']
 MARGIN = settings['margin']
 HEADERSIZE = settings['headersize']
 
-HEADERFONT = settings['headerfont']
-CARDFONT = settings['cardfont']
-COUNTERFONT = settings['counterfont']
+HEADERFONT = settings['font']['header']
+CARDFONT = settings['font']['card']
+COUNTERFONT = settings['font']['counter']
+TIMERFONT = settings['font']['timer']
 
 THEMES = dict()
 THEMES['custom'] = {
@@ -58,6 +64,23 @@ THEMES['prime'] = {
                  'yellow',
                  'orangered']
 }
+
+THEMES['fortress'] = {
+    'bg' : 'black',
+    'main' : 'white',
+    'secondary' : 'grey50',
+    'emptyslot' : 'grey20',
+    'buttonhighlight' : '#090020',
+    'sectionhighlight' : '#100020',
+    'palette' : ['lime',
+                 'cyan',
+                 'blue',
+                 'yellow',
+                 'red',
+                 'magenta',
+                 'grey80']
+}
+
 
 THEMES['whiteboard'] = {
     'bg' : 'white',
@@ -225,7 +248,7 @@ class DropZone:
         self.y_pos = y_pos
         self.width = width
         self.height = height
-        self.canvas_rect = self.canvas.create_rectangle(x_pos, y_pos, x_pos + width, y_pos + self.height, outline = self.theme['emptyslot'])
+        self.canvas_rect = self.canvas.create_rectangle(x_pos, y_pos, x_pos + width, y_pos + self.height, dash=DASH, outline = self.theme['emptyslot'])
     
     def draw(self):
         self.canvas.itemconfig(self.canvas_rect, outline=self.theme['emptyslot'])
@@ -238,12 +261,16 @@ class PointsDisplay(DropZone):
         self.y_pos = y_pos
         self.width = width
         self.height = height
-        self.canvas_rect = self.canvas.create_rectangle(x_pos, y_pos, x_pos + width, y_pos + self.height, outline=self.theme['secondary'])
-        self.point_counter = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2, anchor=CENTER, text="{:,}".format(self.getPointsFromFile()), fill=self.theme['secondary'], width=self.width-MARGIN*2, font=COUNTERFONT)
-    
+        self.start_time = datetime.datetime.now()
+        self.canvas_rect = self.canvas.create_rectangle(x_pos, y_pos, x_pos + width, y_pos + self.height, dash=DASH, outline=self.theme['secondary'])
+        self.point_counter = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height - MARGIN *2, anchor=CENTER, text="{:,}".format(self.getPointsFromFile()), fill=self.theme['secondary'], width=self.width-MARGIN*2, font=COUNTERFONT)
+        self.timer = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2 - MARGIN/2, anchor=CENTER, text="00:00:00", fill=self.theme['secondary'], width=self.width-MARGIN*2, font=TIMERFONT)
+        self.time()
+
     def draw(self):
         self.canvas.itemconfig(self.canvas_rect, outline=self.theme['secondary'])
         self.canvas.itemconfig(self.point_counter, fill=self.theme['secondary'])
+        self.canvas.itemconfig(self.timer, fill=self.theme['secondary'])
 
     def updatePointCounter(self):
         self.canvas.itemconfig(self.point_counter, text="{:,}".format(self.getPointsFromFile()))
@@ -261,6 +288,13 @@ class PointsDisplay(DropZone):
                 archivewriter = csv.writer(archivefile, delimiter="|")
                 archivewriter.writerow(['description', 'points', 'color_index', 'creation_date', 'completion_date'])
             return 0
+    
+    def time(self):
+        time_delta = datetime.datetime.now() - self.start_time
+        hours, remainder = divmod(time_delta.seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        self.canvas.itemconfig(self.timer, text=('{:02}:{:02}:{:02}'.format(hours, minutes, seconds)))
+        self.canvas.after(1000, self.time)
 
 class Section:
     def __init__(self, canvas, theme, name, w, x, ch, last_column_flag=False):
@@ -637,10 +671,11 @@ class Kanban:
         
         self.context_menu = tk.Menu(self.root, tearoff=0, bg=self.theme['bg'], fg=self.theme['secondary'], selectcolor=self.theme['secondary'], font=COUNTERFONT)
         themes_menu = tk.Menu(self.context_menu, tearoff=0, bg=self.theme['bg'], fg=self.theme['secondary'], selectcolor=self.theme['secondary'], font=COUNTERFONT)
-        themes_menu.add_radiobutton(label="Kanbuddy Prime", variable=self.selected_theme, value='prime', command=lambda: self.setTheme('prime'))
+        themes_menu.add_radiobutton(label="KB-Prime", variable=self.selected_theme, value='prime', command=lambda: self.setTheme('prime'))
         themes_menu.add_radiobutton(label="Tri.Optimum", variable=self.selected_theme, value='trioptimum', command=lambda: self.setTheme('trioptimum'))
         #themes_menu.add_radiobutton(label="Uplink", variable=self.selected_theme, value='uplink', command=lambda: self.setTheme('uplink'))
         #themes_menu.add_radiobutton(label="Peachy", variable=self.selected_theme, value='peach', command=lambda: self.setTheme('peach'))
+        themes_menu.add_radiobutton(label="Fortress", variable=self.selected_theme, value='fortress', command=lambda: self.setTheme('fortress'))
         themes_menu.add_radiobutton(label="Whiteboard", variable=self.selected_theme, value='whiteboard', command=lambda: self.setTheme('whiteboard'))
         themes_menu.add_radiobutton(label="Custom", variable=self.selected_theme, value='custom', command=lambda: self.setTheme('custom'))
 
