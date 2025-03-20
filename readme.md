@@ -4,14 +4,23 @@
 A micro-kanban board for people who need help focusing on the short-term stuff.
 
 ### Installation
+
+### Release (Reccomended)
 - Download respective build from Releases
 - Launch it.
 
-### Operation
+### Python
+- Clone git repository
+- run ```pip install requirements.txt```
+- this isnt done so dont worry it wont work
 
-- Create a new card with CTRL-A
-- Double click card to edit.
-- Once a card has been completed, drop it in the bottom-right spot and watch your points go up!
+### Operation
+- CTRL-A : New Card
+- Double-Click : Edit Card
+- Middle-Click : Cycle Card Color (+CTRL to Reverse)
+- Middle-Click + Drag : Adjust Card Points
+
+Once a card has been completed, drop it in the bottom-right spot and watch your points go up!
 
 ### Settings
 Within ``settings.yaml``, the following can be adjusted:

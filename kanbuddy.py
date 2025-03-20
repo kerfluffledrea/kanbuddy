@@ -3,8 +3,7 @@ import yaml
 import sys
 import csv
 import os
-import webbrowser
-from inspect import getsourcefile, getframeinfo, currentframe
+ from inspect import getsourcefile, getframeinfo, currentframe
 from pathlib import Path
 from datetime import date
 import tkinter as tk
@@ -49,7 +48,7 @@ THEMES['prime'] = {
     'main' : 'blueviolet',
     'secondary' : '#00ffcc',
     'emptyslot' : '#1F0030',
-    'buttonhighlight' : '#060015',
+    'buttonhighlight' : '#090020',
     'sectionhighlight' : '#100020',
     'palette' : ['white',
                  'lime',
@@ -71,9 +70,9 @@ THEMES['whiteboard'] = {
                  'green',
                  'blue2',
                  'grey5',
-                 '#CC00CC',
+                 'deeppink2',
                  'darkgoldenrod1',
-                 'deeppink2']
+                 '#CC00CC']
 }
 
 THEMES['trioptimum'] = {
@@ -705,11 +704,14 @@ class Kanban:
 
         instructions = Label(welcome_grid, font=CARDFONT, text=
 '''
-- CTRL-A to make new Card
-- Double-Click card to Edit
+- CTRL-A : New Card
+- Double-Click : Edit Card
+- Middle-Click : Cycle Card Color (+CTRL to Reverse)
+- Middle-Click + Drag : Adjust Card Points
+
 - Drag card to bottom-right box to mark as complete.
 - Settings & custom theme can be changed in settings.yaml
-''', bg=self.theme['bg'], fg=self.theme['secondary'], justify=CENTER).grid(column=0, row=2)
+''', bg=self.theme['bg'], fg=self.theme['secondary'], justify=tk.LEFT).grid(column=0, row=2)
 
         close_button = Button(welcome_grid, text="Enter the World of Kanbuddy", activeforeground=self.theme['secondary'], activebackground=self.theme['buttonhighlight'], relief=FLAT, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, highlightbackground=self.theme['secondary'], command=lambda: self.closeWelcomeScreen()).grid(column=0,row=3)
         self.canvas.create_window(WIDTH/2, HEIGHT/2, anchor=CENTER, window=self.edit_menu)
