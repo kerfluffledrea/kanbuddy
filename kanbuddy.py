@@ -48,7 +48,7 @@ THEMES['prime'] = {
     'bg' : 'black',
     'main' : 'blueviolet',
     'secondary' : '#00ffcc',
-    'emptyslot' : '#160020',
+    'emptyslot' : '#1F0030',
     'buttonhighlight' : '#060015',
     'sectionhighlight' : '#100020',
     'palette' : ['white',
@@ -64,13 +64,13 @@ THEMES['whiteboard'] = {
     'bg' : 'white',
     'main' : 'black',
     'secondary' : 'grey',
-    'emptyslot' : 'grey93',
-    'buttonhighlight' : 'grey90',
-    'sectionhighlight' : 'grey90',
+    'emptyslot' : 'grey90',
+    'buttonhighlight' : 'grey85',
+    'sectionhighlight' : 'grey85',
     'palette' : ['#FF0000',
                  'green',
-                 'blue4',
-                 'royalblue1',
+                 'blue2',
+                 'grey5',
                  '#CC00CC',
                  'darkgoldenrod1',
                  'deeppink2']
@@ -109,7 +109,7 @@ THEMES['uplink'] = {
 }
 
 THEMES['peach'] = {
-    'bg' : '#ffcbc4',
+    'bg' : '#fee0c9',
     'main' : '#fc008b',
     'secondary' : '#ff6699',
     'emptyslot' : '#ffb0d7',
@@ -117,7 +117,7 @@ THEMES['peach'] = {
     'sectionhighlight' : '#ffb0d7',
     'palette' : [
                  '#4c3e17',
-                 'darkgoldenrod',
+                 '#f4bb0d',
                  '#FF7766',
                  '#FF0d80',
                  '#c20717',

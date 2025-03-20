@@ -6,7 +6,7 @@ height: 480
 margin: 10
 headersize: 25
 daycounter: 0
-theme: trioptimum
+theme: prime
 customtheme:
   bg: black
   main: blueviolet
