@@ -1,9 +1,9 @@
 ![Screenshot of Kanbuddy interface](https://i.imgur.com/5TRPGwr.png)
 
-## Kanbuddy
+# Kanbuddy
 A micro-kanban board for people who need help focusing on the short-term stuff.
 
-### Installation
+## Installation
 
 ### Release (Reccomended)
 - Download respective build from Releases
@@ -14,7 +14,7 @@ A micro-kanban board for people who need help focusing on the short-term stuff.
 - run ```pip install requirements.txt```
 - this isnt done so dont worry it wont work
 
-### Operation
+## Operation
 - CTRL-A : New Card
 - Double-Click : Edit Card
 - Middle-Click : Cycle Card Color (+CTRL to Reverse)
@@ -22,9 +22,9 @@ A micro-kanban board for people who need help focusing on the short-term stuff.
 
 Once a card has been completed, drop it in the bottom-right spot and watch your points go up!
 
-### Settings
+## Settings
 Within ``settings.yaml``, the following can be adjusted:
-- Fonts (Any [tkinter fonts](https://stackoverflow.com/a/64301819))
+- Fonts
 - Custom Theme (Any hex code, or [Tkinter Color](https://www.wikipython.com/wp-content/uploads/Color-chart-capture-082321.jpg))
 - Window size
 - Margin/Header size
