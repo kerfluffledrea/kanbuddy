@@ -4,11 +4,10 @@ import os
 import yaml
 import webbrowser
 import datetime
-from pathlib import Path
 from datetime import date
 import tkinter as tk
 from tkinter.constants import BOTH, CENTER
-from tkinter import E, W, Frame, Text, Button, Label, font, LAST, Menu, FLAT, CENTER, RIDGE
+from tkinter import E, W, Frame, Text, Button, Label, FLAT, CENTER
 
 # Read Config File
 mod_path = str(str(os.getcwd()))
@@ -31,6 +30,10 @@ HEADERFONT = settings['font']['header']
 CARDFONT = settings['font']['card']
 COUNTERFONT = settings['font']['counter']
 TIMERFONT = settings['font']['timer']
+
+GLOBALRELIEF = tk.FLAT
+if str(sys.platform).lower() == 'win32':
+    GLOBALRELIEF = tk.RAISED
 
 THEMES = dict()
 THEMES['custom'] = {
@@ -427,9 +430,13 @@ class Kanban:
         self.drag_origin = ()
         self.selected_theme = tk.StringVar(value=theme_name)
         self.setTheme(theme_name)
-        if not str(sys.platform).lower() == 'win32':
+        
+        if str(sys.platform).lower() == 'win32':
+            self.root.overrideredirect(True)
+        else:
             self.root.wm_attributes('-type', 'splash')
         self.root.wm_attributes('-topmost', 'true')
+
         self.root.geometry(str(WIDTH)+"x"+str(HEIGHT))
         self.root.configure(background=self.theme['bg'])
         self.canvas = tk.Canvas(self.root, bg=self.theme['bg'], width=WIDTH, height=HEIGHT, highlightthickness=1, highlightbackground=self.theme['main'])
@@ -784,7 +791,6 @@ class Kanban:
 - Drag card to bottom-right box to mark as complete.
 - Settings & custom theme can be changed in settings.yaml
 ''', bg=self.theme['bg'], fg=self.theme['secondary'], justify=tk.LEFT).grid(column=0, row=2)
-
 
         bottom_button_grid = Frame(self.edit_menu, name='bottom_button_grid', background=self.theme['bg'])
         bottom_button_grid.pack(pady=MARGIN, padx=MARGIN/10)

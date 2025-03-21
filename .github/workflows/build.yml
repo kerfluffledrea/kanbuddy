@@ -37,9 +37,10 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: executable-${{ matrix.os }}
+          name: kanbuddy-${{ matrix.os }}
           path: |
             kanbuddy.exe
+            icon.ico
             kanbuddy
             settings.yaml
             readme.md
