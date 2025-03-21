@@ -432,7 +432,8 @@ class Kanban:
         self.setTheme(theme_name)
         
         if str(sys.platform).lower() == 'win32':
-            self.root.overrideredirect(True)
+            #self.root.overrideredirect(True)
+            self.root.attributes("-fullscreen", True)
         else:
             self.root.wm_attributes('-type', 'splash')
         self.root.wm_attributes('-topmost', 'true')
