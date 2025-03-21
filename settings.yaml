@@ -1,4 +1,3 @@
-theme: prime
 width: 800
 height: 480
 margin: 10
@@ -34,3 +33,4 @@ customtheme:
   pal4: magenta
   pal5: yellow
   pal6: orangered
+theme: prime # options include custom, prime, trioptimum, uplink, peachy

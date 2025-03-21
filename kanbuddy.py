@@ -787,9 +787,9 @@ class Kanban:
 - Double-Click : Edit Card
 - Middle-Click : Cycle Card Color (+CTRL to Reverse)
 - Middle-Click + Drag : Adjust Card Points
-
 - Drag card to bottom-right box to mark as complete.
-- Settings & custom theme can be changed in settings.yaml
+
+- Fonts, colors and more can be changed in settings.yaml
 ''', bg=self.theme['bg'], fg=self.theme['secondary'], justify=tk.LEFT).grid(column=0, row=2)
 
         bottom_button_grid = Frame(self.edit_menu, name='bottom_button_grid', background=self.theme['bg'])

@@ -33,6 +33,8 @@ Within ``settings.yaml``, you can adjust:
 - Day counter
 - Sections (The last section will always have the final card spot replaced with the point counter.)
 
+The Default font is [GNU Unifont](https://www.unifoundry.com/unifont/index.html). Kanbuddy will work with any installed font. Do not use spaces when entering font name. 
+
 ### Philosophy
 I use kanbuddy as an auto-launching companion for my workspace. On my Linux setup, I like to create [.desktop](https://wiki.archlinux.org/title/Desktop_entries) files that will call scripts to open all relevant programs at once to reduce as much friction as possible when starting a work session.
 
