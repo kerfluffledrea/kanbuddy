@@ -729,7 +729,7 @@ class Kanban:
                 self.context_menu.add_command(label="Edit", command=lambda: self.openEditMenu(self.grabbed_card))
                 self.context_menu.add_command(label="Delete", command=lambda: self.deleteCard(self.grabbed_card))
         else:
-            self.context_menu.add_command(label="New Card", accelerator='Ctrl-A', command=lambda: self.addNewCard())
+            self.context_menu.add_command(label="New Card", command=lambda: self.addNewCard())
         self.context_menu.add_separator()
         self.context_menu.add_checkbutton(label="Stay On Top", variable=self.pinned, onvalue=1, offvalue=0, command=lambda: self.setPinned())
         self.context_menu.add_cascade(label="Theme...", menu=themes_menu)
