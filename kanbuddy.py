@@ -7,7 +7,7 @@ import datetime
 from datetime import date
 import tkinter as tk
 from tkinter.constants import BOTH, CENTER
-from tkinter import E, W, Frame, Text, Button, Label, FLAT, CENTER
+from tkinter import W, Frame, Text, Button, Label, CENTER
 
 # Read Config File
 mod_path = str(str(os.getcwd()))
@@ -32,8 +32,6 @@ COUNTERFONT = settings['font']['counter']
 TIMERFONT = settings['font']['timer']
 
 GLOBALRELIEF = tk.FLAT
-if str(sys.platform).lower() == 'win32':
-    GLOBALRELIEF = tk.RAISED
 
 THEMES = dict()
 THEMES['custom'] = {
@@ -520,13 +518,13 @@ class Kanban:
 
         value_button_grid = Frame(button_grid, name='value_button_grid')
         value_button_grid.pack(side = tk.RIGHT, padx=MARGIN)
-        decrease_points = Button(value_button_grid, activebackground=self.theme['buttonhighlight'], activeforeground=self.theme['palette'][edit_card.color_index], relief=tk.FLAT, name='decrease_button', text='-', fg=self.theme['palette'][edit_card.color_index], bg=self.theme['bg'], width=1, height=1, highlightbackground=self.theme['palette'][edit_card.color_index], command=lambda: edit_card.decreasePoints()).grid(column=8, row=0)
-        increase_points = Button(value_button_grid, activebackground=self.theme['buttonhighlight'], activeforeground=self.theme['palette'][edit_card.color_index], relief=tk.FLAT, name='increase_button', text='+', fg=self.theme['palette'][edit_card.color_index], bg=self.theme['bg'], width=1, height=1, highlightbackground=self.theme['palette'][edit_card.color_index], command=lambda: edit_card.increasePoints()).grid(column=9, row=0)
+        decrease_points = Button(value_button_grid, activebackground=self.theme['buttonhighlight'], activeforeground=self.theme['palette'][edit_card.color_index], relief=GLOBALRELIEF, name='decrease_button', text='-', fg=self.theme['palette'][edit_card.color_index], bg=self.theme['bg'], width=1, height=1, highlightbackground=self.theme['palette'][edit_card.color_index], command=lambda: edit_card.decreasePoints()).grid(column=8, row=0)
+        increase_points = Button(value_button_grid, activebackground=self.theme['buttonhighlight'], activeforeground=self.theme['palette'][edit_card.color_index], relief=GLOBALRELIEF, name='increase_button', text='+', fg=self.theme['palette'][edit_card.color_index], bg=self.theme['bg'], width=1, height=1, highlightbackground=self.theme['palette'][edit_card.color_index], command=lambda: edit_card.increasePoints()).grid(column=9, row=0)
 
         bottom_button_grid = Frame(self.edit_menu, name='bottom_button_grid', background=self.theme['bg'])
         bottom_button_grid.pack(pady=MARGIN, padx=MARGIN/10)
-        close_button = Button(bottom_button_grid, activeforeground=self.theme['palette'][edit_card.color_index], activebackground=self.theme['buttonhighlight'], relief=tk.FLAT, name='close_button', text='SAVE', fg=self.theme['palette'][edit_card.color_index], bg=self.theme['bg'], width=20, height=1, highlightbackground=self.theme['palette'][edit_card.color_index], command=lambda: self.closeEditMenu(edit_card, description_entry.get("1.0","end-1c"))).grid(column=3, row=0)
-        delete_button = Button(bottom_button_grid, activeforeground=self.theme['palette'][edit_card.color_index], activebackground=self.theme['buttonhighlight'], relief=tk.FLAT, name='delete_button', text='DELETE', fg=self.theme['palette'][edit_card.color_index], bg=self.theme['bg'], width=5, height=1, highlightbackground=self.theme['palette'][edit_card.color_index], command=lambda: self.deleteCard(edit_card, True)).grid(column=4, row=0)
+        close_button = Button(bottom_button_grid, activeforeground=self.theme['palette'][edit_card.color_index], activebackground=self.theme['buttonhighlight'], relief=GLOBALRELIEF, name='close_button', text='SAVE', fg=self.theme['palette'][edit_card.color_index], bg=self.theme['bg'], width=20, height=1, highlightbackground=self.theme['palette'][edit_card.color_index], command=lambda: self.closeEditMenu(edit_card, description_entry.get("1.0","end-1c"))).grid(column=3, row=0)
+        delete_button = Button(bottom_button_grid, activeforeground=self.theme['palette'][edit_card.color_index], activebackground=self.theme['buttonhighlight'], relief=GLOBALRELIEF, name='delete_button', text='DELETE', fg=self.theme['palette'][edit_card.color_index], bg=self.theme['bg'], width=5, height=1, highlightbackground=self.theme['palette'][edit_card.color_index], command=lambda: self.deleteCard(edit_card, True)).grid(column=4, row=0)
         self.canvas.create_window(WIDTH/2, HEIGHT/2, anchor=CENTER, window=self.edit_menu)
 
     def changeColorButton(self, edit_card, color_index):
@@ -772,7 +770,7 @@ class Kanban:
     
     # --- Welcome Screen ---
     def openWelcomeScreen(self):
-        self.edit_menu = Frame(self.root, name='welcome_screen', relief=FLAT, bg=self.theme['bg'], padx=MARGIN*2, pady=MARGIN*2, highlightcolor=self.theme['secondary'], highlightbackground=self.theme['secondary'], highlightthickness=1, height=HEIGHT-(MARGIN*2), width=WIDTH-(MARGIN*2))        
+        self.edit_menu = Frame(self.root, name='welcome_screen', relief=GLOBALRELIEF, bg=self.theme['bg'], padx=MARGIN*2, pady=MARGIN*2, highlightcolor=self.theme['secondary'], highlightbackground=self.theme['secondary'], highlightthickness=1, height=HEIGHT-(MARGIN*2), width=WIDTH-(MARGIN*2))        
         self.edit_menu.pack(fill=BOTH, expand=False, padx=MARGIN, pady=MARGIN)
         
         welcome_grid = Frame(self.edit_menu, name='welcome_grid', background=self.theme['bg'])
@@ -794,8 +792,8 @@ class Kanban:
 
         bottom_button_grid = Frame(self.edit_menu, name='bottom_button_grid', background=self.theme['bg'])
         bottom_button_grid.pack(pady=MARGIN, padx=MARGIN/10)
-        close_button = Button(bottom_button_grid, text="Enter the World of Kanbuddy", activeforeground=self.theme['secondary'], activebackground=self.theme['buttonhighlight'], relief=FLAT, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, highlightbackground=self.theme['secondary'], command=lambda: self.closeWelcomeScreen()).grid(column=0,row=0)
-        website_button = Button(bottom_button_grid, text="Kerflufflespace↗", activeforeground=self.theme['secondary'], activebackground=self.theme['buttonhighlight'], relief=FLAT, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, highlightbackground=self.theme['secondary'], command=lambda: webbrowser.open_new_tab('https://kerfluffle.space')).grid(column=1,row=0, padx=10)
+        close_button = Button(bottom_button_grid, text="Enter the World of Kanbuddy", activeforeground=self.theme['secondary'], activebackground=self.theme['buttonhighlight'], relief=GLOBALRELIEF, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, highlightbackground=self.theme['secondary'], command=lambda: self.closeWelcomeScreen()).grid(column=0,row=0)
+        website_button = Button(bottom_button_grid, text="Kerflufflespace↗", activeforeground=self.theme['secondary'], activebackground=self.theme['buttonhighlight'], relief=GLOBALRELIEF, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, highlightbackground=self.theme['secondary'], command=lambda: webbrowser.open_new_tab('https://kerfluffle.space')).grid(column=1,row=0, padx=10)
         self.canvas.create_window(WIDTH/2, HEIGHT/2, anchor=CENTER, window=self.edit_menu)
 
     def closeWelcomeScreen(self):
