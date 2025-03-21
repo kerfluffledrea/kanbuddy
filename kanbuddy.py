@@ -432,8 +432,7 @@ class Kanban:
         self.setTheme(theme_name)
         
         if str(sys.platform).lower() == 'win32':
-            #self.root.overrideredirect(True)
-            self.root.attributes("-fullscreen", True)
+            self.root.overrideredirect(True)
         else:
             self.root.wm_attributes('-type', 'splash')
         self.root.wm_attributes('-topmost', 'true')
@@ -796,7 +795,7 @@ class Kanban:
         bottom_button_grid = Frame(self.edit_menu, name='bottom_button_grid', background=self.theme['bg'])
         bottom_button_grid.pack(pady=MARGIN, padx=MARGIN/10)
         close_button = Button(bottom_button_grid, text="Enter the World of Kanbuddy", activeforeground=self.theme['secondary'], activebackground=self.theme['buttonhighlight'], relief=FLAT, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, highlightbackground=self.theme['secondary'], command=lambda: self.closeWelcomeScreen()).grid(column=0,row=0)
-        website_button = Button(bottom_button_grid, text="Kerflufflespace↗", activeforeground=self.theme['secondary'], activebackground=self.theme['buttonhighlight'], relief=FLAT, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, highlightbackground=self.theme['secondary'], command=lambda: webbrowser.open('https://kerfluffle.space')).grid(column=1,row=0, padx=10)
+        website_button = Button(bottom_button_grid, text="Kerflufflespace↗", activeforeground=self.theme['secondary'], activebackground=self.theme['buttonhighlight'], relief=FLAT, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, highlightbackground=self.theme['secondary'], command=lambda: webbrowser.open_new_tab('https://kerfluffle.space')).grid(column=1,row=0, padx=10)
         self.canvas.create_window(WIDTH/2, HEIGHT/2, anchor=CENTER, window=self.edit_menu)
 
     def closeWelcomeScreen(self):
