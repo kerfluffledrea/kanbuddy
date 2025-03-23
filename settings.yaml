@@ -1,36 +1,33 @@
-width: 800
-height: 480
-margin: 10
-headersize: 22
-dashed: False
-daycounter: 0
-sections:
-  - name: TO DO
-    width: 200
-    cards: 4
-  - name: IN PROGRESS
-    width: 400
-    cards: 2
-  - name: FINISHED
-    width: 200
-    cards: 5
-font:
-  header: Unifont 14 bold
-  card: Unifont 12
-  counter: Unifont 10
-  timer: Unifont 18
 customtheme:
   bg: black
   main: blueviolet
   secondary: grey50
   emptyslot: grey10
-  sectionhighlight: '#060015'
   buttonhighlight: grey10
-  pal0: white
-  pal1: lime
-  pal2: cyan
-  pal3: dodgerblue
-  pal4: magenta
-  pal5: yellow
-  pal6: orangered
-theme: prime # options include custom, prime, trioptimum, uplink, peachy
+  sectionhighlight: '#060015'
+  palette0: white
+  palette1: lime
+  palette2: cyan
+  palette3: dodgerblue
+  palette4: magenta
+  palette5: yellow
+  palette6: orangered
+dashed: false
+daycounter: 0
+font:
+  card: Unifont 12
+  counter: Unifont 10
+  header: Unifont 14 bold
+  timer: Unifont 18
+headersize: 22
+height: 480
+margin: 7
+sections:
+- name: TODO
+  width: 225
+  cards: 9
+- name: IN PROGRESS
+  width: 575
+  cards: 3
+theme: prime
+width: 800
