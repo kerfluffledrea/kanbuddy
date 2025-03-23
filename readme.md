@@ -30,7 +30,7 @@ Within ``settings.yaml``, you can adjust:
 - Custom Theme (Any hex code, or [Tkinter Color](https://www.wikipython.com/wp-content/uploads/Color-chart-capture-082321.jpg))
 - Window size
 - Margin/Header size
-- Day counter
+- Line Dashes
 - Sections (The last section will always have the final card spot replaced with the point counter.)
 
 The Default font is [GNU Unifont](https://www.unifoundry.com/unifont/index.html). Kanbuddy will work with any installed font. Do not use spaces when entering font name. 
@@ -40,10 +40,10 @@ I use kanbuddy as an auto-launching companion for my workspace. On my Linux setu
 
 For example, when I want to work on my soda-themed horror game, I click the .desktop file that then launches all relevant programs, including Kanbuddy.
 ```bash
-code "{home}/sodagame/" & # Code Editor & Git Client 
-/usr/bin/godot "{home}/sodagame/project.godot" & # Game Editor
+code "{home}/sodagame/" & # Open Code Editor & Git Client 
+/usr/bin/godot "{home}/sodagame/project.godot" & # Open Game Editor
 cd "{home}/sodagame/kanbuddy/" & # Navigate to the Kanbuddy Directory
-./kanbuddy" # Kanbuddy
+./kanbuddy" # Open Kanbuddy
 ```
  If calling kanbuddy from within a script, you **must** cd to it first for it to look within the correct directory for its configuration files. This allows you to have as many different Kanbuddy instances as you have directories. I personally use a different kanbuddy instance for every project I have.
 
