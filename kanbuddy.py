@@ -333,18 +333,17 @@ class PointsDisplay(DropZone):
         self.updatePointCounter()
 
 class Section:
-    def __init__(self, canvas, theme, name, w, x, ch, last_column_flag=False):
+    def __init__(self, canvas, theme, name, w, x, cards, last_column_flag=False):
         self.canvas = canvas
         self.theme = theme
         self.name = name
         self.width = w
         self.x_pos = x
-        self.card_height = ch
         self.drop_zones = []
         self.canvas_rect = None
         self.cards = []
         self.draw()            
-        self.createDropZones(last_column_flag)
+        self.createDropZones(last_column_flag, cards)
 
     def draw(self):
         self.canvas_rect = self.canvas.create_rectangle(self.x_pos, 0, self.x_pos + self.width, HEIGHT, outline=self.theme['main'])
@@ -375,30 +374,24 @@ class Section:
         self.canvas.itemconfig(self.canvas_line, fill=self.theme['main'])
         self.canvas.itemconfig(self.canvas_text, fill=self.theme['main'])
 
-    def createDropZones(self, last_column_flag):
+    def createDropZones(self, last_column_flag, cards):
+        card_height = (HEIGHT-HEADERSIZE-(MARGIN*(cards+1)))/cards
         i = 0
-        while True:
-            if last_column_flag:
+        for i in range(cards):
+            if i == cards-1 and last_column_flag:
+                self.addPointCounter(card_height)
+            else:
                 xpos = self.x_pos + MARGIN
-                ypos = HEADERSIZE + self.card_height * i + MARGIN * (i + 1)
-                self.drop_zones.append(DropZone(self.canvas, self.theme, xpos, ypos, self.width - MARGIN * 2, self.card_height))
-                i += 1
-                ypos = HEADERSIZE + self.card_height * (i+1) + MARGIN * (i + 2)
-                if ypos + self.card_height > HEIGHT:
-                    self.addPointCounter()
+                ypos = HEADERSIZE + card_height * i + MARGIN * (i + 1)
+                if ypos + card_height > HEIGHT:
                     break
-            else: 
-                xpos = self.x_pos + MARGIN
-                ypos = HEADERSIZE + self.card_height * i + MARGIN * (i + 1)
-                if ypos + self.card_height > HEIGHT:
-                    break
-                self.drop_zones.append(DropZone(self.canvas, self.theme, xpos, ypos, self.width - MARGIN * 2, self.card_height))
+                self.drop_zones.append(DropZone(self.canvas, self.theme, xpos, ypos, self.width - MARGIN * 2, card_height))
                 i += 1
 
-    def addPointCounter(self):
+    def addPointCounter(self, ch):
         xpos = self.x_pos + MARGIN
-        ypos = HEADERSIZE + self.card_height * len(self.drop_zones) + MARGIN * (len(self.drop_zones) + 1)
-        self.archive_dropzone = PointsDisplay(self.canvas, self.theme, xpos, ypos, self.width - MARGIN * 2, self.card_height)
+        ypos = HEADERSIZE + ch * len(self.drop_zones) + MARGIN * (len(self.drop_zones) + 1)
+        self.archive_dropzone = PointsDisplay(self.canvas, self.theme, xpos, ypos, self.width - MARGIN * 2, ch)
 
 class Kanban:
     def __init__(self, theme_name):
@@ -726,7 +719,7 @@ class Kanban:
         #themes_menu.add_radiobutton(label="Uplink", variable=self.selected_theme, value='uplink', command=lambda: self.setTheme('uplink'))
         #themes_menu.add_radiobutton(label="Peachy", variable=self.selected_theme, value='peach', command=lambda: self.setTheme('peach'))
         themes_menu.add_radiobutton(label="Fortress", variable=self.selected_theme, value='fortress', command=lambda: self.setTheme('fortress'))
-        themes_menu.add_radiobutton(label="Whiteboard", variable=self.selected_theme, value='whiteboard', command=lambda: self.setTheme('whiteboard'))
+        themes_menu.add_radiobutton(label="ihaveahax", variable=self.selected_theme, value='ihaveahax', command=lambda: self.setTheme('ihaveahax'))
         themes_menu.add_radiobutton(label="Custom", variable=self.selected_theme, value='custom', command=lambda: self.setTheme('custom'))
 
         if self.isInArchiveDropzone(event.x, event.y):
