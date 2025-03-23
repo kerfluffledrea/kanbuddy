@@ -11,7 +11,8 @@ from tkinter import W, Frame, Text, Button, Label, CENTER
 
 # Read Config File
 mod_path = str(str(os.getcwd()))
-settings = open(mod_path + "/settings.yaml")
+SETTINGS_PATH = (mod_path + "/settings.yaml") 
+settings = open(SETTINGS_PATH)
 cards_filepath = mod_path + "/.cards.csv"
 archive_filepath = mod_path + "/.archive.csv"
 settings = yaml.safe_load(settings)
@@ -766,8 +767,14 @@ class Kanban:
                 c.theme = self.theme
                 c.setColor(c.color_index)
             self.archive_dropzone.draw()
-        #write to settings
-    
+
+
+        settings_yaml = None
+        with open(SETTINGS_PATH, 'r') as file:
+            settings_yaml = yaml.safe_load(file)
+        settings['theme'] = self.theme['name']
+        with open(SETTINGS_PATH, 'w') as file:
+            yaml.safe_dump(settings, file, sort_keys=False)
     # --- Welcome Screen ---
     def openWelcomeScreen(self):
         self.edit_menu = Frame(self.root, name='welcome_screen', relief=GLOBALRELIEF, bg=self.theme['bg'], padx=MARGIN*2, pady=MARGIN*2, highlightcolor=self.theme['secondary'], highlightbackground=self.theme['secondary'], highlightthickness=1, height=HEIGHT-(MARGIN*2), width=WIDTH-(MARGIN*2))        
@@ -789,7 +796,6 @@ class Kanban:
 
 - Fonts, colors and more can be changed in settings.yaml
 ''', bg=self.theme['bg'], fg=self.theme['secondary'], justify=tk.LEFT).grid(column=0, row=2)
-
         bottom_button_grid = Frame(self.edit_menu, name='bottom_button_grid', background=self.theme['bg'])
         bottom_button_grid.pack(pady=MARGIN, padx=MARGIN/10)
         close_button = Button(bottom_button_grid, text="Enter the World of Kanbuddy", activeforeground=self.theme['secondary'], activebackground=self.theme['buttonhighlight'], relief=GLOBALRELIEF, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, highlightbackground=self.theme['secondary'], command=lambda: self.closeWelcomeScreen()).grid(column=0,row=0)
@@ -809,13 +815,12 @@ if not os.path.isfile(archive_filepath):
     k.openWelcomeScreen()
 
 for sec in sections:
-    card_height = (HEIGHT-HEADERSIZE-(MARGIN*(int(sec['cards'])+1)))/int(sec['cards'])
     if sec == sections[-1]:
         last_section_flag = True
-        k.addSectionFromFile(sec['name'], int(sec['width']), sum_width, card_height, True)
+        k.addSectionFromFile(sec['name'], int(sec['width']), sum_width, int(sec['cards']), True)
         k.archive_dropzone = k.sections[len(k.sections)-1].archive_dropzone
     else:   
-        k.addSectionFromFile(sec['name'], int(sec['width']), sum_width, card_height)
+        k.addSectionFromFile(sec['name'], int(sec['width']), sum_width, int(sec['cards']))
     sum_width += int(sec['width'])
 
 # Import cards
