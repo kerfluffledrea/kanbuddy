@@ -1,3 +1,21 @@
+width: 800
+height: 480
+headersize: 20
+margin: 7
+dashed: false
+daycounter: 0
+sections:
+- name: TODO
+  width: 225
+  cards: 9
+- name: IN PROGRESS
+  width: 575
+  cards: 3
+font:
+  card: Unifont 12
+  counter: Unifont 10
+  header: Unifont 14 bold
+  timer: Unifont 18
 customtheme:
   bg: black
   main: blueviolet
@@ -12,22 +30,4 @@ customtheme:
   palette4: magenta
   palette5: yellow
   palette6: orangered
-dashed: false
-daycounter: 0
-font:
-  card: Unifont 12
-  counter: Unifont 10
-  header: Unifont 14 bold
-  timer: Unifont 18
-headersize: 22
-height: 480
-margin: 7
-sections:
-- name: TODO
-  width: 225
-  cards: 9
-- name: IN PROGRESS
-  width: 575
-  cards: 3
 theme: prime
-width: 800
