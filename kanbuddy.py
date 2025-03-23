@@ -36,22 +36,24 @@ GLOBALRELIEF = tk.FLAT
 
 THEMES = dict()
 THEMES['custom'] = {
+    'name' : 'custom',
     'bg' : settings['customtheme']['bg'],
     'main' : settings['customtheme']['main'],
     'secondary' : settings['customtheme']['secondary'],
     'emptyslot' : settings['customtheme']['emptyslot'],
     'buttonhighlight' : settings['customtheme']['buttonhighlight'],
     'sectionhighlight' : settings['customtheme']['sectionhighlight'],
-    'palette' : [settings['customtheme']['pal0'],
-                 settings['customtheme']['pal1'],
-                 settings['customtheme']['pal2'],
-                 settings['customtheme']['pal3'],
-                 settings['customtheme']['pal4'],
-                 settings['customtheme']['pal5'],
-                 settings['customtheme']['pal6']]
+    'palette' : [settings['customtheme']['palette0'],
+                 settings['customtheme']['palette1'],
+                 settings['customtheme']['palette2'],
+                 settings['customtheme']['palette3'],
+                 settings['customtheme']['palette4'],
+                 settings['customtheme']['palette5'],
+                 settings['customtheme']['palette6']]
 }
 
 THEMES['prime'] = {
+    'name' : 'prime',
     'bg' : 'black',
     'main' : 'blueviolet',
     'secondary' : '#00ffcc',
@@ -68,6 +70,7 @@ THEMES['prime'] = {
 }
 
 THEMES['fortress'] = {
+    'name' : 'fortress',
     'bg' : 'black',
     'main' : 'white',
     'secondary' : 'grey50',
@@ -84,23 +87,25 @@ THEMES['fortress'] = {
 }
 
 
-THEMES['whiteboard'] = {
-    'bg' : 'white',
-    'main' : 'black',
-    'secondary' : 'grey',
-    'emptyslot' : 'grey90',
-    'buttonhighlight' : 'grey85',
-    'sectionhighlight' : 'grey85',
-    'palette' : ['#FF0000',
-                 'green',
-                 'blue2',
-                 'grey5',
-                 'deeppink2',
-                 'darkgoldenrod1',
-                 '#CC00CC']
+THEMES['ihaveahax'] = {
+    'name' : 'ihaveahax',
+    'bg' : '#CCD0E5',
+    'main' : '#5E6490',
+    'secondary' : '#5E7D90',
+    'emptyslot' : '#A5B0D6',
+    'buttonhighlight' : '#B6BCDA',
+    'sectionhighlight' : '#BAC0DC',
+    'palette' : ['#3F3B97',
+                 '#765776',
+                 '#715E90',
+                 '#884CB9',
+                 '#B23CC3',
+                 '#BE1800',
+                 '#FF9500']
 }
 
 THEMES['trioptimum'] = {
+    'name' : 'trioptimum',
     'bg' : 'black',
     'main' : '#53538c',
     'secondary' : '#00FFAA',
@@ -108,15 +113,16 @@ THEMES['trioptimum'] = {
     'buttonhighlight' : '#014131',
     'sectionhighlight' : '#014131',
     'palette' : ['#00FFAA',
-                 '#41c09f',
                  '#40fe1f',
                  '#3d01fc',
+                 '#b0a2a7',
                  '#6e66d4',
                  '#d21540',
                  '#ff8300']
 }
 
 THEMES['uplink'] = {
+    'name' : 'uplink',
     'bg' : 'black',
     'main' : '#0320aa',
     'secondary' : '#081f6f',
@@ -133,6 +139,7 @@ THEMES['uplink'] = {
 }
 
 THEMES['peach'] = {
+    'name' : 'peach',
     'bg' : '#fee0c9',
     'main' : '#fc008b',
     'secondary' : '#ff6699',
