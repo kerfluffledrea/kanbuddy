@@ -356,6 +356,7 @@ class Section:
         card.height = self.drop_zones[dz_index].height
         card.move(self.drop_zones[dz_index].x_pos, self.drop_zones[dz_index].y_pos)
         self.cards.append(card)
+        return card
 
     def removeCard(self, card):
         self.cards.remove(card)
@@ -400,19 +401,10 @@ class Kanban:
         self.root.resizable(False, False)
         self.root.wm_title("Kanbuddy")
         self.root.bind('<Control-a>', self.addNewCard)
-        self.theme = {
-            'name' : None,
-            'bg' : None,
-            'main' : None,
-            'secondary' : None,
-            'emptyslot' : None,
-            'buttonhighlight' : None,
-            'sectionhighlight' : None,
-            'palette' : []
-        }
-        
-        self.cards = []
         self.sections = []
+        self.cards = []
+        self.overflow_cards = []
+        self.theme = {}
         self.archive_dropzone = None
         self.edit_menu = None
         self.context_menu = None
@@ -452,7 +444,7 @@ class Kanban:
         self.canvas.bind('<B2-Motion>', self.handleMiddleClickDrag)
 
     # --- File Reading/Writing ---
-    def addNewCard(self, event=None):
+    def addNewCard(self, _event):
         if not self.edit_menu:
             if len(self.sections[0].cards) < len(self.sections[0].drop_zones):
                 c = Card(self.canvas, self.theme)
@@ -464,10 +456,25 @@ class Kanban:
     def saveCardstoFile(self):
         with open(cards_filepath, 'w', newline='\n') as cardfile:
             with open(archive_filepath, 'a', newline='\n') as archivefile:
+                print("OVERFLOW len: \n" + str(len(self.overflow_cards)))
                 cardwriter = csv.writer(cardfile, delimiter="|")
                 cardwriter.writerow(['section_index', 'description', 'color_index', 'points', 'creation_date'])
                 for c in self.cards:
                     cardwriter.writerow([c.section_index, c.description, c.color_index, c.points, c.creation_date])
+                for c in self.overflow_cards:
+                    cardwriter.writerow(c)
+
+    def fillInOverflow(self):
+        for i in range(len(self.sections)):
+            for c in self.overflow_cards:
+                if len(self.sections[i].cards) >= len(self.sections[i].drop_zones):
+                    break
+                elif c[0] == i:
+                    new_card = Card(self.canvas, self.theme, c[1], c[2], c[3], c[4])
+                    self.cards.append(new_card)
+                    self.sections[i].addCard(new_card)
+                    self.overflow_cards.remove(c)
+
 
     def addSectionFromFile(self, name, width, xpos, cardheight, last_column = False):
         s = Section(self.canvas, self.theme, name, width, xpos, cardheight, last_column)
@@ -544,13 +551,16 @@ class Kanban:
         self.saveCardstoFile()
 
     def deleteCard(self, card, editing=False):
+        section_index = card.section_index
         self.cards.remove(card)
-        self.sections[card.section_index].cards.remove(card)
+        self.sections[section_index].cards.remove(card)
         card.delete()
         del card
+        self.sections[section_index].reorderCards()
         if editing:
             self.edit_menu.destroy()
             self.edit_menu = None
+        self.fillInOverflow()
         self.saveCardstoFile()
 
     def updateCardCounters(self):
@@ -612,7 +622,7 @@ class Kanban:
                 elif drop_section and len(drop_section.cards) < len(drop_section.drop_zones) and self.sections.index(drop_section) != self.grabbed_card.section_index:
                     self.grabbed_card.section_index = self.sections.index(drop_section)
                     drop_section.addCard(self.grabbed_card)
-                    self.grabbed_card_section.removeCard(self.grabbed_card)                    
+                    self.grabbed_card_section.removeCard(self.grabbed_card)
                 else:
                     # This prevents the tiny movements during double clicks from moving cards around within a section
                     drag_vector = (event.x - self.grab_location[0],  event.y- self.grab_location[1])
@@ -626,6 +636,7 @@ class Kanban:
                 self.grab_offset = None
                 self.grabbed_card_section = None
                 self.grab_location = None
+                self.fillInOverflow()
                 self.saveCardstoFile()
 
     def handleClickDrag(self, event):
@@ -711,13 +722,10 @@ class Kanban:
     def handleRightClickUp(self, event):
         self.rmb_held = False
         self.grabbed_card = self.getColldingCards(event.x, event.y)
-        
         self.context_menu = tk.Menu(self.root, tearoff=0, bg=self.theme['bg'], fg=self.theme['secondary'], selectcolor=self.theme['secondary'], font=CARDFONT)
         themes_menu = tk.Menu(self.context_menu, tearoff=0, bg=self.theme['bg'], fg=self.theme['secondary'], selectcolor=self.theme['secondary'], font=CARDFONT)
         themes_menu.add_radiobutton(label="KB-Prime", variable=self.selected_theme, value='prime', command=lambda: self.setTheme('prime'))
         themes_menu.add_radiobutton(label="Tri.Optimum", variable=self.selected_theme, value='trioptimum', command=lambda: self.setTheme('trioptimum'))
-        #themes_menu.add_radiobutton(label="Uplink", variable=self.selected_theme, value='uplink', command=lambda: self.setTheme('uplink'))
-        #themes_menu.add_radiobutton(label="Peachy", variable=self.selected_theme, value='peach', command=lambda: self.setTheme('peach'))
         themes_menu.add_radiobutton(label="Fortress", variable=self.selected_theme, value='fortress', command=lambda: self.setTheme('fortress'))
         themes_menu.add_radiobutton(label="ihaveahax", variable=self.selected_theme, value='ihaveahax', command=lambda: self.setTheme('ihaveahax'))
         themes_menu.add_radiobutton(label="Custom", variable=self.selected_theme, value='custom', command=lambda: self.setTheme('custom'))
@@ -768,13 +776,13 @@ class Kanban:
                 c.setColor(c.color_index)
             self.archive_dropzone.draw()
 
-
         settings_yaml = None
         with open(SETTINGS_PATH, 'r') as file:
             settings_yaml = yaml.safe_load(file)
         settings['theme'] = self.theme['name']
         with open(SETTINGS_PATH, 'w') as file:
             yaml.safe_dump(settings, file, sort_keys=False)
+    
     # --- Welcome Screen ---
     def openWelcomeScreen(self):
         self.edit_menu = Frame(self.root, name='welcome_screen', relief=GLOBALRELIEF, bg=self.theme['bg'], padx=MARGIN*2, pady=MARGIN*2, highlightcolor=self.theme['secondary'], highlightbackground=self.theme['secondary'], highlightthickness=1, height=HEIGHT-(MARGIN*2), width=WIDTH-(MARGIN*2))        
@@ -783,10 +791,9 @@ class Kanban:
         welcome_grid = Frame(self.edit_menu, name='welcome_grid', background=self.theme['bg'])
         welcome_grid.pack(padx=MARGIN, pady=MARGIN/4)
 
-        welcome = Label(welcome_grid, text="Welcome to Kanbuddy!", font=HEADERFONT, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, pady=MARGIN).grid(column=0, row=0)
-        byline = Label(welcome_grid, text="by kerfluffle", font=HEADERFONT, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, pady=MARGIN).grid(column=0, row=1)
-
-        instructions = Label(welcome_grid, font=CARDFONT, text=
+        Label(welcome_grid, text="Welcome to Kanbuddy!", font=HEADERFONT, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, pady=MARGIN).grid(column=0, row=0)
+        Label(welcome_grid, text="by kerfluffle", font=HEADERFONT, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, pady=MARGIN).grid(column=0, row=1)
+        Label(welcome_grid, font=CARDFONT, text=
 '''
 - CTRL-A : New Card
 - Double-Click : Edit Card
@@ -798,8 +805,8 @@ class Kanban:
 ''', bg=self.theme['bg'], fg=self.theme['secondary'], justify=tk.LEFT).grid(column=0, row=2)
         bottom_button_grid = Frame(self.edit_menu, name='bottom_button_grid', background=self.theme['bg'])
         bottom_button_grid.pack(pady=MARGIN, padx=MARGIN/10)
-        close_button = Button(bottom_button_grid, text="Enter the World of Kanbuddy", activeforeground=self.theme['secondary'], activebackground=self.theme['buttonhighlight'], relief=GLOBALRELIEF, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, highlightbackground=self.theme['secondary'], command=lambda: self.closeWelcomeScreen()).grid(column=0,row=0)
-        website_button = Button(bottom_button_grid, text="Kerflufflespace↗", activeforeground=self.theme['secondary'], activebackground=self.theme['buttonhighlight'], relief=GLOBALRELIEF, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, highlightbackground=self.theme['secondary'], command=lambda: webbrowser.open_new_tab('https://kerfluffle.space')).grid(column=1,row=0, padx=10)
+        Button(bottom_button_grid, text="Enter the World of Kanbuddy", activeforeground=self.theme['secondary'], activebackground=self.theme['buttonhighlight'], relief=GLOBALRELIEF, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, highlightbackground=self.theme['secondary'], command=lambda: self.closeWelcomeScreen()).grid(column=0,row=0)
+        Button(bottom_button_grid, text="Kerflufflespace↗", activeforeground=self.theme['secondary'], activebackground=self.theme['buttonhighlight'], relief=GLOBALRELIEF, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, highlightbackground=self.theme['secondary'], command=lambda: webbrowser.open_new_tab('https://kerfluffle.space')).grid(column=1,row=0, padx=10)
         self.canvas.create_window(WIDTH/2, HEIGHT/2, anchor=CENTER, window=self.edit_menu)
 
     def closeWelcomeScreen(self):
@@ -811,6 +818,7 @@ k = Kanban(settings['theme'])
 
 sections = settings['sections']
 sum_width = 0
+
 if not os.path.isfile(archive_filepath):
     k.openWelcomeScreen()
 
@@ -828,6 +836,10 @@ if os.path.isfile(cards_filepath):
     with open(cards_filepath, 'r', newline='\n') as csvfile:
         cards = csv.DictReader(csvfile, delimiter='|')
         for c in cards:
-            k.addCardFromFile(int(c['section_index']), c['description'], int(c['color_index']), int(c['points']), date.fromisoformat(c['creation_date']))
+            if int(c['section_index']) > len(sections)-1 or len(k.sections[int(c['section_index'])].cards) >= len(k.sections[int(c['section_index'])].drop_zones):
+                k.overflow_cards.append([int(c['section_index']), c['description'], int(c['color_index']), int(c['points']), date.fromisoformat(c['creation_date'])])
+                print([int(c['section_index']), c['description'], int(c['color_index']), int(c['points']), date.fromisoformat(c['creation_date'])])
+            else:
+                k.addCardFromFile(int(c['section_index']), c['description'], int(c['color_index']), int(c['points']), date.fromisoformat(c['creation_date']))
     csvfile.close()
 k.root.mainloop()
