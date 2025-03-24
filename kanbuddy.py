@@ -11,12 +11,55 @@ from tkinter import W, Frame, Text, Button, Label, CENTER
 
 # Read Config File
 mod_path = str(str(os.getcwd()))
-SETTINGS_PATH = (mod_path + "/settings.yaml") 
-settings = open(SETTINGS_PATH)
+SETTINGS_PATH = (mod_path + "/settings.yaml")
+
+default_settings={
+        'width': 700, 
+        'height': 400, 
+        'headersize': 20, 
+        'margin': 7, 
+        'dashed': False, 
+        'daycounter': 0, 
+        'sections': [
+            {'name': 'TODO', 'width': 200, 'cards': 9}, 
+            {'name': 'IN PROGRESS', 'width': 500, 'cards': 3}
+            ], 
+        'font': {
+            'card': 'Unifont 12', 
+            'counter': 'Unifont 10', 
+            'header': 'Unifont 14 bold', 
+            'timer': 'Unifont 18'}, 
+        'customtheme': {
+            'bg': 'black', 
+            'main': 'blueviolet', 
+            'secondary': 'grey50', 
+            'emptyslot': 'grey10', 
+            'buttonhighlight': 'grey10', 
+            'sectionhighlight': '#060015', 
+            'palette0': 'white', 
+            'palette1': 'lime', 
+            'palette2': 'cyan', 
+            'palette3': 'dodgerblue', 
+            'palette4': 'magenta', 
+            'palette5': 'yellow', 
+            'palette6': 'orangered'}, 
+        'theme': 'prime'
+    }
+
+settings = 'Wet'
+if os.path.isfile(SETTINGS_PATH):
+    print("b")
+    settings = open(SETTINGS_PATH)
+    settings = yaml.safe_load(settings)
+else:
+    with open(SETTINGS_PATH, 'w', newline='\n') as archivefile:
+        print("A")
+        yaml.safe_dump(default_settings)
+        settings = default_settings
 cards_filepath = mod_path + "/.cards.csv"
 archive_filepath = mod_path + "/.archive.csv"
-settings = yaml.safe_load(settings)
 
+print(settings)
 
 DASH = None
 if bool(settings['dashed']):
