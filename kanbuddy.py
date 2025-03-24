@@ -14,21 +14,22 @@ mod_path = str(str(os.getcwd()))
 SETTINGS_PATH = (mod_path + "/settings.yaml")
 
 default_settings={
-        'width': 700, 
-        'height': 400, 
+        'width': 600, 
+        'height': 350, 
         'headersize': 20, 
         'margin': 7, 
-        'dashed': False, 
-        'daycounter': 0, 
+        'dashed': False,
+        'alwaysontop': True,
+        'theme': 'prime',
         'sections': [
-            {'name': 'TODO', 'width': 200, 'cards': 9}, 
-            {'name': 'IN PROGRESS', 'width': 500, 'cards': 3}
+            {'name': 'TODO', 'width': 200, 'cards': 5}, 
+            {'name': 'IN PROGRESS', 'width': 400, 'cards': 3}
             ], 
         'font': {
             'card': 'Unifont 12', 
-            'counter': 'Unifont 10', 
+            'counter': 'Unifont 12', 
             'header': 'Unifont 14 bold', 
-            'timer': 'Unifont 18'}, 
+            'timer': 'Unifont 20'}, 
         'customtheme': {
             'bg': 'black', 
             'main': 'blueviolet', 
@@ -43,56 +44,52 @@ default_settings={
             'palette4': 'magenta', 
             'palette5': 'yellow', 
             'palette6': 'orangered'}, 
-        'theme': 'prime'
+        'pointvalues': [1,5,15,30,60,120,180,360,500,1000,2500]
     }
 
-settings = 'Wet'
+SETTINGS = None
 if os.path.isfile(SETTINGS_PATH):
-    print("b")
-    settings = open(SETTINGS_PATH)
-    settings = yaml.safe_load(settings)
+    SETTINGS = open(SETTINGS_PATH)
+    SETTINGS = yaml.safe_load(SETTINGS)
 else:
     with open(SETTINGS_PATH, 'w', newline='\n') as archivefile:
-        print("A")
         yaml.safe_dump(default_settings)
-        settings = default_settings
+        SETTINGS = default_settings
 cards_filepath = mod_path + "/.cards.csv"
 archive_filepath = mod_path + "/.archive.csv"
 
-print(settings)
-
 DASH = None
-if bool(settings['dashed']):
+if bool(SETTINGS['dashed']):
     DASH = (5,)
 
-WIDTH = settings['width']
-HEIGHT = settings['height']
-MARGIN = settings['margin']
-HEADERSIZE = settings['headersize']
+WIDTH = SETTINGS['width']
+HEIGHT = SETTINGS['height']
+MARGIN = SETTINGS['margin']
+HEADERSIZE = SETTINGS['headersize']
 
-HEADERFONT = settings['font']['header']
-CARDFONT = settings['font']['card']
-COUNTERFONT = settings['font']['counter']
-TIMERFONT = settings['font']['timer']
+HEADERFONT = SETTINGS['font']['header']
+CARDFONT = SETTINGS['font']['card']
+COUNTERFONT = SETTINGS['font']['counter']
+TIMERFONT = SETTINGS['font']['timer']
 
 GLOBALRELIEF = tk.FLAT
 
 THEMES = dict()
 THEMES['custom'] = {
     'name' : 'custom',
-    'bg' : settings['customtheme']['bg'],
-    'main' : settings['customtheme']['main'],
-    'secondary' : settings['customtheme']['secondary'],
-    'emptyslot' : settings['customtheme']['emptyslot'],
-    'buttonhighlight' : settings['customtheme']['buttonhighlight'],
-    'sectionhighlight' : settings['customtheme']['sectionhighlight'],
-    'palette' : [settings['customtheme']['palette0'],
-                 settings['customtheme']['palette1'],
-                 settings['customtheme']['palette2'],
-                 settings['customtheme']['palette3'],
-                 settings['customtheme']['palette4'],
-                 settings['customtheme']['palette5'],
-                 settings['customtheme']['palette6']]
+    'bg' : SETTINGS['customtheme']['bg'],
+    'main' : SETTINGS['customtheme']['main'],
+    'secondary' : SETTINGS['customtheme']['secondary'],
+    'emptyslot' : SETTINGS['customtheme']['emptyslot'],
+    'buttonhighlight' : SETTINGS['customtheme']['buttonhighlight'],
+    'sectionhighlight' : SETTINGS['customtheme']['sectionhighlight'],
+    'palette' : [SETTINGS['customtheme']['palette0'],
+                 SETTINGS['customtheme']['palette1'],
+                 SETTINGS['customtheme']['palette2'],
+                 SETTINGS['customtheme']['palette3'],
+                 SETTINGS['customtheme']['palette4'],
+                 SETTINGS['customtheme']['palette5'],
+                 SETTINGS['customtheme']['palette6']]
 }
 
 THEMES['prime'] = {
@@ -132,9 +129,9 @@ THEMES['fortress'] = {
 
 THEMES['ihaveahax'] = {
     'name' : 'ihaveahax',
-    'bg' : '#CCD0E5',
-    'main' : '#5E6490',
-    'secondary' : '#5E7D90',
+    'bg' : '#e2e6f7',
+    'main' : '#4c558f',
+    'secondary' : '#2e51ed',
     'emptyslot' : '#A5B0D6',
     'buttonhighlight' : '#B6BCDA',
     'sectionhighlight' : '#BAC0DC',
@@ -200,8 +197,8 @@ THEMES['peach'] = {
 }
 
 DRAGTHRESHOLD = 30
-DAYCOUNTER = settings['daycounter']
-POINTVALS = [1,5,15,30,60,120,180,360,500,1000,2500]
+#DAYCOUNTER = settings['daycounter']
+POINTVALS = SETTINGS['pointvalues']
 
 class Card:
     def __init__(self, canvas, theme, desc='-[O-O]-', color_index=0, points=1, creation_date = date.today()):
@@ -224,8 +221,8 @@ class Card:
         self.canvas_rect = self.canvas.create_rectangle(self.position[0], self.position[1], self.position[0] + self.width, self.position[1] + self.height, outline=self.theme['palette'][self.color_index], tag='card')
         self.canvas_text = self.canvas.create_text(self.position[0] + self.width/2, self.position[1] + self.height/2, anchor=CENTER, text=self.description, fill=self.theme['palette'][self.color_index], width=self.width-MARGIN*2, justify=CENTER, font=CARDFONT, tag='card')
         i = 0
-        if DAYCOUNTER:
-            self.canvas_dayctr = self.canvas.create_text(self.position[0] + 5, self.position[1] + 8, anchor=W, text=(date.today() - self.creation_date).days, fill=self.theme['palette'][self.color_index], width=self.width-MARGIN*2, justify=CENTER, font=(COUNTERFONT, 9))
+        #if DAYCOUNTER:
+        #    self.canvas_dayctr = self.canvas.create_text(self.position[0] + 5, self.position[1] + 8, anchor=W, text=(date.today() - self.creation_date).days, fill=self.theme['palette'][self.color_index], width=self.width-MARGIN*2, justify=CENTER, font=(COUNTERFONT, 9))
         while i < self.points+1:
             self.canvas_lines.append(self.canvas.create_line(self.position[0] + self.width, self.position[1] + self.height - i*MARGIN,
                 self.position[0] + self.width - i*MARGIN, self.position[1] + self.height, fill=self.theme['palette'][self.color_index]))
@@ -241,16 +238,16 @@ class Card:
             self.canvas.coords(l, self.position[0] + self.width, self.position[1] + self.height - i*MARGIN,
                 self.position[0] + self.width - i*MARGIN, self.position[1] + self.height)
             i += 1
-        if DAYCOUNTER:
-            self.canvas.coords(self.canvas_dayctr, x + 4, y + 11)
+        #if DAYCOUNTER:
+        #    self.canvas.coords(self.canvas_dayctr, x + 4, y + 11)
 
     def delete(self):
         self.canvas.delete(self.canvas_text)
         self.canvas.delete(self.canvas_rect)
         for l in self.canvas_lines:
             self.canvas.delete(l)
-        if DAYCOUNTER:
-            self.canvas.delete(self.canvas_dayctr)
+        #if DAYCOUNTER:
+        #    self.canvas.delete(self.canvas_dayctr)
 
     def updateCounter(self):
         self.canvas.itemconfig(self.canvas_dayctr, text=(date.today() - self.creation_date).days)
@@ -288,15 +285,15 @@ class Card:
         self.canvas.itemconfig(self.canvas_rect, outline=self.theme['palette'][color_index])
         for l in self.canvas_lines:
             self.canvas.itemconfig(l, fill=self.theme['palette'][color_index])
-        if DAYCOUNTER:
-            self.canvas.itemconfig(self.canvas_dayctr, fill=self.theme['palette'][color_index])
+        #if DAYCOUNTER:
+        #    self.canvas.itemconfig(self.canvas_dayctr, fill=self.theme['palette'][color_index])
 
     def setDescription(self, desc):
         self.description = desc
         self.canvas.itemconfig(self.canvas_text, text=desc)
     
     def increasePoints(self):
-        if self.points < 10 and self.points * MARGIN < self.height:
+        if self.points < 10 and (self.points+1) * MARGIN < self.height:
             self.points += 1
             self.canvas_lines.append(self.canvas.create_line(self.position[0] + self.width, self.position[1] + self.height - self.points*MARGIN,
                     self.position[0] + self.width - self.points*MARGIN, self.position[1] + self.height, fill=self.theme['palette'][self.color_index]))
@@ -460,16 +457,17 @@ class Kanban:
         self.lmb_held = False
         self.rmb_held = False
         self.pinned = tk.BooleanVar()
-        self.pinned.set(True)
+
+        self.pinned.set(SETTINGS['alwaysontop'])
         self.drag_origin = ()
         self.selected_theme = tk.StringVar(value=theme_name)
+        self.updateAlwaysOntop()
         self.setTheme(theme_name)
         
         if str(sys.platform).lower() == 'win32':
             self.root.overrideredirect(True)
         else:
             self.root.wm_attributes('-type', 'splash')
-        self.root.wm_attributes('-topmost', 'true')
 
         self.root.geometry(str(WIDTH)+"x"+str(HEIGHT))
         self.root.configure(background=self.theme['bg'])
@@ -505,6 +503,10 @@ class Kanban:
                     cardwriter.writerow([c.section_index, c.description, c.color_index, c.points, c.creation_date])
                 for c in self.overflow_cards:
                     cardwriter.writerow(c)
+
+    def saveSettingstoFile(self):
+        with open(SETTINGS_PATH, 'w') as file:
+            yaml.safe_dump(SETTINGS, file, sort_keys=False)
 
     def fillInOverflow(self):
         for i in range(len(self.sections)):
@@ -613,11 +615,14 @@ class Kanban:
         if self.context_menu:
             self.context_menu.destroy()
 
-    def setPinned(self):
+    def updateAlwaysOntop(self):
         if self.pinned.get():
             self.root.wm_attributes("-topmost", "true")
+            SETTINGS['alwaysontop'] = True
         else:
             self.root.wm_attributes("-topmost", "false")
+            SETTINGS['alwaysontop'] = False
+        self.saveSettingstoFile()
 
     # --- Event Handlers ---
     def handleMouseMove(self, event):
@@ -647,8 +652,8 @@ class Kanban:
         self.drag_origin = None
         for s in self.sections:
             s.setColor(self.theme['bg'])
-        if DAYCOUNTER:
-            self.updateCardCounters()
+        #if DAYCOUNTER:
+        #    self.updateCardCounters()
         if not self.edit_menu:
             if self.grabbed_card:
                 drop_section = self.getCollidingSections(event.x, event.y)
@@ -782,7 +787,7 @@ class Kanban:
         else:
             self.context_menu.add_command(label="New Card", command=lambda: self.addNewCard())
         self.context_menu.add_separator()
-        self.context_menu.add_checkbutton(label="Stay On Top", variable=self.pinned, onvalue=1, offvalue=0, command=lambda: self.setPinned())
+        self.context_menu.add_checkbutton(label="Stay On Top", variable=self.pinned, onvalue=1, offvalue=0, command=lambda: self.updateAlwaysOntop())
         self.context_menu.add_cascade(label="Theme...", menu=themes_menu)
         self.context_menu.add_command(label="About", command=lambda: self.openWelcomeScreen())
         self.context_menu.add_command(label="Quit", command=lambda: sys.exit())
@@ -818,12 +823,8 @@ class Kanban:
                 c.setColor(c.color_index)
             self.archive_dropzone.draw()
 
-        settings_yaml = None
-        with open(SETTINGS_PATH, 'r') as file:
-            settings_yaml = yaml.safe_load(file)
-        settings['theme'] = self.theme['name']
-        with open(SETTINGS_PATH, 'w') as file:
-            yaml.safe_dump(settings, file, sort_keys=False)
+        SETTINGS['theme'] = self.theme['name']
+        self.saveSettingstoFile()
     
     # --- Welcome Screen ---
     def openWelcomeScreen(self):
@@ -848,7 +849,7 @@ class Kanban:
         bottom_button_grid = Frame(self.edit_menu, name='bottom_button_grid', background=self.theme['bg'])
         bottom_button_grid.pack(pady=MARGIN, padx=MARGIN/10)
         Button(bottom_button_grid, text="Enter the World of Kanbuddy", activeforeground=self.theme['secondary'], activebackground=self.theme['buttonhighlight'], relief=GLOBALRELIEF, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, highlightbackground=self.theme['secondary'], command=lambda: self.closeWelcomeScreen()).grid(column=0,row=0)
-        Button(bottom_button_grid, text="Kerflufflespace↗", activeforeground=self.theme['secondary'], activebackground=self.theme['buttonhighlight'], relief=GLOBALRELIEF, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, highlightbackground=self.theme['secondary'], command=lambda: webbrowser.open_new_tab('https://kerfluffle.space')).grid(column=1,row=0, padx=10)
+        Button(bottom_button_grid, text="kerfluffle.space↗", activeforeground=self.theme['secondary'], activebackground=self.theme['buttonhighlight'], relief=GLOBALRELIEF, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, highlightbackground=self.theme['secondary'], command=lambda: webbrowser.open_new_tab('https://kerfluffle.space')).grid(column=1,row=0, padx=10)
         self.canvas.create_window(WIDTH/2, HEIGHT/2, anchor=CENTER, window=self.edit_menu)
 
     def closeWelcomeScreen(self):
@@ -856,9 +857,9 @@ class Kanban:
         self.edit_menu = None
 
 # Import sections
-k = Kanban(settings['theme'])
+k = Kanban(SETTINGS['theme'])
 
-sections = settings['sections']
+sections = SETTINGS['sections']
 sum_width = 0
 
 if not os.path.isfile(archive_filepath):
