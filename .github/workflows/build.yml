@@ -40,7 +40,5 @@ jobs:
           name: kanbuddy-${{ matrix.os }}
           path: |
             kanbuddy.exe
-            icon.ico
             kanbuddy
-            settings.yaml
             readme.md
