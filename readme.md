@@ -1,7 +1,7 @@
 
 
-# Kanbuddy
-A micro-kanban worktime buddy for people who want support when focusing on the short-term stuff.
+# -[O-O]- Kanbuddy 
+A micro-kanban worktime buddy to help you keep on track during a work session.
 
 ![buddy](https://github.com/user-attachments/assets/917514e5-8f72-42ac-8461-ae4413108d78)
 
