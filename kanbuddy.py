@@ -14,22 +14,23 @@ mod_path = str(str(os.getcwd()))
 SETTINGS_PATH = (mod_path + "/settings.yaml")
 
 default_settings={
-        'width': 600, 
-        'height': 350, 
+        'width': 750, 
+        'height': 400, 
         'headersize': 20, 
         'margin': 7, 
         'dashed': False,
         'alwaysontop': True,
         'theme': 'prime',
         'sections': [
-            {'name': 'TODO', 'width': 200, 'cards': 5}, 
-            {'name': 'IN PROGRESS', 'width': 400, 'cards': 3}
+            {'name': 'TODO', 'width': 185, 'cards': 5}, 
+            {'name': 'IN PROGRESS', 'width': 380, 'cards': 2},
+            {'name': 'IN PROGRESS', 'width': 185, 'cards': 5}
             ], 
         'font': {
-            'card': 'Unifont 12', 
-            'counter': 'Unifont 12', 
-            'header': 'Unifont 14 bold', 
-            'timer': 'Unifont 20'}, 
+            'card': 'Consolas 10', 
+            'counter': 'Consolas 10', 
+            'header': 'Consolas 12 bold', 
+            'timer': 'Consolas 14'}, 
         'customtheme': {
             'bg': 'black', 
             'main': 'blueviolet', 
@@ -44,7 +45,7 @@ default_settings={
             'palette4': 'magenta', 
             'palette5': 'yellow', 
             'palette6': 'orangered'}, 
-        'pointvalues': [1,5,15,30,60,120,180,360,500,1000,2500]
+        'pointvalues': [10,20,30,50,80,130,210,340,550,890,1440]
     }
 
 SETTINGS = None
@@ -115,8 +116,8 @@ THEMES['fortress'] = {
     'main' : 'white',
     'secondary' : 'grey50',
     'emptyslot' : 'grey20',
-    'buttonhighlight' : 'grey10',
-    'sectionhighlight' : 'grey5',
+    'buttonhighlight' : 'grey15',
+    'sectionhighlight' : 'grey10',
     'palette' : ['lime',
                  'cyan',
                  'blue',
