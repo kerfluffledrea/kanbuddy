@@ -1,18 +1,20 @@
-![Screenshot of Kanbuddy interface]()
+
 
 # Kanbuddy
 A micro-kanban worktime buddy for people who want support when focusing on the short-term stuff.
 
+![buddy](https://github.com/user-attachments/assets/917514e5-8f72-42ac-8461-ae4413108d78)
+
 ## Installation
 
 #### Release (Reccomended)
-1. Download build for your OS from [Releases](https://github.com/Nosler/kanbuddy/releases)
+1. Download build for your OS from [Releases](https://github.com/Nosler/kanbuddy/releases) (when it exists)
 2. Launch it.
 
 #### Python
 1. Clone git repository
-2. run ```pip install requirements.txt```
-3. this isnt done so dont worry it wont work
+2. run ``pip install requirements.txt`` (when it exists)
+3. ``python3 kanbuddy.py``
 
 ## Operation
 - CTRL-A : New Card
@@ -46,4 +48,3 @@ cd "{home}/sodagame/kanbuddy/" & # Navigate to the Kanbuddy Directory
 ./kanbuddy" # Open Kanbuddy
 ```
  If calling kanbuddy from within a script, you **must** cd to it first for it to look within the correct directory for its configuration files. This allows you to have as many different Kanbuddy instances as you have directories. I personally use a different kanbuddy instance for every project I have.
-
