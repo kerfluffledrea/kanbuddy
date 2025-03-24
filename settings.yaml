@@ -1,15 +1,15 @@
-width: 800
-height: 480
+width: 700
+height: 400
 headersize: 20
 margin: 7
 dashed: false
 daycounter: 0
 sections:
 - name: TODO
-  width: 225
+  width: 200
   cards: 9
 - name: IN PROGRESS
-  width: 575
+  width: 500
   cards: 3
 font:
   card: Unifont 12

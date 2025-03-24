@@ -444,7 +444,7 @@ class Kanban:
         self.canvas.bind('<B2-Motion>', self.handleMiddleClickDrag)
 
     # --- File Reading/Writing ---
-    def addNewCard(self, _event):
+    def addNewCard(self, _event = None):
         if not self.edit_menu:
             if len(self.sections[0].cards) < len(self.sections[0].drop_zones):
                 c = Card(self.canvas, self.theme)
@@ -456,7 +456,6 @@ class Kanban:
     def saveCardstoFile(self):
         with open(cards_filepath, 'w', newline='\n') as cardfile:
             with open(archive_filepath, 'a', newline='\n') as archivefile:
-                print("OVERFLOW len: \n" + str(len(self.overflow_cards)))
                 cardwriter = csv.writer(cardfile, delimiter="|")
                 cardwriter.writerow(['section_index', 'description', 'color_index', 'points', 'creation_date'])
                 for c in self.cards:
@@ -838,7 +837,6 @@ if os.path.isfile(cards_filepath):
         for c in cards:
             if int(c['section_index']) > len(sections)-1 or len(k.sections[int(c['section_index'])].cards) >= len(k.sections[int(c['section_index'])].drop_zones):
                 k.overflow_cards.append([int(c['section_index']), c['description'], int(c['color_index']), int(c['points']), date.fromisoformat(c['creation_date'])])
-                print([int(c['section_index']), c['description'], int(c['color_index']), int(c['points']), date.fromisoformat(c['creation_date'])])
             else:
                 k.addCardFromFile(int(c['section_index']), c['description'], int(c['color_index']), int(c['points']), date.fromisoformat(c['creation_date']))
     csvfile.close()
