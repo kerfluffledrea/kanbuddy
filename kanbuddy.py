@@ -181,22 +181,38 @@ THEMES['uplink'] = {
 
 THEMES['peach'] = {
     'name' : 'peach',
-    'bg' : '#fee0c9',
-    'main' : '#fc008b',
-    'secondary' : '#ff6699',
+    'bg' : '#F998B1',
+    'main' : '#EF1050',
+    'secondary' : '#ED1260',
+    'emptyslot' : '#f9b8ca',
+    'buttonhighlight' : '#FFa8B1',
+    'sectionhighlight' : '#ffb0d7',
+    'palette' : [
+                 '#FFFFFF',
+                 '#ED1260',
+                 '#FFD700',
+                 '#DD5928',
+                 '#00ffc6',
+                 '#009df2',
+                 '#7A2816']
+}
+THEMES['peach2'] = {
+    'name' : 'peach',
+    'bg' : '#F15FA5',
+    'main' : '#110000',
+    'secondary' : '#f7adcc',
     'emptyslot' : '#ffb0d7',
     'buttonhighlight' : 'pink',
     'sectionhighlight' : '#ffb0d7',
     'palette' : [
-                 '#4c3e17',
-                 '#f4bb0d',
+                 '#55DEDC',
+                 '#FEF501',
                  '#FF7766',
                  '#FF0d80',
                  '#c20717',
                  '#9f4299',
                  '#1488fe']
 }
-
 DRAGTHRESHOLD = 30
 #DAYCOUNTER = settings['daycounter']
 POINTVALS = SETTINGS['pointvalues']
@@ -776,6 +792,9 @@ class Kanban:
         themes_menu.add_radiobutton(label="Tri.Optimum", variable=self.selected_theme, value='trioptimum', command=lambda: self.setTheme('trioptimum'))
         themes_menu.add_radiobutton(label="Fortress", variable=self.selected_theme, value='fortress', command=lambda: self.setTheme('fortress'))
         themes_menu.add_radiobutton(label="ihaveahax", variable=self.selected_theme, value='ihaveahax', command=lambda: self.setTheme('ihaveahax'))
+        themes_menu.add_radiobutton(label="peachy1", variable=self.selected_theme, value='peach', command=lambda: self.setTheme('peach'))
+        themes_menu.add_radiobutton(label="peachy2", variable=self.selected_theme, value='peach2', command=lambda: self.setTheme('peach2'))
+
         themes_menu.add_radiobutton(label="Custom", variable=self.selected_theme, value='custom', command=lambda: self.setTheme('custom'))
 
         if self.isInArchiveDropzone(event.x, event.y):
