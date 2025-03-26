@@ -1,5 +1,4 @@
 *.csv
-*.png
 *.spec
 kanbuddy
 settings.yaml
