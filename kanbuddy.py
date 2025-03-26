@@ -181,10 +181,10 @@ THEMES['uplink'] = {
 
 THEMES['peach'] = {
     'name' : 'peach',
-    'bg' : '#F998B1',
+    'bg' : '#FCA8C1',
     'main' : '#EF1050',
     'secondary' : '#ED1260',
-    'emptyslot' : '#f9b8ca',
+    'emptyslot' : '#ffB8DD',
     'buttonhighlight' : '#FFa8B1',
     'sectionhighlight' : '#ffb0d7',
     'palette' : [
@@ -198,21 +198,22 @@ THEMES['peach'] = {
 }
 THEMES['peach2'] = {
     'name' : 'peach',
-    'bg' : '#F15FA5',
-    'main' : '#110000',
-    'secondary' : '#f7adcc',
-    'emptyslot' : '#ffb0d7',
+    'bg' : '#ff4da3',
+    'main' : '#110011',
+    'secondary' : '#7c2182',
+    'emptyslot' : '#d65888',
     'buttonhighlight' : 'pink',
     'sectionhighlight' : '#ffb0d7',
     'palette' : [
-                 '#55DEDC',
-                 '#FEF501',
-                 '#FF7766',
-                 '#FF0d80',
-                 '#c20717',
-                 '#9f4299',
-                 '#1488fe']
+                 '#7c2182',
+                 '#7c2182',
+                 '#7c2182',
+                 '#7c2182',
+                 '#7c2182',
+                 '#7c2182',
+                 '#7c2182']
 }
+
 DRAGTHRESHOLD = 30
 #DAYCOUNTER = settings['daycounter']
 POINTVALS = SETTINGS['pointvalues']
@@ -791,9 +792,8 @@ class Kanban:
         themes_menu.add_radiobutton(label="KB-Prime", variable=self.selected_theme, value='prime', command=lambda: self.setTheme('prime'))
         themes_menu.add_radiobutton(label="Tri.Optimum", variable=self.selected_theme, value='trioptimum', command=lambda: self.setTheme('trioptimum'))
         themes_menu.add_radiobutton(label="Fortress", variable=self.selected_theme, value='fortress', command=lambda: self.setTheme('fortress'))
+        themes_menu.add_radiobutton(label="Peachy", variable=self.selected_theme, value='peach', command=lambda: self.setTheme('peach'))
         themes_menu.add_radiobutton(label="ihaveahax", variable=self.selected_theme, value='ihaveahax', command=lambda: self.setTheme('ihaveahax'))
-        themes_menu.add_radiobutton(label="peachy1", variable=self.selected_theme, value='peach', command=lambda: self.setTheme('peach'))
-        themes_menu.add_radiobutton(label="peachy2", variable=self.selected_theme, value='peach2', command=lambda: self.setTheme('peach2'))
 
         themes_menu.add_radiobutton(label="Custom", variable=self.selected_theme, value='custom', command=lambda: self.setTheme('custom'))
 
