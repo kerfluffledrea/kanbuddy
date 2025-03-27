@@ -23,7 +23,7 @@ default_settings={
         'sections': [
             {'name': 'TODO', 'width': 185, 'cards': 5}, 
             {'name': 'IN PROGRESS', 'width': 380, 'cards': 2},
-            {'name': 'IN PROGRESS', 'width': 185, 'cards': 5}
+            {'name': 'COMPLETE', 'width': 185, 'cards': 5}
             ], 
         'font': {
             'card': 'Consolas 10', 
@@ -468,10 +468,9 @@ class Kanban:
         self.updateAlwaysOntop()
         self.setTheme(theme_name)
         
-        if str(sys.platform).lower() == 'win32':
-            self.root.overrideredirect(True)
-        else:
+        if not str(sys.platform).lower() == 'win32':
             self.root.wm_attributes('-type', 'splash')
+            #self.root.overrideredirect(True)
 
         self.root.geometry(str(WIDTH)+"x"+str(HEIGHT))
         self.root.configure(background=self.theme['bg'])
