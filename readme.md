@@ -35,12 +35,14 @@ On first launch, it will generate `settings.yaml`. Kanbuddy will populate its se
 
 #### Settings
 Within ``settings.yaml``, you can adjust:
+- Sections
 - Fonts
 - Custom Theme (Any hex code, or [Tkinter Color](https://www.wikipython.com/wp-content/uploads/Color-chart-capture-082321.jpg))
 - Window size
 - Margin/Header size
-- Line Dashes
-- Sections (The last section will always have the final card spot replaced with the point counter.)
+- Line Dashes for empty card slots
+- Disable Timer and/or Points Counter
+- Disable OS Titlebar (May cause issues when alt-tabbing)
 
 The default font is Consolas. Kanbuddy will work with any installed font. Do not use spaces when entering font name. I reccomend [GNU Unifont](https://www.unifoundry.com/unifont/index.html).
 

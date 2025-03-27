@@ -19,9 +19,12 @@ default_settings={
         'margin': 7, 
         'dashed': False,
         'alwaysontop': True,
+        'timer': True,
+        'points': True,
+        'titlebar': True,
         'theme': 'prime',
         'sections': [
-            {'name': 'TODO', 'width': 185, 'cards': 5}, 
+            {'name': 'TODO', 'width': 185, 'cards': 4}, 
             {'name': 'IN PROGRESS', 'width': 380, 'cards': 2},
             {'name': 'COMPLETE', 'width': 185, 'cards': 5}
             ], 
@@ -331,17 +334,41 @@ class PointsDisplay(DropZone):
         self.height = height
         self.start_time = datetime.now()
         self.canvas_rect = self.canvas.create_rectangle(x_pos, y_pos, x_pos + width, y_pos + self.height, dash=DASH, outline=self.theme['secondary'])
-        self.point_counter = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height - MARGIN *2, anchor=tk.CENTER, text="{:,}".format(self.getPointsFromFile()), fill=self.theme['secondary'], width=self.width-MARGIN*2, font=COUNTERFONT)
-        self.timer = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2 - MARGIN/2, anchor=tk.CENTER, text="00:00:00", fill=self.theme['secondary'], width=self.width-MARGIN*2, font=TIMERFONT)
-        
+
+        if SETTINGS['timer'] and SETTINGS['points']:
+            self.point_counter = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height - MARGIN *2, anchor=tk.CENTER, text="{:,}".format(self.getPointsFromFile()), fill=self.theme['secondary'], width=self.width-MARGIN*2, font=COUNTERFONT)
+            self.timer = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2 - MARGIN/2, anchor=tk.CENTER, text="00:00:00", fill=self.theme['secondary'], width=self.width-MARGIN*2, font=TIMERFONT)
+
+        if SETTINGS['timer'] and not SETTINGS['points']:
+            self.timer = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2, anchor=tk.CENTER, text="00:00:00", fill=self.theme['secondary'], width=self.width-MARGIN*2, font=TIMERFONT)
+            self.point_counter = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height - MARGIN *2, anchor=tk.CENTER, text="{:,}".format(self.getPointsFromFile()), fill=self.theme['bg'], width=self.width-MARGIN*2, font=(0))
+
+        if SETTINGS['points'] and not SETTINGS['timer']:
+            self.timer = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2 - MARGIN/2, anchor=tk.CENTER, text="00:00:00", fill=self.theme['bg'], width=self.width-MARGIN*2, font=(0))
+            self.point_counter = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2, anchor=tk.CENTER, text="{:,}".format(self.getPointsFromFile()), fill=self.theme['secondary'], width=self.width-MARGIN*2, font=COUNTERFONT)
+
+        if not SETTINGS['timer'] and not SETTINGS['points']:
+            self.timer = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2 - MARGIN/2, anchor=tk.CENTER, text="00:00:00", fill=self.theme['bg'], width=self.width-MARGIN*2, font=(0))
+            self.point_counter = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2 - MARGIN/2, anchor=tk.CENTER, text="{:,}".format(self.getPointsFromFile()), fill=self.theme['bg'], width=self.width-MARGIN*2, font=COUNTERFONT)
+            self.nonetext = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2 - MARGIN/2, anchor=tk.CENTER, text="-[O-O]-", fill=self.theme['secondary'], width=self.width-MARGIN*2, font=TIMERFONT)
+
         #self.point_counter = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2 - MARGIN/2, anchor=tk.CENTER, text="{:,}".format(self.getPointsFromFile()), fill=self.theme['secondary'], width=self.width-MARGIN*2, font=COUNTERFONT)
         #self.timer = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height - MARGIN *2, anchor=tk.CENTER, text="00:00:00", fill=self.theme['secondary'], width=self.width-MARGIN*2, font=TIMERFONT)
         self.time()
 
     def draw(self):
+        if SETTINGS['timer']:
+            self.canvas.itemconfig(self.point_counter, fill=self.theme['secondary'])
+        else:
+            self.canvas.itemconfig(self.point_counter, fill=self.theme['bg'])
+        if SETTINGS['points']:
+            self.canvas.itemconfig(self.timer, fill=self.theme['secondary'])
+        else:
+            self.canvas.itemconfig(self.timer, fill=self.theme['bg'])
+
+        if not SETTINGS['timer'] and not SETTINGS['points']:
+            self.canvas.itemconfig(self.nonetext, fill=self.theme['secondary'])
         self.canvas.itemconfig(self.canvas_rect, outline=self.theme['secondary'])
-        self.canvas.itemconfig(self.point_counter, fill=self.theme['secondary'])
-        self.canvas.itemconfig(self.timer, fill=self.theme['secondary'])
 
     def updatePointCounter(self):
         self.canvas.itemconfig(self.point_counter, text="{:,}".format(self.getPointsFromFile()))
@@ -468,9 +495,14 @@ class Kanban:
         self.updateAlwaysOntop()
         self.setTheme(theme_name)
         
-        if not str(sys.platform).lower() == 'win32':
-            self.root.wm_attributes('-type', 'splash')
-            #self.root.overrideredirect(True)
+        if os.path.isfile(mod_path+"/icon.png"):
+            self.root.iconphoto(False, tk.PhotoImage(file=mod_path+"/icon.png"))
+
+        if not SETTINGS['titlebar']:
+            if str(sys.platform).lower() == 'win32':
+                self.root.overrideredirect(True)
+            else:
+                self.root.wm_attributes('-type', 'splash')
 
         self.root.geometry(str(WIDTH)+"x"+str(HEIGHT))
         self.root.configure(background=self.theme['bg'])
