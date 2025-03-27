@@ -31,7 +31,7 @@ jobs:
 
       - name: Build binary using PyInstaller
         run: |
-          pyinstaller --onefile --icon=icon.png kanbuddy.py
+          pyinstaller --noconsole --onefile --icon=icon.png kanbuddy.py 
           mv dist/* .
 
       - name: Upload build artifacts
