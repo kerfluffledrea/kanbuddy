@@ -1,13 +1,12 @@
+import yaml
+import os
 import sys
 import csv
-import os
-import yaml
-import webbrowser
 import datetime
-from datetime import date
+from datetime import date, datetime
+from webbrowser import open_new_tab
 import tkinter as tk
-from tkinter.constants import BOTH, CENTER
-from tkinter import W, Frame, Text, Button, Label, CENTER
+from tkinter import Button
 
 # Read Config File
 mod_path = str(str(os.getcwd()))
@@ -73,7 +72,11 @@ CARDFONT = SETTINGS['font']['card']
 COUNTERFONT = SETTINGS['font']['counter']
 TIMERFONT = SETTINGS['font']['timer']
 
-GLOBALRELIEF = tk.FLAT
+GLOBALRELIEF = None
+if str(sys.platform).lower() == 'win32' or str(sys.platform).lower() == 'macos':
+    GLOBALRELIEF = tk.RAISED
+else:
+    GLOBALRELIEF = tk.FLAT
 
 THEMES = dict()
 THEMES['custom'] = {
@@ -196,23 +199,6 @@ THEMES['peach'] = {
                  '#009df2',
                  '#7A2816']
 }
-THEMES['peach2'] = {
-    'name' : 'peach',
-    'bg' : '#ff4da3',
-    'main' : '#110011',
-    'secondary' : '#7c2182',
-    'emptyslot' : '#d65888',
-    'buttonhighlight' : 'pink',
-    'sectionhighlight' : '#ffb0d7',
-    'palette' : [
-                 '#7c2182',
-                 '#7c2182',
-                 '#7c2182',
-                 '#7c2182',
-                 '#7c2182',
-                 '#7c2182',
-                 '#7c2182']
-}
 
 DRAGTHRESHOLD = 30
 #DAYCOUNTER = settings['daycounter']
@@ -237,10 +223,10 @@ class Card:
 
     def draw(self):
         self.canvas_rect = self.canvas.create_rectangle(self.position[0], self.position[1], self.position[0] + self.width, self.position[1] + self.height, outline=self.theme['palette'][self.color_index], tag='card')
-        self.canvas_text = self.canvas.create_text(self.position[0] + self.width/2, self.position[1] + self.height/2, anchor=CENTER, text=self.description, fill=self.theme['palette'][self.color_index], width=self.width-MARGIN*2, justify=CENTER, font=CARDFONT, tag='card')
+        self.canvas_text = self.canvas.create_text(self.position[0] + self.width/2, self.position[1] + self.height/2, anchor=tk.CENTER, text=self.description, fill=self.theme['palette'][self.color_index], width=self.width-MARGIN*2, justify=tk.CENTER, font=CARDFONT, tag='card')
         i = 0
         #if DAYCOUNTER:
-        #    self.canvas_dayctr = self.canvas.create_text(self.position[0] + 5, self.position[1] + 8, anchor=W, text=(date.today() - self.creation_date).days, fill=self.theme['palette'][self.color_index], width=self.width-MARGIN*2, justify=CENTER, font=(COUNTERFONT, 9))
+        #    self.canvas_dayctr = self.canvas.create_text(self.position[0] + 5, self.position[1] + 8, anchor=W, text=(date.today() - self.creation_date).days, fill=self.theme['palette'][self.color_index], width=self.width-MARGIN*2, justify=tk.CENTER, font=(COUNTERFONT, 9))
         while i < self.points+1:
             self.canvas_lines.append(self.canvas.create_line(self.position[0] + self.width, self.position[1] + self.height - i*MARGIN,
                 self.position[0] + self.width - i*MARGIN, self.position[1] + self.height, fill=self.theme['palette'][self.color_index]))
@@ -343,13 +329,13 @@ class PointsDisplay(DropZone):
         self.y_pos = y_pos
         self.width = width
         self.height = height
-        self.start_time = datetime.datetime.now()
+        self.start_time = datetime.now()
         self.canvas_rect = self.canvas.create_rectangle(x_pos, y_pos, x_pos + width, y_pos + self.height, dash=DASH, outline=self.theme['secondary'])
-        self.point_counter = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height - MARGIN *2, anchor=CENTER, text="{:,}".format(self.getPointsFromFile()), fill=self.theme['secondary'], width=self.width-MARGIN*2, font=COUNTERFONT)
-        self.timer = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2 - MARGIN/2, anchor=CENTER, text="00:00:00", fill=self.theme['secondary'], width=self.width-MARGIN*2, font=TIMERFONT)
+        self.point_counter = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height - MARGIN *2, anchor=tk.CENTER, text="{:,}".format(self.getPointsFromFile()), fill=self.theme['secondary'], width=self.width-MARGIN*2, font=COUNTERFONT)
+        self.timer = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2 - MARGIN/2, anchor=tk.CENTER, text="00:00:00", fill=self.theme['secondary'], width=self.width-MARGIN*2, font=TIMERFONT)
         
-        #self.point_counter = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2 - MARGIN/2, anchor=CENTER, text="{:,}".format(self.getPointsFromFile()), fill=self.theme['secondary'], width=self.width-MARGIN*2, font=COUNTERFONT)
-        #self.timer = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height - MARGIN *2, anchor=CENTER, text="00:00:00", fill=self.theme['secondary'], width=self.width-MARGIN*2, font=TIMERFONT)
+        #self.point_counter = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2 - MARGIN/2, anchor=tk.CENTER, text="{:,}".format(self.getPointsFromFile()), fill=self.theme['secondary'], width=self.width-MARGIN*2, font=COUNTERFONT)
+        #self.timer = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height - MARGIN *2, anchor=tk.CENTER, text="00:00:00", fill=self.theme['secondary'], width=self.width-MARGIN*2, font=TIMERFONT)
         self.time()
 
     def draw(self):
@@ -376,14 +362,14 @@ class PointsDisplay(DropZone):
     
 
     def time(self):
-        time_delta = datetime.datetime.now() - self.start_time
+        time_delta = datetime.now() - self.start_time
         hours, remainder = divmod(time_delta.seconds, 3600)
         minutes, seconds = divmod(remainder, 60)
         self.canvas.itemconfig(self.timer, text=('{:02}:{:02}:{:02}'.format(hours, minutes, seconds)))
         self.canvas.after(1000, self.time)
 
     def resetTime(self):
-        self.start_time = datetime.datetime.now()
+        self.start_time = datetime.now()
 
     def resetArchive(self):
         os.remove(archive_filepath)
@@ -406,7 +392,7 @@ class Section:
     def draw(self):
         self.canvas_rect = self.canvas.create_rectangle(self.x_pos, 0, self.x_pos + self.width, HEIGHT, outline=self.theme['main'])
         self.canvas_line = self.canvas.create_line(self.x_pos, HEADERSIZE, self.x_pos+self.width, HEADERSIZE, fill=self.theme['main'])
-        self.canvas_text = self.canvas.create_text(self.x_pos + self.width/2, HEADERSIZE/2, anchor=CENTER, text=self.name, fill=self.theme['main'], width=self.width, font=(HEADERFONT))
+        self.canvas_text = self.canvas.create_text(self.x_pos + self.width/2, HEADERSIZE/2, anchor=tk.CENTER, text=self.name, fill=self.theme['main'], width=self.width, font=(HEADERFONT))
 
     def addCard(self, card):
         dz_index = len(self.cards)
@@ -566,17 +552,17 @@ class Kanban:
     
     # --- Card Editing ---
     def openEditMenu(self, edit_card):
-        self.edit_menu = Frame(self.root, name='edit_menu', pady=MARGIN/3, padx=MARGIN/3, relief=tk.SOLID, bg=self.theme['bg'], highlightcolor=self.theme['palette'][edit_card.color_index], highlightbackground=self.theme['palette'][edit_card.color_index], highlightthickness=1)
-        self.edit_menu.pack(fill=BOTH, expand=True, padx=MARGIN*2, pady=MARGIN*2)
+        self.edit_menu = tk.Frame(self.root, name='edit_menu', pady=MARGIN/3, padx=MARGIN/3, relief=tk.SOLID, bg=self.theme['bg'], highlightcolor=self.theme['palette'][edit_card.color_index], highlightbackground=self.theme['palette'][edit_card.color_index], highlightthickness=1)
+        self.edit_menu.pack(fill=tk.BOTH, expand=True, padx=MARGIN*2, pady=MARGIN*2)
         
-        description_entry = Text(self.edit_menu,name='edit_menu_text', wrap=tk.WORD, insertbackground=self.theme['secondary'], font=CARDFONT, height=5, width=34, padx=15, pady=5, bg=self.theme['bg'], bd=0, highlightbackground=self.theme['palette'][edit_card.color_index], highlightcolor=self.theme['palette'][edit_card.color_index], fg=self.theme['palette'][edit_card.color_index])
+        description_entry = tk.Text(self.edit_menu,name='edit_menu_text', wrap=tk.WORD, insertbackground=self.theme['secondary'], font=CARDFONT, height=5, width=34, padx=15, pady=5, bg=self.theme['bg'], bd=0, highlightbackground=self.theme['palette'][edit_card.color_index], highlightcolor=self.theme['palette'][edit_card.color_index], fg=self.theme['palette'][edit_card.color_index])
         description_entry.insert(tk.END, edit_card.description)
         description_entry.pack(padx=MARGIN, pady=MARGIN)
         
-        button_grid = Frame(self.edit_menu, name='button_grid', background=self.theme['bg'])
+        button_grid = tk.Frame(self.edit_menu, name='button_grid', background=self.theme['bg'])
         button_grid.pack(padx=MARGIN, pady=MARGIN/4)
 
-        color_button_grid = Frame(button_grid, name='color_button_grid')
+        color_button_grid = tk.Frame(button_grid, name='color_button_grid')
         color_button_grid.pack(side = tk.LEFT, padx=MARGIN)
         b0 = Button(color_button_grid, bg=self.theme['palette'][0], padx=8, width=1, height=1, highlightbackground=self.theme['palette'][0], command=lambda: self.changeColorButton(edit_card, 0)).grid(column=0, row=0)
         b1 = Button(color_button_grid, bg=self.theme['palette'][1], padx=8, width=1, height=1, highlightbackground=self.theme['palette'][1], command=lambda: self.changeColorButton(edit_card, 1)).grid(column=1, row=0)
@@ -586,16 +572,16 @@ class Kanban:
         b5 = Button(color_button_grid, bg=self.theme['palette'][5], padx=8, width=1, height=1, highlightbackground=self.theme['palette'][5], command=lambda: self.changeColorButton(edit_card, 5)).grid(column=5, row=0)
         b6 = Button(color_button_grid, bg=self.theme['palette'][6], padx=8, width=1, height=1, highlightbackground=self.theme['palette'][6], command=lambda: self.changeColorButton(edit_card, 6)).grid(column=6, row=0)
 
-        value_button_grid = Frame(button_grid, name='value_button_grid')
+        value_button_grid = tk.Frame(button_grid, name='value_button_grid')
         value_button_grid.pack(side = tk.RIGHT, padx=MARGIN)
         decrease_points = Button(value_button_grid, activebackground=self.theme['buttonhighlight'], activeforeground=self.theme['palette'][edit_card.color_index], relief=GLOBALRELIEF, name='decrease_button', text='-', fg=self.theme['palette'][edit_card.color_index], bg=self.theme['bg'], width=1, height=1, highlightbackground=self.theme['palette'][edit_card.color_index], command=lambda: edit_card.decreasePoints()).grid(column=8, row=0)
         increase_points = Button(value_button_grid, activebackground=self.theme['buttonhighlight'], activeforeground=self.theme['palette'][edit_card.color_index], relief=GLOBALRELIEF, name='increase_button', text='+', fg=self.theme['palette'][edit_card.color_index], bg=self.theme['bg'], width=1, height=1, highlightbackground=self.theme['palette'][edit_card.color_index], command=lambda: edit_card.increasePoints()).grid(column=9, row=0)
 
-        bottom_button_grid = Frame(self.edit_menu, name='bottom_button_grid', background=self.theme['bg'])
+        bottom_button_grid = tk.Frame(self.edit_menu, name='bottom_button_grid', background=self.theme['bg'])
         bottom_button_grid.pack(pady=MARGIN, padx=MARGIN/10)
         close_button = Button(bottom_button_grid, activeforeground=self.theme['palette'][edit_card.color_index], activebackground=self.theme['buttonhighlight'], relief=GLOBALRELIEF, name='close_button', text='SAVE', fg=self.theme['palette'][edit_card.color_index], bg=self.theme['bg'], width=20, height=1, highlightbackground=self.theme['palette'][edit_card.color_index], command=lambda: self.closeEditMenu(edit_card, description_entry.get("1.0","end-1c"))).grid(column=3, row=0)
         delete_button = Button(bottom_button_grid, activeforeground=self.theme['palette'][edit_card.color_index], activebackground=self.theme['buttonhighlight'], relief=GLOBALRELIEF, name='delete_button', text='DELETE', fg=self.theme['palette'][edit_card.color_index], bg=self.theme['bg'], width=5, height=1, highlightbackground=self.theme['palette'][edit_card.color_index], command=lambda: self.deleteCard(edit_card, True)).grid(column=4, row=0)
-        self.canvas.create_window(WIDTH/2, HEIGHT/2, anchor=CENTER, window=self.edit_menu)
+        self.canvas.create_window(WIDTH/2, HEIGHT/2, anchor=tk.CENTER, window=self.edit_menu)
 
     def changeColorButton(self, edit_card, color_index):
         edit_card.setColor(color_index)
@@ -848,15 +834,15 @@ class Kanban:
     
     # --- Welcome Screen ---
     def openWelcomeScreen(self):
-        self.edit_menu = Frame(self.root, name='welcome_screen', relief=GLOBALRELIEF, bg=self.theme['bg'], padx=MARGIN*2, pady=MARGIN*2, highlightcolor=self.theme['secondary'], highlightbackground=self.theme['secondary'], highlightthickness=1, height=HEIGHT-(MARGIN*2), width=WIDTH-(MARGIN*2))        
-        self.edit_menu.pack(fill=BOTH, expand=False, padx=MARGIN, pady=MARGIN)
+        self.edit_menu = tk.Frame(self.root, name='welcome_screen', relief=GLOBALRELIEF, bg=self.theme['bg'], padx=MARGIN*2, pady=MARGIN*2, highlightcolor=self.theme['secondary'], highlightbackground=self.theme['secondary'], highlightthickness=1, height=HEIGHT-(MARGIN*2), width=WIDTH-(MARGIN*2))        
+        self.edit_menu.pack(fill=tk.BOTH, expand=False, padx=MARGIN, pady=MARGIN)
         
-        welcome_grid = Frame(self.edit_menu, name='welcome_grid', background=self.theme['bg'])
+        welcome_grid = tk.Frame(self.edit_menu, name='welcome_grid', background=self.theme['bg'])
         welcome_grid.pack(padx=MARGIN, pady=MARGIN/4)
 
-        Label(welcome_grid, text="Welcome to Kanbuddy!", font=HEADERFONT, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, pady=MARGIN).grid(column=0, row=0)
-        Label(welcome_grid, text="by kerfluffle", font=HEADERFONT, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, pady=MARGIN).grid(column=0, row=1)
-        Label(welcome_grid, font=CARDFONT, text=
+        tk.Label(welcome_grid, text="Welcome to Kanbuddy!", font=HEADERFONT, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, pady=MARGIN).grid(column=0, row=0)
+        tk.Label(welcome_grid, text="by kerfluffle", font=HEADERFONT, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, pady=MARGIN).grid(column=0, row=1)
+        tk.Label(welcome_grid, font=CARDFONT, text=
 '''
 - CTRL-A : New Card
 - Double-Click : Edit Card
@@ -866,11 +852,11 @@ class Kanban:
 
 - Fonts, colors and more can be changed in settings.yaml
 ''', bg=self.theme['bg'], fg=self.theme['secondary'], justify=tk.LEFT).grid(column=0, row=2)
-        bottom_button_grid = Frame(self.edit_menu, name='bottom_button_grid', background=self.theme['bg'])
+        bottom_button_grid = tk.Frame(self.edit_menu, name='bottom_button_grid', background=self.theme['bg'])
         bottom_button_grid.pack(pady=MARGIN, padx=MARGIN/10)
         Button(bottom_button_grid, text="Enter the World of Kanbuddy", activeforeground=self.theme['secondary'], activebackground=self.theme['buttonhighlight'], relief=GLOBALRELIEF, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, highlightbackground=self.theme['secondary'], command=lambda: self.closeWelcomeScreen()).grid(column=0,row=0)
-        Button(bottom_button_grid, text="kerfluffle.space↗", activeforeground=self.theme['secondary'], activebackground=self.theme['buttonhighlight'], relief=GLOBALRELIEF, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, highlightbackground=self.theme['secondary'], command=lambda: webbrowser.open_new_tab('https://kerfluffle.space')).grid(column=1,row=0, padx=10)
-        self.canvas.create_window(WIDTH/2, HEIGHT/2, anchor=CENTER, window=self.edit_menu)
+        Button(bottom_button_grid, text="kerfluffle.space↗", activeforeground=self.theme['secondary'], activebackground=self.theme['buttonhighlight'], relief=GLOBALRELIEF, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, highlightbackground=self.theme['secondary'], command=lambda: open_new_tab('https://kerfluffle.space')).grid(column=1,row=0, padx=10)
+        self.canvas.create_window(WIDTH/2, HEIGHT/2, anchor=tk.CENTER, window=self.edit_menu)
 
     def closeWelcomeScreen(self):
         self.edit_menu.destroy()

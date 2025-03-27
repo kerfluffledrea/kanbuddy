@@ -7,14 +7,21 @@ A micro-kanban worktime buddy to help you keep on track during a work session.
 
 ## Installation
 
-#### Release (Reccomended)
-1. Download build for your OS from [Releases](https://github.com/Nosler/kanbuddy/releases) (when it exists)
+### Release
+1. Download build for your OS from [Releases](https://github.com/Nosler/kanbuddy/releases)
 2. Launch it.
 
-#### Python
+### Python 
 1. Clone git repository
-2. run ``pip install requirements.txt`` (when it exists)
-3. ``python3 kanbuddy.py``
+2. Install Dependencies: `pip install pyyaml`
+3. Run: `python3 kanbuddy.py`
+
+You can just run it with python every time, but if you'd like to build a binary from the script, you can run:
+
+```
+pip install pyinstaller pyyaml pillow
+pyinstaller --onefile --icon=icon.png kanbuddy.py
+```
 
 ## Operation
 - CTRL-A : New Card
@@ -24,7 +31,7 @@ A micro-kanban worktime buddy to help you keep on track during a work session.
 
 Once a card has been completed, drop it in the bottom-right spot and watch your points go up!
 
-Kanbuddy will populate its settings and cards from ``settings.yaml``, ``.cards.csv``, and ``.archive.csv`` files located within the **current working directory** that the program was launched from.
+On first launch, it will generate `settings.yaml`. Kanbuddy will populate its settings and cards from ``settings.yaml``, ``.cards.csv``, and ``.archive.csv`` files located within the **current working directory** that the program was launched from.
 
 #### Settings
 Within ``settings.yaml``, you can adjust:
@@ -35,7 +42,7 @@ Within ``settings.yaml``, you can adjust:
 - Line Dashes
 - Sections (The last section will always have the final card spot replaced with the point counter.)
 
-The Default font is [GNU Unifont](https://www.unifoundry.com/unifont/index.html). Kanbuddy will work with any installed font. Do not use spaces when entering font name. 
+The default font is Consolas. Kanbuddy will work with any installed font. Do not use spaces when entering font name. I reccomend [GNU Unifont](https://www.unifoundry.com/unifont/index.html).
 
 ### Philosophy
 I use kanbuddy as an auto-launching companion for my workspace. On my Linux setup, I like to create [.desktop](https://wiki.archlinux.org/title/Desktop_entries) files that will call scripts to open all relevant programs at once to reduce as much friction as possible when starting a work session.
