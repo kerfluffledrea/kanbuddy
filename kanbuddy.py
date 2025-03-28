@@ -187,10 +187,10 @@ THEMES['uplink'] = {
 
 THEMES['peach'] = {
     'name' : 'peach',
-    'bg' : '#FCA8C1',
+    'bg' : '#ffc8dD',
     'main' : '#EF1050',
     'secondary' : '#ED1260',
-    'emptyslot' : '#ffB8DD',
+    'emptyslot' : '#FCa8c1',
     'buttonhighlight' : '#FFa8B1',
     'sectionhighlight' : '#ffb0d7',
     'palette' : [
