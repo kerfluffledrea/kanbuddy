@@ -76,7 +76,7 @@ COUNTERFONT = SETTINGS['font']['counter']
 TIMERFONT = SETTINGS['font']['timer']
 
 GLOBALRELIEF = None
-if str(sys.platform).lower() == 'win32' or str(sys.platform).lower() == 'macos':
+if str(sys.platform).lower() == 'win32' or str(sys.platform).lower() == 'darwin':
     GLOBALRELIEF = tk.RAISED
 else:
     GLOBALRELIEF = tk.FLAT
@@ -509,15 +509,22 @@ class Kanban:
         self.canvas = tk.Canvas(self.root, bg=self.theme['bg'], width=WIDTH, height=HEIGHT, highlightthickness=1, highlightbackground=self.theme['main'])
         self.canvas.pack()
         self.canvas.bind('<Button-1>', self.handleClickDown)
-        self.canvas.bind('<Button-2>', self.handleMiddleClickDown)
-        self.canvas.bind('<Button-3>', self.handleRightClickDown)
         self.canvas.bind('<ButtonRelease-1>', self.handleClickUp)
-        self.canvas.bind('<ButtonRelease-2>', self.handleMiddleClickUp)
-        self.canvas.bind('<ButtonRelease-3>', self.handleRightClickUp)
         self.canvas.bind('<Double-Button-1>', self.handleDoubleClick)
         self.canvas.bind('<Motion>', self.handleMouseMove)
         self.canvas.bind('<B1-Motion>', self.handleClickDrag)
         self.canvas.bind('<B2-Motion>', self.handleMiddleClickDrag)
+
+        if sys.platform == 'darwin':
+            self.canvas.bind('<Button-2>', self.handleRightClickDown)
+            self.canvas.bind('<ButtonRelease-2>', self.handleRightClickUp)
+            self.canvas.bind('<Button-3>', self.handleMiddleClickDown)
+            self.canvas.bind('<ButtonRelease-3>', self.handleMiddleClickUp)
+        else:
+            self.canvas.bind('<Button-2>', self.handleMiddleClickDown)
+            self.canvas.bind('<ButtonRelease-2>', self.handleMiddleClickUp)
+            self.canvas.bind('<Button-3>', self.handleRightClickDown)
+            self.canvas.bind('<ButtonRelease-3>', self.handleRightClickUp)
 
     # --- File Reading/Writing ---
     def addNewCard(self, _event = None):
