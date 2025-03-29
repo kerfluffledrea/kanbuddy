@@ -832,6 +832,7 @@ class Kanban:
             self.context_menu.add_command(label="New Card", command=lambda: self.addNewCard())
         self.context_menu.add_separator()
         self.context_menu.add_checkbutton(label="Stay On Top", variable=self.pinned, onvalue=1, offvalue=0, command=lambda: self.updateAlwaysOntop())
+        self.context_menu.add_command(label="Settings", command=lambda: open_new_tab(SETTINGS_PATH))
         self.context_menu.add_cascade(label="Theme...", menu=themes_menu)
         self.context_menu.add_command(label="About", command=lambda: self.openWelcomeScreen())
         self.context_menu.add_command(label="Quit", command=lambda: sys.exit())
