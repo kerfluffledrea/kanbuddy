@@ -164,8 +164,8 @@ THEMES['trioptimum'] = {
                  '#3d01fc',
                  '#b0a2a7',
                  '#6e66d4',
-                 '#d21540',
-                 '#ff8300']
+                 '#ff8300',
+                 '#d21540']
 }
 
 THEMES['uplink'] = {
