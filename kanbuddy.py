@@ -15,8 +15,9 @@ SETTINGS_PATH = (mod_path + "/settings.yaml")
 default_settings={
         'width': 750, 
         'height': 400, 
-        'headersize': 20, 
-        'margin': 7, 
+        'headersize': 20,
+        'margin': 7,
+        'pipsize': 10,
         'dashed': False,
         'alwaysontop': True,
         'timer': True,
@@ -68,6 +69,7 @@ if bool(SETTINGS['dashed']):
 WIDTH = SETTINGS['width']
 HEIGHT = SETTINGS['height']
 MARGIN = SETTINGS['margin']
+PIPSIZE = SETTINGS['pipsize']
 HEADERSIZE = SETTINGS['headersize']
 
 HEADERFONT = SETTINGS['font']['header']
@@ -208,18 +210,20 @@ DRAGTHRESHOLD = 30
 POINTVALS = SETTINGS['pointvalues']
 
 class Card:
-    def __init__(self, canvas, theme, desc='-[O-O]-', color_index=0, points=1, creation_date = date.today()):
+    def __init__(self, canvas, theme, desc='-[O-O]-', color_index=0, points=1, pips=0, creation_date = date.today()):
         self.canvas = canvas
         self.theme = theme
         self.description = desc
         self.color_index = color_index
         self.points = points
+        self.pips = pips
         self.creation_date = creation_date
         self.position = (0,0)
         self.width = 5
         self.height = 5
         self.canvas_text = None
         self.canvas_rect = None
+        self.canvas_pips = []
         self.canvas_lines = []
         self.section_index = 0
         self.draw()
@@ -227,12 +231,22 @@ class Card:
     def draw(self):
         self.canvas_rect = self.canvas.create_rectangle(self.position[0], self.position[1], self.position[0] + self.width, self.position[1] + self.height, outline=self.theme['palette'][self.color_index], tag='card')
         self.canvas_text = self.canvas.create_text(self.position[0] + self.width/2, self.position[1] + self.height/2, anchor=tk.CENTER, text=self.description, fill=self.theme['palette'][self.color_index], width=self.width-MARGIN*2, justify=tk.CENTER, font=CARDFONT, tag='card')
-        i = 0
         #if DAYCOUNTER:
         #    self.canvas_dayctr = self.canvas.create_text(self.position[0] + 5, self.position[1] + 8, anchor=W, text=(date.today() - self.creation_date).days, fill=self.theme['palette'][self.color_index], width=self.width-MARGIN*2, justify=tk.CENTER, font=(COUNTERFONT, 9))
+        i = 0
         while i < self.points+1:
             self.canvas_lines.append(self.canvas.create_line(self.position[0] + self.width, self.position[1] + self.height - i*MARGIN,
                 self.position[0] + self.width - i*MARGIN, self.position[1] + self.height, fill=self.theme['palette'][self.color_index]))
+            i += 1
+        
+        i = 0
+        while i < self.pips:
+            pip_coords = self.calculatePipCoords(i)
+            self.canvas_pips.append(self.canvas.create_oval(pip_coords['x1'],
+                                                            pip_coords['y1'],
+                                                            pip_coords['x2'],
+                                                            pip_coords['y2'],
+                                                            outline=self.theme['palette'][self.color_index]))
             i += 1
 
     def move(self, x, y):
@@ -245,6 +259,12 @@ class Card:
             self.canvas.coords(l, self.position[0] + self.width, self.position[1] + self.height - i*MARGIN,
                 self.position[0] + self.width - i*MARGIN, self.position[1] + self.height)
             i += 1
+        i = 0
+        for p in self.canvas_pips:
+            pip_coords = self.calculatePipCoords(i)
+            self.canvas.coords(p, pip_coords['x1'], pip_coords['y1'], pip_coords['x2'], pip_coords['y2'])
+            i += 1
+
         #if DAYCOUNTER:
         #    self.canvas.coords(self.canvas_dayctr, x + 4, y + 11)
 
@@ -253,6 +273,8 @@ class Card:
         self.canvas.delete(self.canvas_rect)
         for l in self.canvas_lines:
             self.canvas.delete(l)
+        for p in self.canvas_pips:
+            self.canvas.delete(p)
         #if DAYCOUNTER:
         #    self.canvas.delete(self.canvas_dayctr)
 
@@ -272,6 +294,8 @@ class Card:
         self.canvas.itemconfig(self.canvas_text, tag='hover_card')
         for l in self.canvas_lines:
             self.canvas.itemconfig(l, tag='hover_card')
+        for p in self.canvas_pips:
+            self.canvas.itemconfig(p, tag='hover_card')
         self.canvas.tag_raise("hover_card")
     
     def drag(self):
@@ -283,6 +307,8 @@ class Card:
     def unhover(self):
         for l in self.canvas_lines:
             self.canvas.itemconfig(l, tag='card')
+        for p in self.canvas_pips:
+            self.canvas.itemconfig(p, tag='card')
         self.canvas.itemconfig(self.canvas_rect, fill=self.theme['bg'], tag='card')
         self.canvas.itemconfig(self.canvas_text, tag='card')
 
@@ -292,6 +318,8 @@ class Card:
         self.canvas.itemconfig(self.canvas_rect, outline=self.theme['palette'][color_index])
         for l in self.canvas_lines:
             self.canvas.itemconfig(l, fill=self.theme['palette'][color_index])
+        for p in self.canvas_pips:
+            self.canvas.itemconfig(p, outline=self.theme['palette'][color_index])
         #if DAYCOUNTER:
         #    self.canvas.itemconfig(self.canvas_dayctr, fill=self.theme['palette'][color_index])
 
@@ -311,6 +339,37 @@ class Card:
             self.points -= 1
             self.canvas.delete(self.canvas_lines.pop())
     
+    def increasePips(self):
+        pip_coords = self.calculatePipCoords(self.pips)
+        self.pips += 1
+        self.canvas_pips.append(self.canvas.create_oval(pip_coords['x1'],
+                                                        pip_coords['y1'],
+                                                        pip_coords['x2'],
+                                                        pip_coords['y2'],
+                                                        outline=self.theme['palette'][self.color_index]))
+    
+    def decreasePips(self):
+        if self.pips > 0:
+            self.pips -= 1
+            self.canvas.delete(self.canvas_pips.pop())
+
+    def calculatePipCoords(self, pip_index):
+        max_y_height = self.height - PIPSIZE
+
+        # TODO: There's totally a way to do this without a loop, right? 
+        y_pos = MARGIN
+        x_pos = self.position[0] + MARGIN
+        for i in range(pip_index):
+            y_pos += PIPSIZE*1.5
+            if y_pos > self.height - MARGIN + PIPSIZE:
+                y_pos = MARGIN
+                x_pos += PIPSIZE*1.5
+        x1 = x_pos - PIPSIZE / 2
+        y1 = self.position[1] + y_pos - PIPSIZE/2
+        x2 = x_pos + PIPSIZE / 2
+        y2 = self.position[1] + y_pos + PIPSIZE/2
+        return {'x1':x1, 'y1':y1, 'x2':x2, 'y2':y2}
+
 class DropZone:
     def __init__(self, canvas, theme, x_pos, y_pos, width, height):
         self.canvas = canvas
@@ -384,7 +443,7 @@ class PointsDisplay(DropZone):
         else:
             with open(archive_filepath, 'w', newline='\n') as archivefile:
                 archivewriter = csv.writer(archivefile, delimiter="|")
-                archivewriter.writerow(['description', 'points', 'color_index', 'creation_date', 'completion_date'])
+                archivewriter.writerow(['description', 'points', 'pips', 'color_index', 'creation_date', 'completion_date'])
             return 0
     
 
@@ -540,9 +599,9 @@ class Kanban:
         with open(cards_filepath, 'w', newline='\n') as cardfile:
             with open(archive_filepath, 'a', newline='\n') as archivefile:
                 cardwriter = csv.writer(cardfile, delimiter="|")
-                cardwriter.writerow(['section_index', 'description', 'color_index', 'points', 'creation_date'])
+                cardwriter.writerow(['section_index', 'description', 'color_index', 'points', 'pips', 'creation_date'])
                 for c in self.cards:
-                    cardwriter.writerow([c.section_index, c.description, c.color_index, c.points, c.creation_date])
+                    cardwriter.writerow([c.section_index, c.description, c.color_index, c.points, c.pips, c.creation_date])
                 for c in self.overflow_cards:
                     cardwriter.writerow(c)
 
@@ -566,8 +625,8 @@ class Kanban:
         s = Section(self.canvas, self.theme, name, width, xpos, cardheight, last_column)
         self.sections.append(s)
 
-    def addCardFromFile(self, section_index, description, color_index, points, creation_date):
-        c = Card(self.canvas, self.theme, description, color_index, points, creation_date)
+    def addCardFromFile(self, section_index, description, color_index, points, creation_date, pips):
+        c = Card(self.canvas, self.theme, description, color_index, points, creation_date, pips)
         c.section_index = section_index
         self.sections[section_index].addCard(c)
         self.cards.append(c)
@@ -614,6 +673,8 @@ class Kanban:
         value_button_grid.pack(side = tk.RIGHT, padx=MARGIN)
         decrease_points = Button(value_button_grid, activebackground=self.theme['buttonhighlight'], activeforeground=self.theme['palette'][edit_card.color_index], relief=GLOBALRELIEF, name='decrease_button', text='-', fg=self.theme['palette'][edit_card.color_index], bg=self.theme['bg'], width=1, height=1, highlightbackground=self.theme['palette'][edit_card.color_index], command=lambda: edit_card.decreasePoints()).grid(column=8, row=0)
         increase_points = Button(value_button_grid, activebackground=self.theme['buttonhighlight'], activeforeground=self.theme['palette'][edit_card.color_index], relief=GLOBALRELIEF, name='increase_button', text='+', fg=self.theme['palette'][edit_card.color_index], bg=self.theme['bg'], width=1, height=1, highlightbackground=self.theme['palette'][edit_card.color_index], command=lambda: edit_card.increasePoints()).grid(column=9, row=0)
+        decrease_pips = Button(value_button_grid, activebackground=self.theme['buttonhighlight'], activeforeground=self.theme['palette'][edit_card.color_index], relief=GLOBALRELIEF, name='decrease_pips_button', text='-p', fg=self.theme['palette'][edit_card.color_index], bg=self.theme['bg'], width=1, height=1, highlightbackground=self.theme['palette'][edit_card.color_index], command=lambda: edit_card.decreasePips()).grid(column=8, row=1)
+        increase_pips = Button(value_button_grid, activebackground=self.theme['buttonhighlight'], activeforeground=self.theme['palette'][edit_card.color_index], relief=GLOBALRELIEF, name='increase_pips_button', text='+p', fg=self.theme['palette'][edit_card.color_index], bg=self.theme['bg'], width=1, height=1, highlightbackground=self.theme['palette'][edit_card.color_index], command=lambda: edit_card.increasePips()).grid(column=9, row=1)
 
         bottom_button_grid = tk.Frame(self.edit_menu, name='bottom_button_grid', background=self.theme['bg'])
         bottom_button_grid.pack(pady=MARGIN, padx=MARGIN/10)
@@ -704,7 +765,7 @@ class Kanban:
                 if self.sections.index(drop_section) == len(self.sections)-1 and self.isInArchiveDropzone(event.x, event.y):
                     with open(archive_filepath, 'a', newline='\n') as archivefile:
                         archivewriter = csv.writer(archivefile, delimiter="|")
-                        archivewriter.writerow([self.grabbed_card.description, self.grabbed_card.points, self.grabbed_card.color_index, self.grabbed_card.creation_date, date.today()])
+                        archivewriter.writerow([self.grabbed_card.description, self.grabbed_card.points, self.grabbed_card.pips, self.grabbed_card.color_index, self.grabbed_card.creation_date, date.today()])
                     self.archive_dropzone.updatePointCounter()
                     self.deleteCard(self.grabbed_card)
                     self.grabbed_card_section.reorderCards()
@@ -826,6 +887,7 @@ class Kanban:
             self.context_menu.add_command(label="Reset Points", command=lambda: self.archive_dropzone.resetArchive())
         elif self.grabbed_card:
                 self.grab_location = (event.x, event.y)
+                self.context_menu.add_command(label="Add Pip", command=lambda: self.grabbed_card.increasePips())
                 self.context_menu.add_command(label="Edit", command=lambda: self.openEditMenu(self.grabbed_card))
                 self.context_menu.add_command(label="Delete", command=lambda: self.deleteCard(self.grabbed_card))
         else:
@@ -925,8 +987,8 @@ if os.path.isfile(cards_filepath):
         cards = csv.DictReader(csvfile, delimiter='|')
         for c in cards:
             if int(c['section_index']) > len(sections)-1 or len(k.sections[int(c['section_index'])].cards) >= len(k.sections[int(c['section_index'])].drop_zones):
-                k.overflow_cards.append([int(c['section_index']), c['description'], int(c['color_index']), int(c['points']), date.fromisoformat(c['creation_date'])])
+                k.overflow_cards.append([int(c['section_index']), c['description'], int(c['color_index']), int(c['points']), int(c['pips']), date.fromisoformat(c['creation_date'])])
             else:
-                k.addCardFromFile(int(c['section_index']), c['description'], int(c['color_index']), int(c['points']), date.fromisoformat(c['creation_date']))
+                k.addCardFromFile(int(c['section_index']), c['description'], int(c['color_index']), int(c['points']), int(c['pips']), date.fromisoformat(c['creation_date']))
     csvfile.close()
 k.root.mainloop()
