@@ -347,11 +347,13 @@ class Card:
                                                         pip_coords['x2'],
                                                         pip_coords['y2'],
                                                         outline=self.theme['palette'][self.color_index]))
+        self.saveCardstoFile()
     
     def decreasePips(self):
         if self.pips > 0:
             self.pips -= 1
             self.canvas.delete(self.canvas_pips.pop())
+        self.saveCardstoFile()
 
     def calculatePipCoords(self, pip_index):
         max_y_height = self.height - PIPSIZE
