@@ -347,13 +347,11 @@ class Card:
                                                         pip_coords['x2'],
                                                         pip_coords['y2'],
                                                         outline=self.theme['palette'][self.color_index]))
-        self.saveCardstoFile()
-    
+
     def decreasePips(self):
         if self.pips > 0:
             self.pips -= 1
             self.canvas.delete(self.canvas_pips.pop())
-        self.saveCardstoFile()
 
     def calculatePipCoords(self, pip_index):
         max_y_height = self.height - PIPSIZE
@@ -395,6 +393,7 @@ class PointsDisplay(DropZone):
         self.height = height
         self.start_time = datetime.now()
         self.canvas_rect = self.canvas.create_rectangle(x_pos, y_pos, x_pos + width, y_pos + self.height, dash=DASH, outline=self.theme['secondary'])
+        self.canvas_pips = []
 
         if SETTINGS['timer'] and SETTINGS['points']:
             self.point_counter = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height - MARGIN *2, anchor=tk.CENTER, text="{:,}".format(self.getPointsFromFile()), fill=self.theme['secondary'], width=self.width-MARGIN*2, font=COUNTERFONT)
@@ -411,11 +410,13 @@ class PointsDisplay(DropZone):
         if not SETTINGS['timer'] and not SETTINGS['points']:
             self.timer = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2 - MARGIN/2, anchor=tk.CENTER, text="00:00:00", fill=self.theme['bg'], width=self.width-MARGIN*2, font=(0))
             self.point_counter = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2 - MARGIN/2, anchor=tk.CENTER, text="{:,}".format(self.getPointsFromFile()), fill=self.theme['bg'], width=self.width-MARGIN*2, font=COUNTERFONT)
-            self.nonetext = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2 - MARGIN/2, anchor=tk.CENTER, text="-[O-O]-", fill=self.theme['secondary'], width=self.width-MARGIN*2, font=TIMERFONT)
+            self.nonetext = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2 - MARGIN/2, anchor=tk.CENTER, text="", fill=self.theme['secondary'], width=self.width-MARGIN*2, font=TIMERFONT)
 
         #self.point_counter = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height/2 - MARGIN/2, anchor=tk.CENTER, text="{:,}".format(self.getPointsFromFile()), fill=self.theme['secondary'], width=self.width-MARGIN*2, font=COUNTERFONT)
         #self.timer = self.canvas.create_text(x_pos + self.width/2, y_pos + self.height - MARGIN *2, anchor=tk.CENTER, text="00:00:00", fill=self.theme['secondary'], width=self.width-MARGIN*2, font=TIMERFONT)
         self.time()
+        self.updatePointCounter()
+
 
     def draw(self):
         if SETTINGS['timer']:
@@ -433,6 +434,22 @@ class PointsDisplay(DropZone):
 
     def updatePointCounter(self):
         self.canvas.itemconfig(self.point_counter, text="{:,}".format(self.getPointsFromFile()))
+        for i in self.canvas_pips:
+            self.canvas.delete(i)
+        pip_colors = self.getPipsFromFile()
+        max_y_height = self.height - PIPSIZE
+        y_pos = MARGIN
+        x_pos = self.x_pos + MARGIN
+        for i in pip_colors:
+            x1 = x_pos - PIPSIZE / 2
+            y1 = self.y_pos + y_pos - PIPSIZE/2
+            x2 = x_pos + PIPSIZE / 2
+            y2 = self.y_pos + y_pos + PIPSIZE/2
+            self.canvas_pips.append(self.canvas.create_oval(x1, y1, x2, y2, outline=self.theme['palette'][i]))
+            y_pos += PIPSIZE*1.5
+            if y_pos > self.height - MARGIN + PIPSIZE:
+                y_pos = MARGIN
+                x_pos += PIPSIZE*1.5
 
     def getPointsFromFile(self):
         point_sum = 0
@@ -448,6 +465,19 @@ class PointsDisplay(DropZone):
                 archivewriter.writerow(['description', 'points', 'pips', 'color_index', 'creation_date', 'completion_date'])
             return 0
     
+    def getPipsFromFile(self):
+        pip_colors = []
+        if os.path.isfile(archive_filepath):
+            with open(archive_filepath, 'r', newline='\n') as csvfile:
+                cards = csv.DictReader(csvfile, delimiter='|')
+                for c in cards:
+                    pip_colors.append(int(c['color_index']))
+            return pip_colors
+        else:
+            with open(archive_filepath, 'w', newline='\n') as archivefile:
+                archivewriter = csv.writer(archivefile, delimiter="|")
+                archivewriter.writerow(['description', 'points', 'pips', 'color_index', 'creation_date', 'completion_date'])
+            return None
 
     def time(self):
         time_delta = datetime.now() - self.start_time
@@ -729,6 +759,10 @@ class Kanban:
             SETTINGS['alwaysontop'] = False
         self.saveSettingstoFile()
 
+    def handlePipUp(self, card):
+        card.increasePips()
+        self.saveCardstoFile()
+
     # --- Event Handlers ---
     def handleMouseMove(self, event):
         card = self.getColldingCards(event.x, event.y)
@@ -885,11 +919,12 @@ class Kanban:
         themes_menu.add_radiobutton(label="Custom", variable=self.selected_theme, value='custom', command=lambda: self.setTheme('custom'))
 
         if self.isInArchiveDropzone(event.x, event.y):
-            self.context_menu.add_command(label="Reset Timer", command=lambda: self.archive_dropzone.resetTime())
-            self.context_menu.add_command(label="Reset Points", command=lambda: self.archive_dropzone.resetArchive())
+            if SETTINGS['timer'] == True:
+                self.context_menu.add_command(label="Reset Timer", command=lambda: self.archive_dropzone.resetTime())
+            self.context_menu.add_command(label="Clear Archives", command=lambda: self.archive_dropzone.resetArchive())
         elif self.grabbed_card:
                 self.grab_location = (event.x, event.y)
-                self.context_menu.add_command(label="Add Pip", command=lambda: self.grabbed_card.increasePips())
+                self.context_menu.add_command(label="Add Pip", command=lambda: self.handlePipUp(self.grabbed_card))
                 self.context_menu.add_command(label="Edit", command=lambda: self.openEditMenu(self.grabbed_card))
                 self.context_menu.add_command(label="Delete", command=lambda: self.deleteCard(self.grabbed_card))
         else:
