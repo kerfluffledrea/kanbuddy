@@ -21,7 +21,7 @@ default_settings={
         'dashed': False,
         'alwaysontop': True,
         'timer': True,
-        'points': True,
+        'points': False,
         'titlebar': True,
         'theme': 'prime',
         'sections': [
