@@ -17,7 +17,7 @@ default_settings={
         'height': 400, 
         'headersize': 20,
         'margin': 7,
-        'pipsize': 10,
+        'pipsize': 6,
         'dashed': False,
         'alwaysontop': True,
         'timer': True,
@@ -391,6 +391,8 @@ class PointsDisplay(DropZone):
         self.y_pos = y_pos
         self.width = width
         self.height = height
+        self.timer_paused = False
+        self.held_time_delta = None
         self.start_time = datetime.now()
         self.canvas_rect = self.canvas.create_rectangle(x_pos, y_pos, x_pos + width, y_pos + self.height, dash=DASH, outline=self.theme['secondary'])
         self.canvas_pips = []
@@ -480,12 +482,23 @@ class PointsDisplay(DropZone):
             return None
 
     def time(self):
-        time_delta = datetime.now() - self.start_time
-        hours, remainder = divmod(time_delta.seconds, 3600)
-        minutes, seconds = divmod(remainder, 60)
-        self.canvas.itemconfig(self.timer, text=('{:02}:{:02}:{:02}'.format(hours, minutes, seconds)))
+        if not self.timer_paused:
+            time_delta = datetime.now() - self.start_time
+            hours, remainder = divmod(time_delta.seconds, 3600)
+            minutes, seconds = divmod(remainder, 60)
+            self.canvas.itemconfig(self.timer, text=('{:02}:{:02}:{:02}'.format(hours, minutes, seconds)))
         self.canvas.after(1000, self.time)
 
+    def pauseTimer(self):
+        self.canvas.itemconfig(self.timer, fill=self.theme['main'])
+        self.held_time_delta = datetime.now() - self.start_time
+        self.timer_paused = True
+    
+    def unpauseTimer(self):
+        self.canvas.itemconfig(self.timer, fill=self.theme['secondary'])
+        self.start_time = datetime.now() - self.held_time_delta
+        self.timer_paused = False
+    
     def resetTime(self):
         self.start_time = datetime.now()
 
@@ -920,6 +933,10 @@ class Kanban:
 
         if self.isInArchiveDropzone(event.x, event.y):
             if SETTINGS['timer'] == True:
+                if self.archive_dropzone.timer_paused:
+                    self.context_menu.add_command(label="Resume Timer", command=lambda: self.archive_dropzone.unpauseTimer())
+                else:
+                    self.context_menu.add_command(label="Pause Timer", command=lambda: self.archive_dropzone.pauseTimer())
                 self.context_menu.add_command(label="Reset Timer", command=lambda: self.archive_dropzone.resetTime())
             self.context_menu.add_command(label="Clear Archives", command=lambda: self.archive_dropzone.resetArchive())
         elif self.grabbed_card:
