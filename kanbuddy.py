@@ -995,7 +995,7 @@ class Kanban:
         welcome_grid = tk.Frame(self.edit_menu, name='welcome_grid', background=self.theme['bg'])
         welcome_grid.pack(padx=MARGIN, pady=MARGIN/4)
 
-        tk.Label(welcome_grid, text="Welcome to Kanbuddy!", font=HEADERFONT, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, pady=MARGIN).grid(column=0, row=0)
+        tk.Label(welcome_grid, text="Welcome to Kanbuddy! v1.02", font=HEADERFONT, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, pady=MARGIN).grid(column=0, row=0)
         tk.Label(welcome_grid, text="by kerfluffle", font=HEADERFONT, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, pady=MARGIN).grid(column=0, row=1)
         tk.Label(welcome_grid, font=CARDFONT, text=
 '''
