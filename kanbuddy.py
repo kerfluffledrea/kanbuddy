@@ -47,7 +47,8 @@ default_settings={
             'palette3': 'dodgerblue', 
             'palette4': 'magenta', 
             'palette5': 'yellow', 
-            'palette6': 'orangered'}, 
+            'palette6': 'orangered', 
+            'palette7': 'orange'}, 
         'pointvalues': [10,20,30,50,80,130,210,340,550,890,1440]
     }
 
@@ -98,7 +99,8 @@ THEMES['custom'] = {
                  SETTINGS['customtheme']['palette3'],
                  SETTINGS['customtheme']['palette4'],
                  SETTINGS['customtheme']['palette5'],
-                 SETTINGS['customtheme']['palette6']]
+                 SETTINGS['customtheme']['palette6'],
+                 SETTINGS['customtheme']['palette7']]
 }
 
 THEMES['prime'] = {
@@ -115,7 +117,8 @@ THEMES['prime'] = {
                  'dodgerblue',
                  'magenta',
                  'yellow',
-                 'orangered']
+                 'orangered',
+                 'orange']
 }
 
 THEMES['fortress'] = {
@@ -132,7 +135,8 @@ THEMES['fortress'] = {
                  'yellow',
                  'red',
                  'magenta',
-                 'grey80']
+                 'grey80',
+                 'white']
 }
 
 
@@ -150,7 +154,8 @@ THEMES['ihaveahax'] = {
                  '#884CB9',
                  '#B23CC3',
                  '#BE1800',
-                 '#FF9500']
+                 '#FF9500',
+                 '#36648b']
 }
 
 THEMES['trioptimum'] = {
@@ -167,7 +172,8 @@ THEMES['trioptimum'] = {
                  '#b0a2a7',
                  '#6e66d4',
                  '#ff8300',
-                 '#d21540']
+                 '#d21540',
+                 '#c6e2ff']
 }
 
 THEMES['uplink'] = {
@@ -184,7 +190,8 @@ THEMES['uplink'] = {
                  '#FFFFFF',
                  '#41c09f',
                  '#00FF00',
-                 '#FF0000']
+                 '#FF0000',
+                 '#ffec8b']
 }
 
 THEMES['peach'] = {
@@ -202,7 +209,8 @@ THEMES['peach'] = {
                  '#DD5928',
                  '#00ffc6',
                  '#009df2',
-                 '#7A2816']
+                 '#7A2816',
+                 '#836fff']
 }
 
 DRAGTHRESHOLD = 30
@@ -424,11 +432,11 @@ class PointsDisplay(DropZone):
         if SETTINGS['timer']:
             self.canvas.itemconfig(self.point_counter, fill=self.theme['secondary'])
         else:
-            self.canvas.itemconfig(self.point_counter, fill=self.theme['bg'])
+            self.canvas.itemconfig(self.point_counter, fill='white', state='hidden')
         if SETTINGS['points']:
             self.canvas.itemconfig(self.timer, fill=self.theme['secondary'])
         else:
-            self.canvas.itemconfig(self.timer, fill=self.theme['bg'])
+            self.canvas.itemconfig(self.timer, fill='white', state='hidden')
 
         if not SETTINGS['timer'] and not SETTINGS['points']:
             self.canvas.itemconfig(self.nonetext, fill=self.theme['secondary'])
@@ -503,7 +511,7 @@ class PointsDisplay(DropZone):
         self.start_time = datetime.now()
 
     def resetArchive(self):
-        os.remove(archive_filepath)
+        os.rename(archive_filepath, archive_filepath.strip(".csv") + "_" + str(datetime.now())+".csv")
         self.getPointsFromFile()
         self.updatePointCounter()
 
@@ -697,7 +705,12 @@ class Kanban:
         self.edit_menu = tk.Frame(self.root, name='edit_menu', pady=MARGIN/3, padx=MARGIN/3, relief=tk.SOLID, bg=self.theme['bg'], highlightcolor=self.theme['palette'][edit_card.color_index], highlightbackground=self.theme['palette'][edit_card.color_index], highlightthickness=1)
         self.edit_menu.pack(fill=tk.BOTH, expand=True, padx=MARGIN*2, pady=MARGIN*2)
         
-        description_entry = tk.Text(self.edit_menu,name='edit_menu_text', wrap=tk.WORD, insertbackground=self.theme['secondary'], font=CARDFONT, height=5, width=34, padx=15, pady=5, bg=self.theme['bg'], bd=0, highlightbackground=self.theme['palette'][edit_card.color_index], highlightcolor=self.theme['palette'][edit_card.color_index], fg=self.theme['palette'][edit_card.color_index])
+
+        width_for_cool_and_sexy_people = int(WIDTH/11)
+        sexy_width_for_cool_people = int(WIDTH/25)
+
+
+        description_entry = tk.Text(self.edit_menu,name='edit_menu_text', wrap=tk.WORD, insertbackground=self.theme['secondary'], font=CARDFONT, height=5, width=width_for_cool_and_sexy_people, padx=15, pady=5, bg=self.theme['bg'], bd=0, highlightbackground=self.theme['palette'][edit_card.color_index], highlightcolor=self.theme['palette'][edit_card.color_index], fg=self.theme['palette'][edit_card.color_index])
         description_entry.insert(tk.END, edit_card.description)
         description_entry.pack(padx=MARGIN, pady=MARGIN)
         
@@ -705,14 +718,25 @@ class Kanban:
         button_grid.pack(padx=MARGIN, pady=MARGIN/4)
 
         color_button_grid = tk.Frame(button_grid, name='color_button_grid')
-        color_button_grid.pack(side = tk.LEFT, padx=MARGIN)
+        color_button_grid.pack(side = tk.LEFT, padx=MARGIN/2)
+
         b0 = Button(color_button_grid, bg=self.theme['palette'][0], padx=8, width=1, height=1, highlightbackground=self.theme['palette'][0], command=lambda: self.changeColorButton(edit_card, 0)).grid(column=0, row=0)
         b1 = Button(color_button_grid, bg=self.theme['palette'][1], padx=8, width=1, height=1, highlightbackground=self.theme['palette'][1], command=lambda: self.changeColorButton(edit_card, 1)).grid(column=1, row=0)
-        b2 = Button(color_button_grid, bg=self.theme['palette'][2], padx=8, width=1, height=1, highlightbackground=self.theme['palette'][2], command=lambda: self.changeColorButton(edit_card, 2)).grid(column=2, row=0)
-        b3 = Button(color_button_grid, bg=self.theme['palette'][3], padx=8, width=1, height=1, highlightbackground=self.theme['palette'][3], command=lambda: self.changeColorButton(edit_card, 3)).grid(column=3, row=0)
-        b4 = Button(color_button_grid, bg=self.theme['palette'][4], padx=8, width=1, height=1, highlightbackground=self.theme['palette'][4], command=lambda: self.changeColorButton(edit_card, 4)).grid(column=4, row=0)
-        b5 = Button(color_button_grid, bg=self.theme['palette'][5], padx=8, width=1, height=1, highlightbackground=self.theme['palette'][5], command=lambda: self.changeColorButton(edit_card, 5)).grid(column=5, row=0)
-        b6 = Button(color_button_grid, bg=self.theme['palette'][6], padx=8, width=1, height=1, highlightbackground=self.theme['palette'][6], command=lambda: self.changeColorButton(edit_card, 6)).grid(column=6, row=0)
+
+        if WIDTH >= 200:            
+            b2 = Button(color_button_grid, bg=self.theme['palette'][2], padx=8, width=1, height=1, highlightbackground=self.theme['palette'][2], command=lambda: self.changeColorButton(edit_card, 2)).grid(column=2, row=0)
+            b3 = Button(color_button_grid, bg=self.theme['palette'][3], padx=8, width=1, height=1, highlightbackground=self.theme['palette'][3], command=lambda: self.changeColorButton(edit_card, 3)).grid(column=3, row=0)
+            b4 = Button(color_button_grid, bg=self.theme['palette'][4], padx=8, width=1, height=1, highlightbackground=self.theme['palette'][4], command=lambda: self.changeColorButton(edit_card, 4)).grid(column=0, row=1)
+            b5 = Button(color_button_grid, bg=self.theme['palette'][5], padx=8, width=1, height=1, highlightbackground=self.theme['palette'][5], command=lambda: self.changeColorButton(edit_card, 5)).grid(column=1, row=1)
+            b6 = Button(color_button_grid, bg=self.theme['palette'][6], padx=8, width=1, height=1, highlightbackground=self.theme['palette'][6], command=lambda: self.changeColorButton(edit_card, 6)).grid(column=2, row=1)
+            b7 = Button(color_button_grid, bg=self.theme['palette'][7], padx=8, width=1, height=1, highlightbackground=self.theme['palette'][7], command=lambda: self.changeColorButton(edit_card, 7)).grid(column=3, row=1)
+        else: 
+            b2 = Button(color_button_grid, bg=self.theme['palette'][2], padx=8, width=1, height=1, highlightbackground=self.theme['palette'][2], command=lambda: self.changeColorButton(edit_card, 2)).grid(column=0, row=1)
+            b3 = Button(color_button_grid, bg=self.theme['palette'][3], padx=8, width=1, height=1, highlightbackground=self.theme['palette'][3], command=lambda: self.changeColorButton(edit_card, 3)).grid(column=1, row=1)
+            b4 = Button(color_button_grid, bg=self.theme['palette'][4], padx=8, width=1, height=1, highlightbackground=self.theme['palette'][4], command=lambda: self.changeColorButton(edit_card, 4)).grid(column=0, row=2)
+            b5 = Button(color_button_grid, bg=self.theme['palette'][5], padx=8, width=1, height=1, highlightbackground=self.theme['palette'][5], command=lambda: self.changeColorButton(edit_card, 5)).grid(column=1, row=2)
+            b6 = Button(color_button_grid, bg=self.theme['palette'][6], padx=8, width=1, height=1, highlightbackground=self.theme['palette'][6], command=lambda: self.changeColorButton(edit_card, 6)).grid(column=0, row=3)
+            b7 = Button(color_button_grid, bg=self.theme['palette'][7], padx=8, width=1, height=1, highlightbackground=self.theme['palette'][7], command=lambda: self.changeColorButton(edit_card, 7)).grid(column=1, row=3)
 
         value_button_grid = tk.Frame(button_grid, name='value_button_grid')
         value_button_grid.pack(side = tk.RIGHT, padx=MARGIN)
@@ -723,7 +747,7 @@ class Kanban:
 
         bottom_button_grid = tk.Frame(self.edit_menu, name='bottom_button_grid', background=self.theme['bg'])
         bottom_button_grid.pack(pady=MARGIN, padx=MARGIN/10)
-        close_button = Button(bottom_button_grid, activeforeground=self.theme['palette'][edit_card.color_index], activebackground=self.theme['buttonhighlight'], relief=GLOBALRELIEF, name='close_button', text='SAVE', fg=self.theme['palette'][edit_card.color_index], bg=self.theme['bg'], width=20, height=1, highlightbackground=self.theme['palette'][edit_card.color_index], command=lambda: self.closeEditMenu(edit_card, description_entry.get("1.0","end-1c"))).grid(column=3, row=0)
+        close_button = Button(bottom_button_grid, activeforeground=self.theme['palette'][edit_card.color_index], activebackground=self.theme['buttonhighlight'], relief=GLOBALRELIEF, name='close_button', text='SAVE', fg=self.theme['palette'][edit_card.color_index], bg=self.theme['bg'], width=sexy_width_for_cool_people, height=1, highlightbackground=self.theme['palette'][edit_card.color_index], command=lambda: self.closeEditMenu(edit_card, description_entry.get("1.0","end-1c"))).grid(column=3, row=0)
         delete_button = Button(bottom_button_grid, activeforeground=self.theme['palette'][edit_card.color_index], activebackground=self.theme['buttonhighlight'], relief=GLOBALRELIEF, name='delete_button', text='DELETE', fg=self.theme['palette'][edit_card.color_index], bg=self.theme['bg'], width=5, height=1, highlightbackground=self.theme['palette'][edit_card.color_index], command=lambda: self.deleteCard(edit_card, True)).grid(column=4, row=0)
         self.canvas.create_window(WIDTH/2, HEIGHT/2, anchor=tk.CENTER, window=self.edit_menu)
 
@@ -970,6 +994,7 @@ class Kanban:
                 THEMES[theme]['palette'][4],
                 THEMES[theme]['palette'][5],
                 THEMES[theme]['palette'][6],
+                THEMES[theme]['palette'][7],
             ]
         if self.canvas:
             self.canvas.config(self.canvas, highlightbackground=self.theme['main'])
@@ -995,7 +1020,7 @@ class Kanban:
         welcome_grid = tk.Frame(self.edit_menu, name='welcome_grid', background=self.theme['bg'])
         welcome_grid.pack(padx=MARGIN, pady=MARGIN/4)
 
-        tk.Label(welcome_grid, text="Welcome to Kanbuddy! v1.02", font=HEADERFONT, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, pady=MARGIN).grid(column=0, row=0)
+        tk.Label(welcome_grid, text="Welcome to Kanbuddy! v1.03", font=HEADERFONT, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, pady=MARGIN).grid(column=0, row=0)
         tk.Label(welcome_grid, text="by kerfluffle", font=HEADERFONT, bg=self.theme['bg'], fg=self.theme['secondary'], padx=MARGIN, pady=MARGIN).grid(column=0, row=1)
         tk.Label(welcome_grid, font=CARDFONT, text=
 '''
