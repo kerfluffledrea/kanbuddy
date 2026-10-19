@@ -525,7 +525,7 @@ class Section:
         self.drop_zones = []
         self.canvas_rect = None
         self.cards = []
-        self.draw()            
+        self.draw()
         self.createDropZones(last_column_flag, cards)
 
     def draw(self):
@@ -704,11 +704,9 @@ class Kanban:
     def openEditMenu(self, edit_card):
         self.edit_menu = tk.Frame(self.root, name='edit_menu', pady=MARGIN/3, padx=MARGIN/3, relief=tk.SOLID, bg=self.theme['bg'], highlightcolor=self.theme['palette'][edit_card.color_index], highlightbackground=self.theme['palette'][edit_card.color_index], highlightthickness=1)
         self.edit_menu.pack(fill=tk.BOTH, expand=True, padx=MARGIN*2, pady=MARGIN*2)
-        
 
         width_for_cool_and_sexy_people = int(WIDTH/11)
         sexy_width_for_cool_people = int(WIDTH/25)
-
 
         description_entry = tk.Text(self.edit_menu,name='edit_menu_text', wrap=tk.WORD, insertbackground=self.theme['secondary'], font=CARDFONT, height=5, width=width_for_cool_and_sexy_people, padx=15, pady=5, bg=self.theme['bg'], bd=0, highlightbackground=self.theme['palette'][edit_card.color_index], highlightcolor=self.theme['palette'][edit_card.color_index], fg=self.theme['palette'][edit_card.color_index])
         description_entry.insert(tk.END, edit_card.description)
@@ -952,7 +950,6 @@ class Kanban:
         themes_menu.add_radiobutton(label="Fortress", variable=self.selected_theme, value='fortress', command=lambda: self.setTheme('fortress'))
         themes_menu.add_radiobutton(label="Peachy", variable=self.selected_theme, value='peach', command=lambda: self.setTheme('peach'))
         themes_menu.add_radiobutton(label="ihaveahax", variable=self.selected_theme, value='ihaveahax', command=lambda: self.setTheme('ihaveahax'))
-
         themes_menu.add_radiobutton(label="Custom", variable=self.selected_theme, value='custom', command=lambda: self.setTheme('custom'))
 
         if self.isInArchiveDropzone(event.x, event.y):
