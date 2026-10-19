@@ -22,6 +22,7 @@ You can just run it with python every time, but if you'd like to build a binary 
 pip install pyinstaller pyyaml pillow
 pyinstaller --onefile --icon=icon.png kanbuddy.py
 ```
+On Windows, replace ``icon.png`` with ``icon.ico``.
 
 ## Operation
 - CTRL-A : New Card
@@ -39,6 +40,7 @@ Within ``settings.yaml``, you can adjust:
 - Fonts
 - Custom Theme (Any hex code, or [Tkinter Color](https://www.wikipython.com/wp-content/uploads/Color-chart-capture-082321.jpg))
 - Window size
+- Completion Pip Size
 - Margin/Header size
 - Line Dashes for empty card slots
 - Disable Timer and/or Points Counter
